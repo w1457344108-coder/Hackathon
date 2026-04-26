@@ -1,0 +1,7 @@
+node_modules
+.next
+.home
+.tooling
+.DS_Store
+tsconfig.tsbuildinfo
+start-dev.command

@@ -1,0 +1,9 @@
+.next
+node_modules
+npm-debug.log*
+.DS_Store
+.vercel
+.home
+.tooling
+tsconfig.tsbuildinfo
+start-dev.command
