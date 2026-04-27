@@ -9,124 +9,18 @@ import { EvidenceTable } from "@/components/evidence-table";
 import { AuditView } from "@/components/audit-view";
 import { ExportPanel } from "@/components/export-panel";
 import { filterEvidenceByCountries, mockEvidenceRecords } from "@/lib/mock-evidence";
-import {
-  AgentStatus,
-  ComparisonAgentResult,
-  PolicyAnalysisResult,
-  ReportAgentResult,
-  ResearchAgentResult,
-  StreamEventName,
-  SupportedCountry,
-  WorkflowResult
-} from "@/lib/types";
-
-type AgentKey = "research" | "policy" | "comparison" | "report";
-
-interface AgentCardState<T> {
-  status: AgentStatus;
-  title: string;
-  subtitle: string;
-  data: T | null;
-}
-
-interface DashboardState {
-  research: AgentCardState<ResearchAgentResult>;
-  policy: AgentCardState<PolicyAnalysisResult[]>;
-  comparison: AgentCardState<ComparisonAgentResult>;
-  report: AgentCardState<ReportAgentResult>;
-}
-
-const initialState: DashboardState = {
-  research: {
-    status: "idle",
-    title: "Research Agent",
-    subtitle: "Collects country policy evidence mapped to ESCAP Pillar 6.",
-    data: null
-  },
-  policy: {
-    status: "idle",
-    title: "Policy Analysis Agent",
-    subtitle: "Evaluates restrictiveness, openness, and compliance burden.",
-    data: null
-  },
-  comparison: {
-    status: "idle",
-    title: "Comparison Agent",
-    subtitle: "Highlights gap analysis across two jurisdictions.",
-    data: null
-  },
-  report: {
-    status: "idle",
-    title: "Report Agent",
-    subtitle: "Synthesizes the full multi-agent outcome into a final brief.",
-    data: null
-  }
-};
-
-const stepOrder: AgentKey[] = ["research", "policy", "comparison", "report"];
-
-function statusClasses(status: AgentStatus) {
-  if (status === "completed") {
-    return "border-emerald-200 bg-emerald-50/70";
-  }
-
-  if (status === "running") {
-    return "border-blue-300 bg-blue-50/80";
-  }
-
-  if (status === "error") {
-    return "border-red-200 bg-red-50/80";
-  }
-
-  return "border-white/70 bg-white/60";
-}
-
-function dotClasses(status: AgentStatus) {
-  if (status === "completed") {
-    return "bg-emerald-500";
-  }
-
-  if (status === "running") {
-    return "bg-blue-500 glow-dot";
-  }
-
-  if (status === "error") {
-    return "bg-red-500";
-  }
-
-  return "bg-slate-300";
-}
-
-function cloneInitialState(): DashboardState {
-  return {
-    research: { ...initialState.research },
-    policy: { ...initialState.policy },
-    comparison: { ...initialState.comparison },
-    report: { ...initialState.report }
-  };
-}
-
-function markCompletedIfRunning<T>(card: AgentCardState<T>): AgentCardState<T> {
-  if (card.status !== "running") {
-    return card;
-  }
-
-  return {
-    ...card,
-    status: "completed"
-  };
-}
+import { StreamEventName, SupportedCountry, WorkflowResult } from "@/lib/types";
 
 export function AnalystDashboard() {
   const [countryA, setCountryA] = useState<SupportedCountry>("China");
   const [countryB, setCountryB] = useState<SupportedCountry | "">("Singapore");
-  const [dashboard, setDashboard] = useState<DashboardState>(cloneInitialState);
   const [workflowResult, setWorkflowResult] = useState<WorkflowResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [selectedCitation, setSelectedCitation] = useState<string>("Art. 12");
 
-  const deferredReport = useDeferredValue(dashboard.report.data);
+  const deferredWorkflowResult = useDeferredValue(workflowResult);
+  const deferredReport = deferredWorkflowResult?.report ?? null;
   const selectedProfile = countryPolicyProfiles[countryA];
   const evidenceRecords = filterEvidenceByCountries(mockEvidenceRecords, countryA, countryB);
   const selectedEvidenceRecord =
@@ -138,111 +32,10 @@ export function AnalystDashboard() {
     }
   }, [countryA, countryB]);
 
-  function resetAgents() {
-    const base = cloneInitialState();
-    base.research.status = "running";
-    setDashboard(base);
-    setWorkflowResult(null);
-    setErrorMessage(null);
-  }
-
-  function setRunningStep(step: AgentKey) {
-    startTransition(() => {
-      setDashboard((current) => {
-        const next: DashboardState = {
-          research: markCompletedIfRunning(current.research),
-          policy: markCompletedIfRunning(current.policy),
-          comparison: markCompletedIfRunning(current.comparison),
-          report: markCompletedIfRunning(current.report)
-        };
-
-        switch (step) {
-          case "research":
-            next.research = {
-              ...next.research,
-              status: "running"
-            };
-            break;
-          case "policy":
-            next.policy = {
-              ...next.policy,
-              status: "running"
-            };
-            break;
-          case "comparison":
-            next.comparison = {
-              ...next.comparison,
-              status: "running"
-            };
-            break;
-          case "report":
-            next.report = {
-              ...next.report,
-              status: "running"
-            };
-            break;
-        }
-
-        return next;
-      });
-    });
-  }
-
-  function setResearchCompleted(data: ResearchAgentResult) {
-    startTransition(() => {
-      setDashboard((current) => ({
-        ...current,
-        research: {
-          ...current.research,
-          status: "completed",
-          data
-        }
-      }));
-    });
-  }
-
-  function setPolicyCompleted(data: PolicyAnalysisResult[]) {
-    startTransition(() => {
-      setDashboard((current) => ({
-        ...current,
-        policy: {
-          ...current.policy,
-          status: "completed",
-          data
-        }
-      }));
-    });
-  }
-
-  function setComparisonCompleted(data: ComparisonAgentResult) {
-    startTransition(() => {
-      setDashboard((current) => ({
-        ...current,
-        comparison: {
-          ...current.comparison,
-          status: "completed",
-          data
-        }
-      }));
-    });
-  }
-
-  function setReportCompleted(data: ReportAgentResult) {
-    startTransition(() => {
-      setDashboard((current) => ({
-        ...current,
-        report: {
-          ...current.report,
-          status: "completed",
-          data
-        }
-      }));
-    });
-  }
-
   async function runAnalysis() {
     setIsRunning(true);
-    resetAgents();
+    setWorkflowResult(null);
+    setErrorMessage(null);
 
     try {
       const response = await fetch("/api/analyze", {
@@ -287,31 +80,10 @@ export function AnalystDashboard() {
           const eventName = eventLine.replace("event: ", "") as StreamEventName;
           const payload = JSON.parse(dataLine.replace("data: ", ""));
 
-          if (eventName === "research") {
-            setResearchCompleted(payload as ResearchAgentResult);
-            setRunningStep("policy");
-          }
-
-          if (eventName === "policy") {
-            setPolicyCompleted(payload as PolicyAnalysisResult[]);
-            if (countryB) {
-              setRunningStep("comparison");
-            } else {
-              setRunningStep("report");
-            }
-          }
-
-          if (eventName === "comparison") {
-            setComparisonCompleted(payload as ComparisonAgentResult);
-            setRunningStep("report");
-          }
-
-          if (eventName === "report") {
-            setReportCompleted(payload as ReportAgentResult);
-          }
-
           if (eventName === "done") {
-            setWorkflowResult(payload as WorkflowResult);
+            startTransition(() => {
+              setWorkflowResult(payload as WorkflowResult);
+            });
           }
 
           if (eventName === "error") {
@@ -323,25 +95,6 @@ export function AnalystDashboard() {
       setErrorMessage(
         error instanceof Error ? error.message : "Unexpected error while running the workflow."
       );
-
-      setDashboard((current) => ({
-        research: {
-          ...current.research,
-          status: current.research.data ? "completed" : "error"
-        },
-        policy: {
-          ...current.policy,
-          status: current.policy.data ? "completed" : "error"
-        },
-        comparison: {
-          ...current.comparison,
-          status: current.comparison.data ? "completed" : "error"
-        },
-        report: {
-          ...current.report,
-          status: current.report.data ? "completed" : "error"
-        }
-      }));
     } finally {
       setIsRunning(false);
     }
@@ -431,21 +184,6 @@ export function AnalystDashboard() {
         ) : null}
       </section>
 
-      <section className="mt-8 grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
-        <AgentCard state={dashboard.research}>
-          {dashboard.research.data ? <ResearchContent data={dashboard.research.data} /> : null}
-        </AgentCard>
-        <AgentCard state={dashboard.policy}>
-          {dashboard.policy.data ? <PolicyContent data={dashboard.policy.data} /> : null}
-        </AgentCard>
-        <AgentCard state={dashboard.comparison}>
-          {dashboard.comparison.data ? <ComparisonContent data={dashboard.comparison.data} /> : null}
-        </AgentCard>
-        <AgentCard state={dashboard.report}>
-          {dashboard.report.data ? <ReportPreview data={dashboard.report.data} /> : null}
-        </AgentCard>
-      </section>
-
       <section className="mt-8 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
         <div className="glass-panel stagger-in rounded-[2rem] border border-white/70 p-6">
           <div className="mb-5 flex items-center justify-between">
@@ -496,8 +234,8 @@ export function AnalystDashboard() {
           <h2 className="mt-2 text-2xl font-semibold text-slate-950">Country Policy Signals</h2>
 
           <div className="mt-5 space-y-4">
-            {(dashboard.policy.data ?? []).length > 0 ? (
-              dashboard.policy.data?.map((item) => (
+            {(workflowResult?.policyAnalysis ?? []).length > 0 ? (
+              workflowResult?.policyAnalysis.map((item) => (
                 <div key={item.country} className="rounded-3xl border border-blue-100 bg-white/80 p-4">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-semibold text-slate-900">{item.country}</h3>
@@ -583,101 +321,6 @@ export function AnalystDashboard() {
   );
 }
 
-function AgentCard<T>({
-  state,
-  children
-}: {
-  state: AgentCardState<T>;
-  children: React.ReactNode;
-}) {
-  return (
-    <article
-      className={`glass-panel rounded-[1.75rem] border p-5 transition ${statusClasses(state.status)} ${
-        state.status === "running" ? "agent-running" : ""
-      }`}
-    >
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h3 className="text-lg font-semibold text-slate-950">{state.title}</h3>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{state.subtitle}</p>
-        </div>
-        <div className={`h-3 w-3 rounded-full ${dotClasses(state.status)}`} />
-      </div>
-
-      <div className="mt-5">
-        {state.status === "idle" ? (
-          <p className="text-sm text-slate-500">Waiting to run.</p>
-        ) : null}
-        {state.status === "running" ? (
-          <p className="text-sm font-medium text-blue-700">Working on this step now...</p>
-        ) : null}
-        {state.status === "error" ? (
-          <p className="text-sm font-medium text-red-700">This step was interrupted by an error.</p>
-        ) : null}
-        {state.status === "completed" ? <div className="stagger-in">{children}</div> : null}
-      </div>
-    </article>
-  );
-}
-
-function ResearchContent({ data }: { data: ResearchAgentResult }) {
-  return (
-    <div className="space-y-4">
-      <p className="text-sm leading-6 text-slate-700">{data.summary}</p>
-      <div className="space-y-3">
-        {data.profiles.map((profile) => (
-          <div key={profile.country} className="rounded-2xl bg-white/90 p-4">
-            <div className="flex items-center justify-between gap-3">
-              <h4 className="font-semibold text-slate-900">{profile.country}</h4>
-              <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-                Openness {profile.opennessScore}
-              </span>
-            </div>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{profile.dataTransferPolicy}</p>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function PolicyContent({ data }: { data: PolicyAnalysisResult[] }) {
-  return (
-    <div className="space-y-3">
-      {data.map((item) => (
-        <div key={item.country} className="rounded-2xl bg-white/90 p-4">
-          <div className="flex items-center justify-between gap-3">
-            <h4 className="font-semibold text-slate-900">{item.country}</h4>
-            <RiskPill risk={item.riskLevel} />
-          </div>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{item.executiveSummary}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function ComparisonContent({ data }: { data: ComparisonAgentResult }) {
-  return (
-    <div className="space-y-4">
-      <p className="text-sm leading-6 text-slate-700">{data.headline}</p>
-      <div className="grid gap-3">
-        <MiniBadge label="More Open" value={data.winnerOnOpenness} />
-        <MiniBadge label="Higher Risk" value={data.higherRiskCountry} />
-      </div>
-    </div>
-  );
-}
-
-function ReportPreview({ data }: { data: ReportAgentResult }) {
-  return (
-    <div className="space-y-4">
-      <RiskPill risk={data.overallRisk} />
-      <p className="text-sm leading-6 text-slate-700">{data.finalNarrative}</p>
-    </div>
-  );
-}
-
 function MetricBar({ label, value }: { label: string; value: number }) {
   return (
     <div>
@@ -726,15 +369,6 @@ function SourceLink({ href, label }: { href: string; label: string }) {
     >
       {label}
     </a>
-  );
-}
-
-function MiniBadge({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-2xl bg-white/90 px-4 py-3">
-      <p className="text-xs uppercase tracking-[0.16em] text-slate-500">{label}</p>
-      <p className="mt-2 text-sm font-semibold text-slate-900">{value}</p>
-    </div>
   );
 }
 
