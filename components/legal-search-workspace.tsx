@@ -69,8 +69,8 @@ export function LegalSearchWorkspace({ defaultJurisdiction }: { defaultJurisdict
   }
 
   return (
-    <section className="mt-8 grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
-      <div className="glass-panel rounded-[2rem] border border-white/70 p-6">
+    <section className="mt-8 grid gap-6 2xl:grid-cols-[minmax(0,1.05fr)_minmax(0,0.95fr)]">
+      <div className="glass-panel min-w-0 rounded-[2rem] border border-white/70 p-6">
         <div className="mb-5">
           <p className="section-title text-xs font-semibold text-blue-700">Legal Search Workspace</p>
           <h2 className="mt-2 text-2xl font-semibold text-slate-950">
@@ -78,7 +78,7 @@ export function LegalSearchWorkspace({ defaultJurisdiction }: { defaultJurisdict
           </h2>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-6 xl:grid-cols-[minmax(0,0.7fr)_minmax(0,1.3fr)]">
           <Field label="Jurisdiction">
             <input
               value={jurisdiction}
@@ -159,10 +159,10 @@ export function LegalSearchWorkspace({ defaultJurisdiction }: { defaultJurisdict
         </div>
       </div>
 
-      <div className="glass-panel rounded-[2rem] border border-white/70 p-6">
+      <div className="glass-panel min-w-0 rounded-[2rem] border border-white/70 p-6">
         <p className="section-title text-xs font-semibold text-blue-700">Generated Output</p>
         <h2 className="mt-2 text-2xl font-semibold text-slate-950">Search Profile JSON</h2>
-        <pre className="mt-5 overflow-x-auto rounded-[1.5rem] border border-blue-100 bg-slate-950 p-4 text-xs leading-6 text-cyan-100">
+        <pre className="mt-5 min-w-0 overflow-x-auto rounded-[1.5rem] border border-blue-100 bg-slate-950 p-4 text-xs leading-6 text-cyan-100">
           {profileJson}
         </pre>
       </div>

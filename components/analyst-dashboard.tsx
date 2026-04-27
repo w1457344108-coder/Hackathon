@@ -525,7 +525,7 @@ export function AnalystDashboard() {
 
       <AgentPipelineViewer isRunning={isRunning} hasResult={Boolean(workflowResult)} />
 
-      <section className="mt-8 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+      <section className="mt-8 grid gap-6 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
         <EvidenceTable
           records={evidenceRecords}
           selectedCitation={selectedEvidenceRecord.citation}

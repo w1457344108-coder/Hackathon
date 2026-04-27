@@ -2,14 +2,14 @@ import { EvidenceRecord } from "@/lib/pillar6-schema";
 
 export function AuditView({ record }: { record: EvidenceRecord }) {
   return (
-    <section className="glass-panel rounded-[2rem] border border-white/70 p-6">
+    <section className="glass-panel min-w-0 rounded-[2rem] border border-white/70 p-6">
       <div className="mb-5">
         <p className="section-title text-xs font-semibold text-blue-700">Audit View</p>
         <h2 className="mt-2 text-2xl font-semibold text-slate-950">Left-Right Legal Review</h2>
       </div>
 
-      <div className="grid gap-4 xl:grid-cols-2">
-        <article className="rounded-[1.5rem] border border-blue-100 bg-white/85 p-5">
+      <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <article className="min-w-0 rounded-[1.5rem] border border-blue-100 bg-white/85 p-5">
           <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Original Legal Text</p>
           <h3 className="mt-2 text-lg font-semibold text-slate-950">
             {record.lawTitle} · {record.citation}
@@ -25,7 +25,7 @@ export function AuditView({ record }: { record: EvidenceRecord }) {
           </a>
         </article>
 
-        <article className="rounded-[1.5rem] border border-blue-100 bg-blue-50/60 p-5">
+        <article className="min-w-0 rounded-[1.5rem] border border-blue-100 bg-blue-50/60 p-5">
           <p className="text-xs uppercase tracking-[0.16em] text-slate-500">AI Extraction Review</p>
           <div className="mt-4 space-y-4">
             <AuditBlock title="AI extraction" content={record.aiExtraction} />
@@ -47,7 +47,7 @@ export function AuditView({ record }: { record: EvidenceRecord }) {
 
 function AuditBlock({ title, content }: { title: string; content: string }) {
   return (
-    <div className="rounded-2xl border border-white/70 bg-white/90 p-4">
+    <div className="min-w-0 rounded-2xl border border-white/70 bg-white/90 p-4">
       <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{title}</p>
       <p className="mt-2 text-sm leading-6 text-slate-700">{content}</p>
     </div>
