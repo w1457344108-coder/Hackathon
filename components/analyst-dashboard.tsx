@@ -1,7 +1,14 @@
 "use client";
 
-import { startTransition, useDeferredValue, useState } from "react";
-import { supportedCountries } from "@/lib/mock-data";
+import { startTransition, useDeferredValue, useEffect, useState } from "react";
+import { supportedCountries, countryPolicyProfiles } from "@/lib/mock-data";
+import { Pillar6IndicatorCards } from "@/components/pillar6-indicator-cards";
+import { LegalSearchWorkspace } from "@/components/legal-search-workspace";
+import { AgentPipelineViewer } from "@/components/agent-pipeline-viewer";
+import { EvidenceTable } from "@/components/evidence-table";
+import { AuditView } from "@/components/audit-view";
+import { ExportPanel } from "@/components/export-panel";
+import { filterEvidenceByCountries, mockEvidenceRecords } from "@/lib/mock-evidence";
 import {
   AgentStatus,
   ComparisonAgentResult,
@@ -117,8 +124,19 @@ export function AnalystDashboard() {
   const [workflowResult, setWorkflowResult] = useState<WorkflowResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedCitation, setSelectedCitation] = useState<string>("Art. 12");
 
   const deferredReport = useDeferredValue(dashboard.report.data);
+  const selectedProfile = countryPolicyProfiles[countryA];
+  const evidenceRecords = filterEvidenceByCountries(mockEvidenceRecords, countryA, countryB);
+  const selectedEvidenceRecord =
+    evidenceRecords.find((record) => record.citation === selectedCitation) ?? evidenceRecords[0];
+
+  useEffect(() => {
+    if (evidenceRecords.length > 0) {
+      setSelectedCitation(evidenceRecords[0].citation);
+    }
+  }, [countryA, countryB]);
 
   function resetAgents() {
     const base = cloneInitialState();
@@ -500,6 +518,23 @@ export function AnalystDashboard() {
           </div>
         </div>
       </section>
+
+      <Pillar6IndicatorCards profile={selectedProfile} />
+
+      <LegalSearchWorkspace defaultJurisdiction={countryA} />
+
+      <AgentPipelineViewer isRunning={isRunning} hasResult={Boolean(workflowResult)} />
+
+      <section className="mt-8 grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+        <EvidenceTable
+          records={evidenceRecords}
+          selectedCitation={selectedEvidenceRecord.citation}
+          onSelect={setSelectedCitation}
+        />
+        <AuditView record={selectedEvidenceRecord} />
+      </section>
+
+      <ExportPanel records={evidenceRecords} />
 
       <section className="glass-panel mt-8 rounded-[2rem] border border-white/70 p-6">
         <div className="mb-5">
