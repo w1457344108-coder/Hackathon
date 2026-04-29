@@ -1,94 +1,44 @@
-import { pipelineStages } from "@/lib/mock-evidence";
+import { architectureRows, pillar6Agents } from "@/data/agents";
+import { AgentMeta } from "@/types/agent-schema";
 
-const pipelinePhases = [
-  {
-    label: "Discovery",
-    range: "Agents 1-2",
-    summary: "Builds search logic and finds authoritative legal sources.",
-    accent: "from-sky-500/20 via-blue-500/10 to-transparent"
-  },
-  {
-    label: "Evidence Intake",
-    range: "Agents 3-4",
-    summary: "Reads documents and keeps only Pillar 6-relevant passages.",
-    accent: "from-cyan-500/20 via-blue-500/10 to-transparent"
-  },
-  {
-    label: "Mapping & Review",
-    range: "Agents 5-7",
-    summary: "Maps indicators, checks citations, and prepares human review.",
-    accent: "from-indigo-500/20 via-blue-500/10 to-transparent"
-  },
-  {
-    label: "Reporting",
-    range: "Agent 8",
-    summary: "Packages outputs into deliverables for judges and reviewers.",
-    accent: "from-emerald-500/20 via-teal-500/10 to-transparent"
-  }
-] as const;
-
-function getCardState(index: number, isRunning: boolean, hasResult: boolean) {
+function getAgentPresentation(agent: AgentMeta, isRunning: boolean, hasResult: boolean) {
   if (hasResult) {
-    return "Completed";
-  }
-
-  if (isRunning && index === 0) {
-    return "Active";
-  }
-
-  if (isRunning) {
-    return "Queued";
-  }
-
-  return "Ready";
-}
-
-function getStateClasses(state: string) {
-  if (state === "Completed") {
     return {
-      card: "border-emerald-200 bg-emerald-50/75 shadow-[0_20px_50px_rgba(16,185,129,0.12)]",
+      card: "border-emerald-200 bg-emerald-50/65 shadow-[0_14px_36px_rgba(16,185,129,0.08)]",
       badge: "bg-emerald-100 text-emerald-700",
-      stripe: "from-emerald-500 via-teal-400 to-cyan-300"
+      ribbon: "bg-emerald-600"
     };
   }
 
-  if (state === "Active") {
+  if (isRunning && agent.agent_type === "mainline") {
     return {
-      card: "border-blue-300 bg-blue-50/85 shadow-[0_24px_64px_rgba(37,99,235,0.16)] ring-1 ring-blue-200",
+      card: "border-blue-200 bg-blue-50/70 shadow-[0_16px_40px_rgba(37,99,235,0.08)]",
       badge: "bg-blue-100 text-blue-700",
-      stripe: "from-blue-600 via-cyan-400 to-sky-300"
+      ribbon: "bg-blue-600"
     };
   }
 
-  if (state === "Queued") {
+  if (agent.status === "API-ready") {
     return {
-      card: "border-slate-200 bg-white/88 shadow-[0_18px_46px_rgba(15,23,42,0.06)]",
-      badge: "bg-slate-100 text-slate-600",
-      stripe: "from-slate-400 via-slate-300 to-slate-200"
+      card: "border-slate-200 bg-white/92 shadow-[0_10px_30px_rgba(15,23,42,0.05)]",
+      badge: "bg-slate-100 text-slate-700",
+      ribbon: "bg-slate-800"
+    };
+  }
+
+  if (agent.status === "Mock") {
+    return {
+      card: "border-amber-200 bg-amber-50/55 shadow-[0_10px_30px_rgba(180,83,9,0.05)]",
+      badge: "bg-amber-100 text-amber-700",
+      ribbon: "bg-amber-600"
     };
   }
 
   return {
-    card: "border-blue-100 bg-white/88 shadow-[0_18px_46px_rgba(37,99,235,0.06)]",
-    badge: "bg-slate-100 text-slate-600",
-    stripe: "from-blue-200 via-cyan-100 to-white"
+    card: "border-blue-100 bg-white/92 shadow-[0_10px_30px_rgba(37,99,235,0.05)]",
+    badge: "bg-blue-100 text-blue-700",
+    ribbon: "bg-blue-500"
   };
-}
-
-function getPhaseLabel(index: number) {
-  if (index <= 1) {
-    return "Discovery";
-  }
-
-  if (index <= 3) {
-    return "Evidence Intake";
-  }
-
-  if (index <= 6) {
-    return "Mapping & Review";
-  }
-
-  return "Reporting";
 }
 
 export function AgentPipelineViewer({
@@ -100,105 +50,206 @@ export function AgentPipelineViewer({
 }) {
   return (
     <section className="glass-panel mt-8 overflow-hidden rounded-[2rem] border border-white/70 p-6">
-      <div className="relative overflow-hidden rounded-[1.75rem] border border-blue-100 bg-[linear-gradient(135deg,rgba(37,99,235,0.12),rgba(255,255,255,0.9)_40%,rgba(191,219,254,0.3))] p-6">
-        <div className="absolute inset-y-0 right-0 hidden w-1/3 bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.16),transparent_70%)] lg:block" />
-
-        <div className="relative flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
-          <div className="max-w-3xl">
+      <div className="rounded-[1.75rem] border border-blue-100 bg-white/90 p-6">
+        <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+          <div className="max-w-4xl">
             <p className="section-title text-xs font-semibold text-blue-700">Evidence Pipeline</p>
             <h2 className="mt-2 text-2xl font-semibold text-slate-950 sm:text-3xl">
-              Eight-Agent Legal Analysis Flow
+              Eleven-Agent Pillar 6 Architecture
             </h2>
-            <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 sm:text-base">
-              A staged legal evidence workflow designed for discovery, extraction, mapping,
-              citation review, and export. The visual hierarchy mirrors how a law student or
-              evaluator would inspect the evidence chain.
+            <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
+              This architecture is scoped only to UN ESCAP RDTII Pillar 6: Cross-Border Data
+              Policies. It organizes legal intake, evidence extraction, indicator mapping,
+              reasoning, quantification, citation review, and export into a policy-analysis-ready
+              multi-agent system.
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
-            <LegendPill label="Topology" value="8 Specialized Agents" />
+            <LegendPill label="Topology" value="11 Specialized Agents" />
             <LegendPill
               label="Current State"
-              value={hasResult ? "Completed" : isRunning ? "Pipeline Running" : "Ready"}
+              value={hasResult ? "Completed" : isRunning ? "Mock Execution" : "Architecture Ready"}
             />
-            <LegendPill label="Focus" value="Pillar 6 Legal Evidence" />
+            <LegendPill label="Scope" value="Pillar 6 Only" />
           </div>
-        </div>
-
-        <div className="relative mt-6 grid gap-3 lg:grid-cols-4">
-          {pipelinePhases.map((phase) => (
-            <div
-              key={phase.label}
-              className="relative overflow-hidden rounded-[1.35rem] border border-white/80 bg-white/80 p-4 shadow-sm"
-            >
-              <div className={`absolute inset-x-0 top-0 h-1 bg-gradient-to-r ${phase.accent}`} />
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                {phase.range}
-              </p>
-              <h3 className="mt-2 text-base font-semibold text-slate-950">{phase.label}</h3>
-              <p className="mt-2 text-sm leading-6 text-slate-600">{phase.summary}</p>
-            </div>
-          ))}
         </div>
       </div>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {pipelineStages.map((stage, index) => {
-          const state = getCardState(index, isRunning, hasResult);
-          const stateClasses = getStateClasses(state);
+      <section className="mt-6 rounded-[1.75rem] border border-blue-100 bg-white/90 p-5">
+        <div className="mb-4">
+          <p className="section-title text-xs font-semibold text-blue-700">
+            Team Responsibility Overview
+          </p>
+          <h3 className="mt-2 text-xl font-semibold text-slate-950">
+            Delivery Ownership by Agent Track
+          </h3>
+          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
+            Mainline implementation is assigned to Rakan, while supporting orchestration and
+            frontend-facing delivery is assigned to Arnold.
+          </p>
+        </div>
+
+        <div className="grid gap-4 lg:grid-cols-2">
+          <ResponsibilityColumn
+            title="Rakan: Mainline Agents"
+            tone="blue"
+            agents={pillar6Agents.filter((agent) => agent.owner_track === "teammate-mainline")}
+          />
+          <ResponsibilityColumn
+            title="Arnold: Frontend + Supporting Agents"
+            tone="slate"
+            agents={pillar6Agents.filter((agent) => agent.owner_track === "my-supporting")}
+          />
+        </div>
+      </section>
+
+      <div className="mt-6 space-y-6">
+        {architectureRows.map((row) => {
+          const rowAgents = row.agentIds
+            .map((agentId) => pillar6Agents.find((agent) => agent.id === agentId))
+            .filter((agent): agent is AgentMeta => Boolean(agent));
 
           return (
-            <article
-              key={stage.id}
-              className={`group relative overflow-hidden rounded-[1.6rem] border p-5 transition duration-300 hover:-translate-y-1 ${stateClasses.card} ${
-                state === "Active" ? "agent-running" : ""
-              }`}
+            <section
+              key={row.title}
+              className="rounded-[1.75rem] border border-blue-100 bg-white/88 p-5"
             >
-              <div
-                className={`absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r ${stateClasses.stripe}`}
-              />
-              <div className="absolute right-4 top-4 text-6xl font-semibold tracking-tight text-slate-200/70">
-                {String(index + 1).padStart(2, "0")}
-              </div>
-
-              <div className="relative">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                      {getPhaseLabel(index)}
-                    </p>
-                    <p className="mt-2 text-xs font-medium uppercase tracking-[0.18em] text-slate-400">
-                      Agent {index + 1}
-                    </p>
-                  </div>
-
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold backdrop-blur ${stateClasses.badge}`}
-                  >
-                    {state}
-                  </span>
-                </div>
-
-                <h3 className="relative mt-5 max-w-[85%] text-lg font-semibold leading-7 text-slate-950">
-                  {stage.name}
-                </h3>
-                <p className="mt-3 min-h-[96px] text-sm leading-6 text-slate-600">
-                  {stage.purpose}
-                </p>
-
-                <div className="mt-5 rounded-[1.15rem] border border-white/80 bg-white/80 px-4 py-3">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                    Output Artifact
+              <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
+                    {row.layer}
                   </p>
-                  <p className="mt-2 text-sm font-medium leading-6 text-slate-800">{stage.output}</p>
+                  <h3 className="mt-2 text-xl font-semibold text-slate-950">{row.title}</h3>
                 </div>
+                <p className="max-w-3xl text-sm leading-6 text-slate-600">{row.summary}</p>
               </div>
-            </article>
+
+              <div
+                className={`grid gap-4 ${
+                  rowAgents.length === 5
+                    ? "xl:grid-cols-5 md:grid-cols-2"
+                    : "xl:grid-cols-3 md:grid-cols-2"
+                }`}
+              >
+                {rowAgents.map((agent, index) => {
+                  const number = pillar6Agents.findIndex((item) => item.id === agent.id) + 1;
+                  const presentation = getAgentPresentation(agent, isRunning, hasResult);
+
+                  return (
+                    <article
+                      key={agent.id}
+                      className={`relative overflow-hidden rounded-[1.5rem] border p-5 ${presentation.card} ${
+                        isRunning && agent.agent_type === "mainline" ? "agent-running" : ""
+                      }`}
+                    >
+                      <div className={`absolute left-0 top-0 h-full w-1.5 ${presentation.ribbon}`} />
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                            Agent {String(number).padStart(2, "0")}
+                          </p>
+                          <h4 className="mt-2 text-lg font-semibold leading-7 text-slate-950">
+                            {agent.name}
+                          </h4>
+                        </div>
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${presentation.badge}`}
+                        >
+                          {agent.status}
+                        </span>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        <MetaTag label={agent.layer} tone="neutral" />
+                        <MetaTag
+                          label={agent.agent_type === "mainline" ? "Mainline" : "Supporting"}
+                          tone={agent.agent_type === "mainline" ? "blue" : "slate"}
+                        />
+                        <MetaTag
+                          label={agent.owner_track === "teammate-mainline" ? "Rakan Track" : "Arnold Track"}
+                          tone={agent.owner_track === "teammate-mainline" ? "blue" : "slate"}
+                        />
+                      </div>
+
+                      <div className="mt-4 rounded-2xl border border-white/80 bg-white/88 p-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                          Main Function
+                        </p>
+                        <p className="mt-2 text-sm leading-6 text-slate-700">{agent.role}</p>
+                      </div>
+
+                      <div className="mt-4 grid gap-3">
+                        <InfoBlock title="Input" value={agent.input} />
+                        <InfoBlock title="Output" value={agent.output} />
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            </section>
           );
         })}
       </div>
     </section>
+  );
+}
+
+function ResponsibilityColumn({
+  title,
+  agents,
+  tone
+}: {
+  title: string;
+  agents: AgentMeta[];
+  tone: "blue" | "slate";
+}) {
+  const classes = {
+    blue: "border-cyan-100 bg-cyan-50/50",
+    slate: "border-slate-200 bg-slate-50/70"
+  };
+
+  return (
+    <div className={`rounded-[1.5rem] border p-4 ${classes[tone]}`}>
+      <h4 className="text-lg font-semibold text-slate-950">{title}</h4>
+      <div className="mt-4 space-y-3">
+        {agents.map((agent) => (
+          <div key={agent.id} className="rounded-2xl border border-white/80 bg-white/90 p-4">
+            <p className="text-sm font-semibold text-slate-950">{agent.name}</p>
+            <p className="mt-2 text-sm leading-6 text-slate-600">{agent.role}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function InfoBlock({ title, value }: { title: string; value: string }) {
+  return (
+    <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{title}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-700">{value}</p>
+    </div>
+  );
+}
+
+function MetaTag({
+  label,
+  tone
+}: {
+  label: string;
+  tone: "neutral" | "blue" | "slate";
+}) {
+  const classes = {
+    neutral: "border-blue-100 bg-blue-50 text-blue-700",
+    blue: "border-cyan-100 bg-cyan-50 text-cyan-700",
+    slate: "border-slate-200 bg-slate-100 text-slate-700"
+  };
+
+  return (
+    <span className={`rounded-full border px-3 py-1 text-xs font-medium ${classes[tone]}`}>
+      {label}
+    </span>
   );
 }
 
