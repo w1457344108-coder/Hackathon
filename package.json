@@ -1,0 +1,25 @@
+{
+  "name": "cross-border-data-policy-multi-agent-analyst",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --webpack",
+    "build": "next build --webpack",
+    "start": "next start"
+  },
+  "dependencies": {
+    "next": "16.2.4",
+    "react": "19.2.5",
+    "react-dom": "19.2.5"
+  },
+  "devDependencies": {
+    "@next/swc-wasm-nodejs": "^16.2.4",
+    "@types/node": "^22.15.18",
+    "@types/react": "^19.1.5",
+    "@types/react-dom": "^19.1.5",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "3.4.19",
+    "typescript": "^5.8.3"
+  }
+}
