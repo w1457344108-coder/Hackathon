@@ -99,10 +99,40 @@ export function buildPillar6IndicatorCards(
 export const preferredSourceOptions: PreferredSourceType[] = [
   "Official legislation portal",
   "Regulator guidance",
+  "Government ministry website",
   "International agreement database",
-  "Case law database",
-  "Government ministry website"
+  "RDTII / UN ESCAP source"
 ];
+
+function splitTerms(value: string) {
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+export function buildAiSuggestedTerms(jurisdiction: string, businessScenario: string) {
+  const scenario = businessScenario.toLowerCase();
+  const scenarioTerms = [
+    scenario.includes("fintech") ? "payment data transfer" : null,
+    scenario.includes("e-commerce") ? "merchant data export" : null,
+    scenario.includes("cloud") ? "cross-border cloud hosting" : null,
+    scenario.includes("health") ? "sensitive health data transfer" : null
+  ].filter(Boolean) as string[];
+
+  const jurisdictionTerms =
+    jurisdiction === "China"
+      ? ["security assessment", "important data export", "cross-border transfer"]
+      : jurisdiction === "Singapore"
+        ? ["comparable protection", "overseas transfer", "accountability standard"]
+        : jurisdiction === "European Union"
+          ? ["third country transfer", "appropriate safeguards", "adequacy decision"]
+          : jurisdiction === "Japan"
+            ? ["foreign transfer consent", "equivalent protection", "outsourcing transfer"]
+            : ["cross-border data flow", "transfer condition", "regulatory openness"];
+
+  return [...new Set([...jurisdictionTerms, ...scenarioTerms, "data localization"])].join(", ");
+}
 
 export const pipelineStages: PipelineAgentStage[] = [
   {
@@ -157,9 +187,11 @@ export const pipelineStages: PipelineAgentStage[] = [
 
 export const mockEvidenceRecords: EvidenceRecord[] = [
   {
+    evidenceId: "EV-CHN-001",
     country: "China",
     pillar: "Pillar 6",
     indicator: "Conditional flow regimes",
+    indicatorCode: "P6_4_CONDITIONAL_FLOW",
     lawTitle: "Mock Personal Information Export Compliance Notice",
     citation: "Art. 12",
     verbatimSnippet:
@@ -176,12 +208,18 @@ export const mockEvidenceRecords: EvidenceRecord[] = [
     aiExtraction:
       "Transfer is allowed only after a formal security review, which creates an ex ante approval gate for cross-border data movement.",
     pillar6Mapping:
-      "Maps to Conditional flow regimes because the transfer pathway depends on a formal review before execution."
+      "Maps to Conditional flow regimes because the transfer pathway depends on a formal review before execution.",
+    mappingRationale:
+      "The clause does not ban transfer outright, but it conditions transfer on a prior security review. That is the core structure of a Pillar 6 conditional flow regime signal.",
+    riskImplication:
+      "High compliance friction for exporters because deal timelines and operational launch plans may be delayed by pre-transfer review requirements."
   },
   {
+    evidenceId: "EV-CHN-002",
     country: "China",
     pillar: "Pillar 6",
     indicator: "Local storage requirements",
+    indicatorCode: "P6_2_LOCAL_STORAGE",
     lawTitle: "Mock Critical Information Infrastructure Data Rule",
     citation: "Sec. 5",
     verbatimSnippet:
@@ -198,12 +236,18 @@ export const mockEvidenceRecords: EvidenceRecord[] = [
     aiExtraction:
       "Covered data must be stored domestically, with only limited exception pathways.",
     pillar6Mapping:
-      "Maps to Local storage requirements because the obligation explicitly anchors data storage inside the jurisdiction."
+      "Maps to Local storage requirements because the obligation explicitly anchors data storage inside the jurisdiction.",
+    mappingRationale:
+      "The text directly imposes an in-country storage obligation. That is a strong fit for the Pillar 6 local storage indicator rather than a softer transfer condition.",
+    riskImplication:
+      "Businesses may need duplicated storage architecture, local vendors, or region-specific compliance controls before launch."
   },
   {
+    evidenceId: "EV-SGP-001",
     country: "Singapore",
     pillar: "Pillar 6",
     indicator: "Binding commitments on data transfer",
+    indicatorCode: "P6_5_BINDING_COMMITMENT",
     lawTitle: "Mock Digital Economy Cooperation Chapter",
     citation: "Chapter 8, Art. 4",
     verbatimSnippet:
@@ -220,12 +264,18 @@ export const mockEvidenceRecords: EvidenceRecord[] = [
     aiExtraction:
       "This text shows a positive binding commitment supporting data transfers for commercial activity.",
     pillar6Mapping:
-      "Maps to Binding commitments on data transfer because it creates a treaty-level openness commitment."
+      "Maps to Binding commitments on data transfer because it creates a treaty-level openness commitment.",
+    mappingRationale:
+      "The provision uses treaty-style commitment language and explicitly addresses cross-border movement of covered data, which aligns with the binding commitment indicator.",
+    riskImplication:
+      "Lower transfer friction for firms relying on regional data operations, although domestic safeguard exceptions still need legal review."
   },
   {
+    evidenceId: "EV-SGP-002",
     country: "Singapore",
     pillar: "Pillar 6",
     indicator: "Conditional flow regimes",
+    indicatorCode: "P6_4_CONDITIONAL_FLOW",
     lawTitle: "Mock Accountability Transfer Guidance",
     citation: "Para. 17",
     verbatimSnippet:
@@ -242,12 +292,18 @@ export const mockEvidenceRecords: EvidenceRecord[] = [
     aiExtraction:
       "Transfers are generally allowed, but exporters must prove comparable protection.",
     pillar6Mapping:
-      "Maps to Conditional flow regimes because transfer permission is tied to a safeguards test rather than a blanket ban."
+      "Maps to Conditional flow regimes because transfer permission is tied to a safeguards test rather than a blanket ban.",
+    mappingRationale:
+      "The text keeps transfers open in principle but ties legality to a safeguards-based accountability standard, which is characteristic of conditional transfer rules.",
+    riskImplication:
+      "Moderate compliance burden because organizations must document equivalence and maintain internal justification for cross-border flows."
   },
   {
+    evidenceId: "EV-EU-001",
     country: "European Union",
     pillar: "Pillar 6",
     indicator: "Conditional flow regimes",
+    indicatorCode: "P6_4_CONDITIONAL_FLOW",
     lawTitle: "Mock Adequacy and Safeguards Regulation",
     citation: "Art. 44-46",
     verbatimSnippet:
@@ -264,12 +320,18 @@ export const mockEvidenceRecords: EvidenceRecord[] = [
     aiExtraction:
       "Transfer is possible, but only through adequacy or safeguard mechanisms.",
     pillar6Mapping:
-      "Maps to Conditional flow regimes because permissibility depends on a recognized legal transfer mechanism."
+      "Maps to Conditional flow regimes because permissibility depends on a recognized legal transfer mechanism.",
+    mappingRationale:
+      "This is a textbook example of transfer conditionality: cross-border movement depends on adequacy decisions or substitute safeguards rather than default permissibility.",
+    riskImplication:
+      "Operational risk is manageable but documentation, contracting, and transfer impact analysis can increase legal review cost."
   },
   {
+    evidenceId: "EV-JPN-001",
     country: "Japan",
     pillar: "Pillar 6",
     indicator: "Binding commitments on data transfer",
+    indicatorCode: "P6_5_BINDING_COMMITMENT",
     lawTitle: "Mock Regional Digital Trade Commitment",
     citation: "Annex 3, Clause 7",
     verbatimSnippet:
@@ -286,12 +348,18 @@ export const mockEvidenceRecords: EvidenceRecord[] = [
     aiExtraction:
       "This suggests a pro-flow treaty orientation, but the language is softer than a strict binding ban on localization requirements.",
     pillar6Mapping:
-      "Maps to Binding commitments on data transfer, with a caution note on legal force and exceptions."
+      "Maps to Binding commitments on data transfer, with a caution note on legal force and exceptions.",
+    mappingRationale:
+      "The clause still belongs in the commitment bucket because it addresses localization-related obligations at agreement level, but its softer wording reduces certainty.",
+    riskImplication:
+      "Useful pro-flow signal for business planning, but legal teams should treat it as a qualified commitment rather than a complete shield from local infrastructure demands."
   },
   {
+    evidenceId: "EV-USA-001",
     country: "United States",
     pillar: "Pillar 6",
     indicator: "Infrastructure requirements",
+    indicatorCode: "P6_3_INFRASTRUCTURE",
     lawTitle: "Mock Sectoral Cloud Hosting Advisory",
     citation: "Advisory Note 9",
     verbatimSnippet:
@@ -308,55 +376,57 @@ export const mockEvidenceRecords: EvidenceRecord[] = [
     aiExtraction:
       "The text may influence infrastructure design, though it does not clearly impose a local server mandate.",
     pillar6Mapping:
-      "Tentatively maps to Infrastructure requirements because the legal concern is about architecture and regulator access, not direct transfer prohibition."
+      "Tentatively maps to Infrastructure requirements because the legal concern is about architecture and regulator access, not direct transfer prohibition.",
+    mappingRationale:
+      "The provision is best treated as an infrastructure signal because it shapes system design and supervisory access expectations, even without explicit localization language.",
+    riskImplication:
+      "Potential architecture and vendor risk if cloud environments cannot satisfy regulator access expectations in practice."
   }
 ];
 
 export const buildSearchProfile = (
   input: {
     jurisdiction: string;
+    businessScenario: string;
     plainLanguageQuery: string;
-    legalTerms: string;
-    synonyms: string;
+    aiGeneratedTerms: string;
+    lawStudentTerms: string;
     exclusionTerms: string;
     preferredSources: PreferredSourceType[];
   }
 ): SearchProfileJson => {
-  const splitTerms = (value: string) =>
-    value
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean);
-
-  const legalTerms = splitTerms(input.legalTerms);
-  const synonyms = splitTerms(input.synonyms);
+  const aiGeneratedTerms = splitTerms(input.aiGeneratedTerms);
+  const lawStudentTerms = splitTerms(input.lawStudentTerms);
   const exclusionTerms = splitTerms(input.exclusionTerms);
   const indicatorTargets = indicatorDefinitions.map((item) => item.title);
-  const baseTerms = [...legalTerms, ...synonyms].filter(Boolean);
+  const baseTerms = [...aiGeneratedTerms, ...lawStudentTerms].filter(Boolean);
 
   const searchQueries = [
-    `${input.jurisdiction} cross-border data transfer ${input.plainLanguageQuery}`.trim(),
+    `${input.jurisdiction} ${input.businessScenario} ${input.plainLanguageQuery}`.trim(),
     `${input.jurisdiction} (${baseTerms.join(" OR ") || "data transfer"}) official guidance`,
-    `${input.jurisdiction} (${indicatorTargets.slice(0, 2).join(" OR ")}) site:gov`
+    `${input.jurisdiction} ${input.businessScenario} (${indicatorTargets.join(" OR ")})`,
+    `${input.jurisdiction} cross-border data policy ${input.businessScenario} site:gov`
   ];
 
   return {
     jurisdiction: input.jurisdiction,
-    pillar: "Pillar 6: Cross-Border Data Policies",
-    objective: input.plainLanguageQuery,
-    legalTerms,
-    synonyms,
-    exclusionTerms,
-    preferredSources: input.preferredSources,
-    indicatorTargets,
-    searchQueries,
-    reviewChecklist: [
+    business_scenario: input.businessScenario,
+    user_query: input.plainLanguageQuery,
+    ai_generated_terms: aiGeneratedTerms,
+    law_student_terms: lawStudentTerms,
+    exclusion_terms: exclusionTerms,
+    preferred_sources: input.preferredSources,
+    pillar6_indicator_targets: indicatorTargets,
+    search_queries: searchQueries,
+    review_checklist: [
       "Confirm the source is official, current, and relevant to cross-border data transfers.",
-      "Check whether the text is binding law, regulator guidance, or treaty language.",
-      "Extract verbatim language before scoring or summarizing an indicator.",
-      "Record uncertainty where the text affects architecture or supervision but not explicit transfer bans."
+      "Check whether the text is binding law, regulator guidance, ministry material, or international commitment.",
+      "Let law students add or revise specialist legal terms before finalizing the search set.",
+      "Extract verbatim language before scoring or summarizing a Pillar 6 indicator.",
+      "Record uncertainty where the text affects architecture or supervision but not explicit transfer bans.",
+      "Keep the search limited to Pillar 6 and avoid drifting into general domestic privacy compliance."
     ],
-    generatedAt: new Date().toISOString()
+    generated_at: new Date().toISOString()
   };
 };
 

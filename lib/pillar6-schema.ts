@@ -20,9 +20,9 @@ export type Pillar6IndicatorScoreField =
 export type PreferredSourceType =
   | "Official legislation portal"
   | "Regulator guidance"
+  | "Government ministry website"
   | "International agreement database"
-  | "Case law database"
-  | "Government ministry website";
+  | "RDTII / UN ESCAP source";
 
 export type EvidenceSourceType =
   | "Official Portal"
@@ -31,7 +31,18 @@ export type EvidenceSourceType =
   | "International Agreement"
   | "Policy Notice";
 
-export type EvidenceReviewStatus = "Pending Review" | "Approved" | "Needs Revision";
+export type EvidenceReviewStatus =
+  | "Pending Review"
+  | "Approved"
+  | "Needs Revision"
+  | "Rejected";
+
+export type Pillar6IndicatorCode =
+  | "P6_1_BAN_LOCAL_PROCESSING"
+  | "P6_2_LOCAL_STORAGE"
+  | "P6_3_INFRASTRUCTURE"
+  | "P6_4_CONDITIONAL_FLOW"
+  | "P6_5_BINDING_COMMITMENT";
 
 export interface Pillar6IndicatorCardData {
   id: Pillar6IndicatorId;
@@ -46,25 +57,26 @@ export interface Pillar6IndicatorCardData {
 
 export interface LegalSearchWorkspaceInput {
   jurisdiction: string;
+  businessScenario: string;
   plainLanguageQuery: string;
-  legalTerms: string;
-  synonyms: string;
+  aiGeneratedTerms: string;
+  lawStudentTerms: string;
   exclusionTerms: string;
   preferredSources: PreferredSourceType[];
 }
 
 export interface SearchProfileJson {
   jurisdiction: string;
-  pillar: "Pillar 6: Cross-Border Data Policies";
-  objective: string;
-  legalTerms: string[];
-  synonyms: string[];
-  exclusionTerms: string[];
-  preferredSources: PreferredSourceType[];
-  indicatorTargets: string[];
-  searchQueries: string[];
-  reviewChecklist: string[];
-  generatedAt: string;
+  business_scenario: string;
+  user_query: string;
+  ai_generated_terms: string[];
+  law_student_terms: string[];
+  exclusion_terms: string[];
+  preferred_sources: PreferredSourceType[];
+  pillar6_indicator_targets: string[];
+  search_queries: string[];
+  review_checklist: string[];
+  generated_at: string;
 }
 
 export interface PipelineAgentStage {
@@ -75,9 +87,11 @@ export interface PipelineAgentStage {
 }
 
 export interface EvidenceRecord {
+  evidenceId: string;
   country: string;
   pillar: string;
   indicator: string;
+  indicatorCode: Pillar6IndicatorCode;
   lawTitle: string;
   citation: string;
   verbatimSnippet: string;
@@ -90,4 +104,6 @@ export interface EvidenceRecord {
   originalLegalText: string;
   aiExtraction: string;
   pillar6Mapping: string;
+  mappingRationale: string;
+  riskImplication: string;
 }

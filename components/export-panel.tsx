@@ -19,6 +19,7 @@ function escapeCsv(value: string | number) {
 
 function toCsv(records: EvidenceRecord[]) {
   const headers = [
+    "evidenceId",
     "country",
     "pillar",
     "indicator",
@@ -35,6 +36,7 @@ function toCsv(records: EvidenceRecord[]) {
 
   const rows = records.map((record) =>
     [
+      record.evidenceId,
       record.country,
       record.pillar,
       record.indicator,
@@ -66,6 +68,7 @@ function toMarkdown(records: EvidenceRecord[]) {
   const sections = records.map((record) =>
     [
       `## ${record.country} · ${record.indicator}`,
+      `- Evidence ID: ${record.evidenceId}`,
       `- Law title: ${record.lawTitle}`,
       `- Citation: ${record.citation}`,
       `- Source type: ${record.sourceType}`,

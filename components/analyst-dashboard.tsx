@@ -5,6 +5,7 @@ import { supportedCountries, countryPolicyProfiles } from "@/lib/mock-data";
 import { Pillar6IndicatorCards } from "@/components/pillar6-indicator-cards";
 import { LegalSearchWorkspace } from "@/components/legal-search-workspace";
 import { AgentPipelineViewer } from "@/components/agent-pipeline-viewer";
+import { DevelopmentRoadmap } from "@/components/development-roadmap";
 import { EvidenceTable } from "@/components/evidence-table";
 import { AuditView } from "@/components/audit-view";
 import { ExportPanel } from "@/components/export-panel";
@@ -262,6 +263,8 @@ export function AnalystDashboard() {
       <LegalSearchWorkspace defaultJurisdiction={countryA} />
 
       <AgentPipelineViewer isRunning={isRunning} hasResult={Boolean(workflowResult)} />
+
+      <DevelopmentRoadmap />
 
       <section className="mt-8 grid gap-6 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
         <EvidenceTable
