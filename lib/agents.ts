@@ -1,13 +1,17 @@
 import { countryPolicyProfiles } from "@/lib/mock-data";
+import { filterEvidenceByCountries, mockEvidenceRecords } from "@/lib/mock-evidence";
 import {
   ComparisonAgentResult,
   ComparisonRow,
   CountryPolicyProfile,
+  DemoNarrative,
   PolicyAnalysisResult,
   ReportAgentResult,
   ResearchAgentResult,
   RiskLevel,
   SupportedCountry,
+  TenAgentId,
+  WorkflowAgentTrace,
   WorkflowResult
 } from "@/lib/types";
 
@@ -16,6 +20,32 @@ const SOURCE_BASIS = [
   "ESCAP RDTII 2.1 Guide, Pillar 6 scoring logic",
   "ESCAP coverage of Pillar 6: cross-border data policies"
 ];
+
+const TEN_AGENT_ORDER: TenAgentId[] = [
+  "intent-arbiter",
+  "query-builder",
+  "source-discovery",
+  "document-reader",
+  "relevance-filter",
+  "indicator-mapping",
+  "legal-reasoner",
+  "risk-cost-quantifier",
+  "audit-citation",
+  "legal-review-export"
+];
+
+const agentNames: Record<TenAgentId, string> = {
+  "intent-arbiter": "Intent Arbiter Agent",
+  "query-builder": "Query Builder Agent",
+  "source-discovery": "Source Discovery Agent",
+  "document-reader": "Document Reader Agent",
+  "relevance-filter": "Relevance Filter Agent",
+  "indicator-mapping": "Indicator Mapping Agent",
+  "legal-reasoner": "Legal Reasoner Agent",
+  "risk-cost-quantifier": "Risk & Cost Quantifier Agent",
+  "audit-citation": "Audit View & Citation Agent",
+  "legal-review-export": "Legal Review & Export Agent"
+};
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -183,10 +213,207 @@ export async function reportAgent(results: {
   };
 }
 
+function nextAgent(agentId: TenAgentId): TenAgentId | null {
+  const index = TEN_AGENT_ORDER.indexOf(agentId);
+
+  return TEN_AGENT_ORDER[index + 1] ?? null;
+}
+
+function buildTenAgentTrace(input: {
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  businessScenario: string;
+  userQuery: string;
+  policyAnalysis: PolicyAnalysisResult[];
+}): WorkflowAgentTrace[] {
+  const countries = [input.countryA, input.countryB].filter(Boolean).join(" and ");
+  const evidenceIds = filterEvidenceByCountries(
+    mockEvidenceRecords,
+    input.countryA,
+    input.countryB ?? ""
+  ).map((record) => record.evidenceId);
+  const approvedEvidenceIds = filterEvidenceByCountries(
+    mockEvidenceRecords,
+    input.countryA,
+    input.countryB ?? ""
+  )
+    .filter((record) => record.reviewStatus === "Approved")
+    .map((record) => record.evidenceId);
+
+  return [
+    {
+      agentId: "intent-arbiter",
+      name: agentNames["intent-arbiter"],
+      inputSummary: `${countries} | ${input.businessScenario} | ${input.userQuery}`,
+      outputSummary: "Classifies the request as a Pillar 6 cross-border data policy workflow.",
+      evidenceIds: [],
+      humanReviewGate: {
+        required: true,
+        reviewerRole: "law-student",
+        action: "Confirm Pillar 6 scope before retrieval"
+      },
+      nextAgent: nextAgent("intent-arbiter")
+    },
+    {
+      agentId: "query-builder",
+      name: agentNames["query-builder"],
+      inputSummary: "Normalized Pillar 6 intent, jurisdiction, scenario, and review terms.",
+      outputSummary: "Builds search queries and lets law students revise specialist legal terms.",
+      evidenceIds: [],
+      humanReviewGate: {
+        required: true,
+        reviewerRole: "law-student",
+        action: "Revise search terms before discovery"
+      },
+      nextAgent: nextAgent("query-builder")
+    },
+    {
+      agentId: "source-discovery",
+      name: agentNames["source-discovery"],
+      inputSummary: "Search Profile JSON with preferred official source types.",
+      outputSummary: "Ranks candidate statutes, regulator guidance, official portals, and treaties.",
+      evidenceIds,
+      humanReviewGate: {
+        required: true,
+        reviewerRole: "law-student",
+        action: "Spot-check official source authority"
+      },
+      nextAgent: nextAgent("source-discovery")
+    },
+    {
+      agentId: "document-reader",
+      name: agentNames["document-reader"],
+      inputSummary: "Candidate sources with URL, title, jurisdiction, and source type.",
+      outputSummary: "Normalizes source text into citation-ready passages.",
+      evidenceIds,
+      humanReviewGate: {
+        required: true,
+        reviewerRole: "law-student",
+        action: "Confirm parsing quality"
+      },
+      nextAgent: nextAgent("document-reader")
+    },
+    {
+      agentId: "relevance-filter",
+      name: agentNames["relevance-filter"],
+      inputSummary: "Parsed passages plus Pillar 6 focus indicators.",
+      outputSummary: "Removes domestic privacy-only material and keeps transfer-policy evidence.",
+      evidenceIds,
+      humanReviewGate: {
+        required: true,
+        reviewerRole: "law-student",
+        action: "Approve relevance shortlist"
+      },
+      nextAgent: nextAgent("relevance-filter")
+    },
+    {
+      agentId: "indicator-mapping",
+      name: agentNames["indicator-mapping"],
+      inputSummary: "Shortlisted evidence snippets and canonical Pillar 6 indicator enum.",
+      outputSummary: "Maps every retained evidence item to one of the five Pillar 6 codes.",
+      evidenceIds,
+      humanReviewGate: {
+        required: true,
+        reviewerRole: "law-student",
+        action: "Approve indicator mapping"
+      },
+      nextAgent: nextAgent("indicator-mapping")
+    },
+    {
+      agentId: "legal-reasoner",
+      name: agentNames["legal-reasoner"],
+      inputSummary: "Mapped evidence, original text lookup, and jurisdiction context.",
+      outputSummary: "Produces if-then legal conclusions bound to evidence IDs.",
+      evidenceIds,
+      humanReviewGate: {
+        required: true,
+        reviewerRole: "law-student",
+        action: "Review legal conclusion"
+      },
+      nextAgent: nextAgent("legal-reasoner")
+    },
+    {
+      agentId: "risk-cost-quantifier",
+      name: agentNames["risk-cost-quantifier"],
+      inputSummary: "Legal conclusions with transfer gates, localization signals, and commitments.",
+      outputSummary: `Summarizes risk as ${input.policyAnalysis
+        .map((item) => `${item.country}: ${item.riskLevel}`)
+        .join(", ")}.`,
+      evidenceIds,
+      humanReviewGate: {
+        required: true,
+        reviewerRole: "law-student",
+        action: "Review business impact"
+      },
+      nextAgent: nextAgent("risk-cost-quantifier")
+    },
+    {
+      agentId: "audit-citation",
+      name: agentNames["audit-citation"],
+      inputSummary: "Risk findings plus evidence lookup with source URLs and citation anchors.",
+      outputSummary: "Builds side-by-side audit items linking each AI claim to legal source text.",
+      evidenceIds,
+      humanReviewGate: {
+        required: true,
+        reviewerRole: "law-student",
+        action: "Approve citation chain"
+      },
+      nextAgent: nextAgent("audit-citation")
+    },
+    {
+      agentId: "legal-review-export",
+      name: agentNames["legal-review-export"],
+      inputSummary: "Approved audit items, reviewer notes, and risk summary.",
+      outputSummary: "Packages JSON, CSV, and Markdown exports from reviewed Pillar 6 evidence.",
+      evidenceIds: approvedEvidenceIds,
+      humanReviewGate: {
+        required: true,
+        reviewerRole: "law-student",
+        action: "Confirm export package"
+      },
+      nextAgent: nextAgent("legal-review-export")
+    }
+  ];
+}
+
+function buildDemoNarrative(input: {
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  businessScenario: string;
+}): DemoNarrative {
+  return {
+    title: `${input.businessScenario} cross-border data transfer review`,
+    scenario: `A ${input.businessScenario} team wants to understand whether data can move from ${input.countryA}${
+      input.countryB ? ` to ${input.countryB}` : ""
+    } while staying inside UN ESCAP RDTII Pillar 6 scope.`,
+    primaryJurisdiction: input.countryA,
+    comparisonJurisdiction: input.countryB ?? null,
+    walkthrough: [
+      "Start in Legal Search Workspace and generate a Search Profile JSON.",
+      "Use the ten-agent trace to explain how evidence flows through discovery, filtering, mapping, reasoning, audit, and export.",
+      "Open Evidence Audit View to compare original legal text with the AI claim and Pillar 6 mapping.",
+      "Let a law student approve, revise, or reject the evidence before exporting the final package."
+    ],
+    successCriteria: [
+      "All mapped evidence uses only the five canonical Pillar 6 indicator codes.",
+      "Every legal conclusion can be traced to an evidence ID, source URL, and citation.",
+      "The export bundle reflects reviewer status and reviewer notes."
+    ]
+  };
+}
+
 export async function runMultiAgentWorkflow(
   countryA: SupportedCountry,
-  countryB?: SupportedCountry | null
+  countryB?: SupportedCountry | null,
+  options?: {
+    businessScenario?: string;
+    userQuery?: string;
+  }
 ): Promise<WorkflowResult> {
+  const businessScenario = options?.businessScenario ?? "fintech";
+  const userQuery =
+    options?.userQuery ??
+    "Find legal evidence describing how cross-border data transfers are permitted, conditioned, or restricted.";
   const firstProfile = await researchAgent(countryA);
   const secondProfile = countryB ? await researchAgent(countryB) : null;
 
@@ -214,12 +441,26 @@ export async function runMultiAgentWorkflow(
   return {
     input: {
       countryA,
-      countryB
+      countryB,
+      businessScenario,
+      userQuery
     },
     research,
     policyAnalysis,
     comparison,
     report,
+    agentTrace: buildTenAgentTrace({
+      countryA,
+      countryB,
+      businessScenario,
+      userQuery,
+      policyAnalysis
+    }),
+    demoNarrative: buildDemoNarrative({
+      countryA,
+      countryB,
+      businessScenario
+    }),
     generatedAt: new Date().toISOString()
   };
 }

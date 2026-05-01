@@ -12,16 +12,39 @@ All agents must follow these rules:
 - Every agent output must be wrapped in `AgentResult<T>`.
 - Agents must not emit undefined or undocumented fields.
 - Failure cases must use one unified error format.
-- Every evidence object must retain either `source_url` or `citation_ref`.
-- Every legal conclusion must bind to at least one `evidence_id`.
+- Every evidence object must retain either `sourceUrl` or `citationRef`.
+- Every legal conclusion must bind to at least one `evidenceId`.
 - The project processes only Pillar 6 and must not introduce Pillar 7 logic.
+
+### Canonical field casing
+
+The running Next.js app, TypeScript types, streaming API response, and mock orchestration code use **camelCase** as the canonical field casing. Examples: `evidenceId`, `sourceUrl`, `reviewStatus`, `agentTrace`, `humanReviewGate`.
+
+Export adapters may convert selected fields to snake_case for downstream CSV or JSON consumers, but internal agent contracts should stay camelCase so UI components, mock data, and future API-backed agents share one naming convention.
+
+### Human review gates
+
+The current hackathon version treats law student review as a first-class orchestration step, not as an afterthought. Each agent trace item must identify whether a `humanReviewGate` is required, which reviewer role owns the gate, and what action must be completed before downstream output is trusted.
+
+The required review checkpoints are:
+
+1. Confirm Pillar 6 scope before retrieval.
+2. Revise search terms before discovery.
+3. Spot-check official source authority.
+4. Confirm parsing quality.
+5. Approve relevance shortlist.
+6. Approve indicator mapping.
+7. Review legal conclusion.
+8. Review business impact.
+9. Approve citation chain.
+10. Confirm export package.
 
 Reference wrapper:
 
 ```ts
 interface AgentResult<T> {
   status: "success" | "error";
-  agent_id: string;
+  agentId: string;
   data?: T;
   message?: string;
 }
@@ -31,14 +54,14 @@ Shared evidence rules:
 
 ```ts
 interface EvidenceRef {
-  evidence_id: string;
-  source_url?: string;
-  citation_ref?: string;
+  evidenceId: string;
+  sourceUrl?: string;
+  citationRef?: string;
 }
 
 interface LegalConclusionRef {
-  conclusion_id: string;
-  evidence_ids: string[];
+  conclusionId: string;
+  evidenceIds: string[];
 }
 ```
 
@@ -49,7 +72,7 @@ All agents must return the following failure payload:
 ```json
 {
   "status": "error",
-  "agent_id": "string",
+  "agentId": "string",
   "message": "string"
 }
 ```
@@ -59,7 +82,7 @@ Type form:
 ```ts
 interface GlobalFailureOutput {
   status: "error";
-  agent_id: string;
+  agentId: string;
   message: string;
 }
 ```

@@ -71,6 +71,55 @@ export interface ComparisonAgentResult {
 export interface WorkflowInput {
   countryA: SupportedCountry;
   countryB?: SupportedCountry | null;
+  businessScenario: string;
+  userQuery: string;
+}
+
+export type TenAgentId =
+  | "intent-arbiter"
+  | "query-builder"
+  | "source-discovery"
+  | "document-reader"
+  | "relevance-filter"
+  | "indicator-mapping"
+  | "legal-reasoner"
+  | "risk-cost-quantifier"
+  | "audit-citation"
+  | "legal-review-export";
+
+export interface AgentHumanReviewGate {
+  required: boolean;
+  reviewerRole: "law-student" | "none";
+  action:
+    | "Confirm Pillar 6 scope before retrieval"
+    | "Revise search terms before discovery"
+    | "Spot-check official source authority"
+    | "Confirm parsing quality"
+    | "Approve relevance shortlist"
+    | "Approve indicator mapping"
+    | "Review legal conclusion"
+    | "Review business impact"
+    | "Approve citation chain"
+    | "Confirm export package";
+}
+
+export interface WorkflowAgentTrace {
+  agentId: TenAgentId;
+  name: string;
+  inputSummary: string;
+  outputSummary: string;
+  evidenceIds: string[];
+  humanReviewGate: AgentHumanReviewGate;
+  nextAgent: TenAgentId | null;
+}
+
+export interface DemoNarrative {
+  title: string;
+  scenario: string;
+  primaryJurisdiction: SupportedCountry;
+  comparisonJurisdiction: SupportedCountry | null;
+  walkthrough: string[];
+  successCriteria: string[];
 }
 
 export interface WorkflowResult {
@@ -79,6 +128,8 @@ export interface WorkflowResult {
   policyAnalysis: PolicyAnalysisResult[];
   comparison: ComparisonAgentResult | null;
   report: ReportAgentResult;
+  agentTrace: WorkflowAgentTrace[];
+  demoNarrative: DemoNarrative;
   generatedAt: string;
 }
 

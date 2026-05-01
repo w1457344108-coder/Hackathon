@@ -8,12 +8,22 @@ function createEvent(event: StreamEventName, data: unknown) {
   return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
 }
 
-function parseBody(body: unknown): { countryA: SupportedCountry; countryB?: SupportedCountry | null } {
+function parseBody(body: unknown): {
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  businessScenario?: string;
+  userQuery?: string;
+} {
   if (!body || typeof body !== "object") {
     throw new Error("Invalid request body.");
   }
 
-  const input = body as { countryA?: SupportedCountry; countryB?: SupportedCountry | null };
+  const input = body as {
+    countryA?: SupportedCountry;
+    countryB?: SupportedCountry | null;
+    businessScenario?: string;
+    userQuery?: string;
+  };
 
   if (!input.countryA) {
     throw new Error("countryA is required.");
@@ -21,7 +31,9 @@ function parseBody(body: unknown): { countryA: SupportedCountry; countryB?: Supp
 
   return {
     countryA: input.countryA,
-    countryB: input.countryB ?? null
+    countryB: input.countryB ?? null,
+    businessScenario: input.businessScenario,
+    userQuery: input.userQuery
   };
 }
 
@@ -41,7 +53,10 @@ export async function POST(request: NextRequest) {
           message: "Multi-agent workflow initiated."
         });
 
-        const result: WorkflowResult = await runMultiAgentWorkflow(body.countryA, body.countryB);
+        const result: WorkflowResult = await runMultiAgentWorkflow(body.countryA, body.countryB, {
+          businessScenario: body.businessScenario,
+          userQuery: body.userQuery
+        });
 
         send("research", result.research);
         send("policy", result.policyAnalysis);
