@@ -1,4 +1,4 @@
-import { architectureRows, pillar6Agents } from "@/data/agents";
+import { pillar6Agents } from "@/data/agents";
 import { AgentMeta } from "@/types/agent-schema";
 
 function getAgentPresentation(agent: AgentMeta, isRunning: boolean, hasResult: boolean) {
@@ -48,6 +48,9 @@ export function AgentPipelineViewer({
   isRunning: boolean;
   hasResult: boolean;
 }) {
+  const mainlineAgents = pillar6Agents.filter((agent) => agent.agent_type === "mainline");
+  const supportingAgents = pillar6Agents.filter((agent) => agent.agent_type === "supporting");
+
   return (
     <section className="glass-panel mt-8 overflow-hidden rounded-[2rem] border border-white/70 p-6">
       <div className="rounded-[1.75rem] border border-blue-100 bg-white/90 p-6">
@@ -55,18 +58,18 @@ export function AgentPipelineViewer({
           <div className="max-w-4xl">
             <p className="section-title text-xs font-semibold text-blue-700">Evidence Pipeline</p>
             <h2 className="mt-2 text-2xl font-semibold text-slate-950 sm:text-3xl">
-              Eleven-Agent Pillar 6 Architecture
+              Ten-Agent Pillar 6 Architecture
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
               This architecture is scoped only to UN ESCAP RDTII Pillar 6: Cross-Border Data
               Policies. It organizes legal intake, evidence extraction, indicator mapping,
               reasoning, quantification, citation review, and export into a policy-analysis-ready
-              multi-agent system.
+              multi-agent system with a streamlined 5 + 5 structure.
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
-            <LegendPill label="Topology" value="11 Specialized Agents" />
+            <LegendPill label="Topology" value="10 Specialized Agents" />
             <LegendPill
               label="Current State"
               value={hasResult ? "Completed" : isRunning ? "Mock Execution" : "Architecture Ready"}
@@ -76,151 +79,104 @@ export function AgentPipelineViewer({
         </div>
       </div>
 
-      <section className="mt-6 rounded-[1.75rem] border border-blue-100 bg-white/90 p-5">
-        <div className="mb-4">
-          <p className="section-title text-xs font-semibold text-blue-700">
-            Team Responsibility Overview
-          </p>
-          <h3 className="mt-2 text-xl font-semibold text-slate-950">
-            Delivery Ownership by Agent Track
-          </h3>
-          <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-            Mainline implementation is assigned to Rakan, while supporting orchestration and
-            frontend-facing delivery is assigned to Arnold.
-          </p>
-        </div>
-
-        <div className="grid gap-4 lg:grid-cols-2">
-          <ResponsibilityColumn
-            title="Rakan: Mainline Agents"
-            tone="blue"
-            agents={pillar6Agents.filter((agent) => agent.owner_track === "teammate-mainline")}
-          />
-          <ResponsibilityColumn
-            title="Arnold: Frontend + Supporting Agents"
-            tone="slate"
-            agents={pillar6Agents.filter((agent) => agent.owner_track === "my-supporting")}
-          />
-        </div>
-      </section>
-
       <div className="mt-6 space-y-6">
-        {architectureRows.map((row) => {
-          const rowAgents = row.agentIds
-            .map((agentId) => pillar6Agents.find((agent) => agent.id === agentId))
-            .filter((agent): agent is AgentMeta => Boolean(agent));
-
-          return (
-            <section
-              key={row.title}
-              className="rounded-[1.75rem] border border-blue-100 bg-white/88 p-5"
-            >
-              <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
-                    {row.layer}
-                  </p>
-                  <h3 className="mt-2 text-xl font-semibold text-slate-950">{row.title}</h3>
-                </div>
-                <p className="max-w-3xl text-sm leading-6 text-slate-600">{row.summary}</p>
-              </div>
-
-              <div
-                className={`grid gap-4 ${
-                  rowAgents.length === 5
-                    ? "xl:grid-cols-5 md:grid-cols-2"
-                    : "xl:grid-cols-3 md:grid-cols-2"
-                }`}
-              >
-                {rowAgents.map((agent, index) => {
-                  const number = pillar6Agents.findIndex((item) => item.id === agent.id) + 1;
-                  const presentation = getAgentPresentation(agent, isRunning, hasResult);
-
-                  return (
-                    <article
-                      key={agent.id}
-                      className={`relative overflow-hidden rounded-[1.5rem] border p-5 ${presentation.card} ${
-                        isRunning && agent.agent_type === "mainline" ? "agent-running" : ""
-                      }`}
-                    >
-                      <div className={`absolute left-0 top-0 h-full w-1.5 ${presentation.ribbon}`} />
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
-                          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            Agent {String(number).padStart(2, "0")}
-                          </p>
-                          <h4 className="mt-2 text-lg font-semibold leading-7 text-slate-950">
-                            {agent.name}
-                          </h4>
-                        </div>
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${presentation.badge}`}
-                        >
-                          {agent.status}
-                        </span>
-                      </div>
-
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        <MetaTag label={agent.layer} tone="neutral" />
-                        <MetaTag
-                          label={agent.agent_type === "mainline" ? "Mainline" : "Supporting"}
-                          tone={agent.agent_type === "mainline" ? "blue" : "slate"}
-                        />
-                        <MetaTag
-                          label={agent.owner_track === "teammate-mainline" ? "Rakan Track" : "Arnold Track"}
-                          tone={agent.owner_track === "teammate-mainline" ? "blue" : "slate"}
-                        />
-                      </div>
-
-                      <div className="mt-4 rounded-2xl border border-white/80 bg-white/88 p-4">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                          Main Function
-                        </p>
-                        <p className="mt-2 text-sm leading-6 text-slate-700">{agent.role}</p>
-                      </div>
-
-                      <div className="mt-4 grid gap-3">
-                        <InfoBlock title="Input" value={agent.input} />
-                        <InfoBlock title="Output" value={agent.output} />
-                      </div>
-                    </article>
-                  );
-                })}
-              </div>
-            </section>
-          );
-        })}
+        <AgentRow
+          title="Mainline Agents"
+          summary="Five core agents drive the path from user intent to legal conclusion."
+          agents={mainlineAgents}
+          isRunning={isRunning}
+          hasResult={hasResult}
+        />
+        <AgentRow
+          title="Supporting Agents"
+          summary="Five supporting agents strengthen retrieval quality, evidence transparency, and export readiness."
+          agents={supportingAgents}
+          isRunning={isRunning}
+          hasResult={hasResult}
+        />
       </div>
     </section>
   );
 }
 
-function ResponsibilityColumn({
+function AgentRow({
   title,
+  summary,
   agents,
-  tone
+  isRunning,
+  hasResult
 }: {
   title: string;
+  summary: string;
   agents: AgentMeta[];
-  tone: "blue" | "slate";
+  isRunning: boolean;
+  hasResult: boolean;
 }) {
-  const classes = {
-    blue: "border-cyan-100 bg-cyan-50/50",
-    slate: "border-slate-200 bg-slate-50/70"
-  };
-
   return (
-    <div className={`rounded-[1.5rem] border p-4 ${classes[tone]}`}>
-      <h4 className="text-lg font-semibold text-slate-950">{title}</h4>
-      <div className="mt-4 space-y-3">
-        {agents.map((agent) => (
-          <div key={agent.id} className="rounded-2xl border border-white/80 bg-white/90 p-4">
-            <p className="text-sm font-semibold text-slate-950">{agent.name}</p>
-            <p className="mt-2 text-sm leading-6 text-slate-600">{agent.role}</p>
-          </div>
-        ))}
+    <section className="rounded-[1.75rem] border border-blue-100 bg-white/88 p-5">
+      <div className="mb-4 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
+            {title}
+          </p>
+          <h3 className="mt-2 text-xl font-semibold text-slate-950">{title}</h3>
+        </div>
+        <p className="max-w-3xl text-sm leading-6 text-slate-600">{summary}</p>
       </div>
-    </div>
+
+      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        {agents.map((agent) => {
+          const number = pillar6Agents.findIndex((item) => item.id === agent.id) + 1;
+          const presentation = getAgentPresentation(agent, isRunning, hasResult);
+
+          return (
+            <article
+              key={agent.id}
+              className={`relative overflow-hidden rounded-[1.5rem] border p-5 ${presentation.card} ${
+                isRunning && agent.agent_type === "mainline" ? "agent-running" : ""
+              }`}
+            >
+              <div className={`absolute left-0 top-0 h-full w-1.5 ${presentation.ribbon}`} />
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+                    Agent {String(number).padStart(2, "0")}
+                  </p>
+                  <h4 className="mt-2 text-lg font-semibold leading-7 text-slate-950">
+                    {agent.name}
+                  </h4>
+                </div>
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-semibold ${presentation.badge}`}
+                >
+                  {agent.status}
+                </span>
+              </div>
+
+              <div className="mt-4 flex flex-wrap gap-2">
+                <MetaTag label={agent.layer} tone="neutral" />
+                <MetaTag
+                  label={agent.agent_type === "mainline" ? "Mainline" : "Supporting"}
+                  tone={agent.agent_type === "mainline" ? "blue" : "slate"}
+                />
+              </div>
+
+              <div className="mt-4 rounded-2xl border border-white/80 bg-white/88 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+                  Main Function
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-700">{agent.role}</p>
+              </div>
+
+              <div className="mt-4 grid gap-3">
+                <InfoBlock title="Input" value={agent.input} />
+                <InfoBlock title="Output" value={agent.output} />
+              </div>
+            </article>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 

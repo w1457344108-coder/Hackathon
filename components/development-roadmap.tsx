@@ -5,7 +5,7 @@ const roadmapPhases = [
     status: "Current",
     goals: [
       "Establish /types/agent-schema.ts",
-      "Define 11 Agent parameter contracts",
+      "Define 10 Agent parameter contracts",
       "Lock Pillar 6 indicator enum",
       "Use mock data to test UI"
     ]
@@ -29,7 +29,6 @@ const roadmapPhases = [
     goals: [
       "Add Query Builder",
       "Add Relevance Filter",
-      "Add Pillar 6 Context Memory",
       "Add Risk & Cost Quantifier",
       "Add Audit View & Citation",
       "Add Legal Review & Export"

@@ -1,4 +1,4 @@
-import { AgentMeta, AgentLayer } from "@/types/agent-schema";
+import { AgentMeta } from "@/types/agent-schema";
 
 export const pillar6Agents: AgentMeta[] = [
   {
@@ -22,17 +22,6 @@ export const pillar6Agents: AgentMeta[] = [
     status: "API-ready",
     agent_type: "mainline",
     owner_track: "teammate-mainline"
-  },
-  {
-    id: "pillar6-context-memory",
-    name: "Pillar 6 Context Memory Agent",
-    layer: "Strategic Control & Reasoning Layer",
-    role: "Maintains Pillar 6-specific context so later agents reuse prior assumptions, evidence anchors, and unresolved issues.",
-    input: "Workflow state, intermediate reasoning, indicator traces, and unresolved ambiguity notes.",
-    output: "Shared contextual memory object for consistent downstream analysis.",
-    status: "Mock",
-    agent_type: "supporting",
-    owner_track: "my-supporting"
   },
   {
     id: "risk-cost-quantifier",
@@ -121,40 +110,5 @@ export const pillar6Agents: AgentMeta[] = [
     status: "Ready",
     agent_type: "supporting",
     owner_track: "my-supporting"
-  }
-];
-
-export const architectureRows: Array<{
-  layer: AgentLayer;
-  title: string;
-  summary: string;
-  agentIds: string[];
-}> = [
-  {
-    layer: "Strategic Control & Reasoning Layer",
-    title: "Strategic Control & Reasoning Layer",
-    summary:
-      "Controls legal routing, reasoning continuity, impact quantification, and final packaging for a Pillar 6 policy analysis run.",
-    agentIds: [
-      "intent-arbiter",
-      "legal-reasoner",
-      "pillar6-context-memory",
-      "risk-cost-quantifier",
-      "legal-review-export"
-    ]
-  },
-  {
-    layer: "Input & Discovery Layer",
-    title: "Input & Discovery Layer",
-    summary:
-      "Builds search instructions, finds official legal sources, and structures raw legal documents for machine review.",
-    agentIds: ["query-builder", "source-discovery", "document-reader"]
-  },
-  {
-    layer: "Filtering, Mapping & Review Layer",
-    title: "Filtering, Mapping & Review Layer",
-    summary:
-      "Filters legal text, maps evidence to RDTII Pillar 6 indicators, and binds every claim to a citation trail.",
-    agentIds: ["relevance-filter", "indicator-mapping", "audit-citation"]
   }
 ];

@@ -1,6 +1,6 @@
 # Agent Parameter Contract
 
-This document defines the shared parameter contract for the Eleven-Agent Pillar 6 Architecture in the `Cross-Border Data Policy Multi-Agent Analyst` project. Its purpose is to ensure that multiple developers can implement or upgrade agents independently without breaking downstream integration.
+This document defines the shared parameter contract for the Ten-Agent Pillar 6 Architecture in the `Cross-Border Data Policy Multi-Agent Analyst` project. Its purpose is to ensure that multiple developers can implement or upgrade agents independently without breaking downstream integration.
 
 The scope of this contract is strictly limited to **UN ESCAP RDTII Pillar 6: Cross-Border Data Policies**.
 
@@ -344,48 +344,9 @@ interface LegalReasonerOutput {
 - `optional_fields`
   - none
 - `downstream_agent`
-  - `pillar6-context-memory`
-
-### 4.8 Pillar 6 Context Memory Agent
-
-- `agent_id`: `pillar6-context-memory`
-- `input`
-
-```ts
-interface Pillar6ContextMemoryInput {
-  jurisdiction: string;
-  legal_findings: Array<{
-    conclusion_id: string;
-    indicator_id: Pillar6IndicatorEnum;
-    conclusion: string;
-    evidence_ids: string[];
-  }>;
-  unresolved_issues?: string[];
-}
-```
-
-- `output`
-
-```ts
-interface Pillar6ContextMemoryOutput {
-  context_memory: {
-    jurisdiction: string;
-    active_indicator_ids: Pillar6IndicatorEnum[];
-    carried_conclusions: string[];
-    unresolved_issues: string[];
-  };
-}
-```
-
-- `required_fields`
-  - `jurisdiction`
-  - `legal_findings`
-- `optional_fields`
-  - `unresolved_issues`
-- `downstream_agent`
   - `risk-cost-quantifier`
 
-### 4.9 Risk & Cost Quantifier Agent
+### 4.8 Risk & Cost Quantifier Agent
 
 - `agent_id`: `risk-cost-quantifier`
 - `input`
@@ -399,10 +360,6 @@ interface RiskCostQuantifierInput {
     conclusion: string;
     evidence_ids: string[];
   }>;
-  context_memory?: {
-    active_indicator_ids: Pillar6IndicatorEnum[];
-    unresolved_issues: string[];
-  };
 }
 ```
 
@@ -422,11 +379,11 @@ interface RiskCostQuantifierOutput {
   - `jurisdiction`
   - `legal_findings`
 - `optional_fields`
-  - `context_memory`
+  - none
 - `downstream_agent`
   - `audit-citation`
 
-### 4.10 Audit View & Citation Agent
+### 4.9 Audit View & Citation Agent
 
 - `agent_id`: `audit-citation`
 - `input`
@@ -473,7 +430,7 @@ interface AuditCitationOutput {
 - `downstream_agent`
   - `legal-review-export`
 
-### 4.11 Legal Review & Export Agent
+### 4.10 Legal Review & Export Agent
 
 - `agent_id`: `legal-review-export`
 - `input`
