@@ -19,7 +19,6 @@ function escapeCsv(value: string | number) {
 
 function toCsv(records: EvidenceRecord[]) {
   const headers = [
-    "evidenceId",
     "country",
     "pillar",
     "indicator",
@@ -36,7 +35,6 @@ function toCsv(records: EvidenceRecord[]) {
 
   const rows = records.map((record) =>
     [
-      record.evidenceId,
       record.country,
       record.pillar,
       record.indicator,
@@ -68,7 +66,6 @@ function toMarkdown(records: EvidenceRecord[]) {
   const sections = records.map((record) =>
     [
       `## ${record.country} · ${record.indicator}`,
-      `- Evidence ID: ${record.evidenceId}`,
       `- Law title: ${record.lawTitle}`,
       `- Citation: ${record.citation}`,
       `- Source type: ${record.sourceType}`,
@@ -97,13 +94,13 @@ function toMarkdown(records: EvidenceRecord[]) {
 
 export function ExportPanel({ records }: { records: EvidenceRecord[] }) {
   return (
-    <section className="glass-panel mt-8 rounded-[2rem] border border-white/70 p-6">
+    <section className="glass-panel mt-8 rounded-2xl p-6">
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="section-title text-xs font-semibold text-blue-700">Export Panel</p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-950">Download Evidence Packages</h2>
+          <p className="section-title text-xs font-medium text-slate-400">Export</p>
+          <h2 className="mt-2 text-xl font-medium text-slate-900">Download Evidence Packages</h2>
         </div>
-        <span className="rounded-full border border-blue-100 bg-white/80 px-4 py-2 text-sm text-slate-600">
+        <span className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-500">
           Mock export only, API-ready later
         </span>
       </div>
@@ -118,10 +115,10 @@ export function ExportPanel({ records }: { records: EvidenceRecord[] }) {
               "application/json"
             )
           }
-          className="rounded-[1.5rem] border border-blue-100 bg-white/85 p-5 text-left transition hover:border-blue-300"
+          className="rounded-xl border border-slate-100 bg-white p-5 text-left transition hover:border-slate-200"
         >
-          <p className="text-lg font-semibold text-slate-950">Export JSON</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="text-base font-medium text-slate-900">Export JSON</p>
+          <p className="mt-2 text-sm leading-6 text-slate-500">
             Structured evidence payload for future agent orchestration or evaluator pipelines.
           </p>
         </button>
@@ -129,10 +126,10 @@ export function ExportPanel({ records }: { records: EvidenceRecord[] }) {
         <button
           type="button"
           onClick={() => downloadFile("pillar6-evidence.csv", toCsv(records), "text/csv")}
-          className="rounded-[1.5rem] border border-blue-100 bg-white/85 p-5 text-left transition hover:border-blue-300"
+          className="rounded-xl border border-slate-100 bg-white p-5 text-left transition hover:border-slate-200"
         >
-          <p className="text-lg font-semibold text-slate-950">Export CSV</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="text-base font-medium text-slate-900">Export CSV</p>
+          <p className="mt-2 text-sm leading-6 text-slate-500">
             Reviewer-friendly flat table for spreadsheet validation and manual scoring workflows.
           </p>
         </button>
@@ -142,10 +139,10 @@ export function ExportPanel({ records }: { records: EvidenceRecord[] }) {
           onClick={() =>
             downloadFile("pillar6-report.md", toMarkdown(records), "text/markdown")
           }
-          className="rounded-[1.5rem] border border-blue-100 bg-white/85 p-5 text-left transition hover:border-blue-300"
+          className="rounded-xl border border-slate-100 bg-white p-5 text-left transition hover:border-slate-200"
         >
-          <p className="text-lg font-semibold text-slate-950">Export Markdown Report</p>
-          <p className="mt-2 text-sm leading-6 text-slate-600">
+          <p className="text-base font-medium text-slate-900">Export Markdown Report</p>
+          <p className="mt-2 text-sm leading-6 text-slate-500">
             Lightweight narrative report with citations, snippets, and review notes for demo sharing.
           </p>
         </button>
