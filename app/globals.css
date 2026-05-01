@@ -3,19 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --bg: #eef4ff;
-  --bg-deep: #dfeaff;
-  --panel: rgba(255, 255, 255, 0.78);
-  --panel-strong: rgba(255, 255, 255, 0.92);
-  --line: rgba(99, 130, 255, 0.18);
-  --text: #102042;
-  --muted: #5f6f91;
-  --accent: #2563eb;
-  --accent-soft: #dbeafe;
-  --success: #0f766e;
-  --warning: #b45309;
-  --danger: #b91c1c;
-  --shadow: 0 24px 80px rgba(29, 78, 216, 0.14);
+  --background: #f7f7f8;
+  --foreground: #171717;
 }
 
 * {
@@ -29,38 +18,35 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top left, rgba(96, 165, 250, 0.22), transparent 30%),
-    radial-gradient(circle at top right, rgba(147, 197, 253, 0.18), transparent 24%),
-    linear-gradient(180deg, #f7fbff 0%, var(--bg) 52%, var(--bg-deep) 100%);
-  color: var(--text);
-  font-family:
-    "IBM Plex Sans",
-    "Avenir Next",
-    "Segoe UI",
-    sans-serif;
-}
-
-body::before {
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background-image:
-    linear-gradient(rgba(37, 99, 235, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(37, 99, 235, 0.05) 1px, transparent 1px);
-  background-size: 48px 48px;
-  content: "";
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.8), transparent 92%);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), var(--font-noto), "Segoe UI", sans-serif;
 }
 
 ::selection {
-  background: rgba(37, 99, 235, 0.16);
+  background: rgba(0, 0, 0, 0.12);
 }
 
 .glass-panel {
-  background: var(--panel);
+  background: rgba(255, 255, 255, 0.78);
   backdrop-filter: blur(20px);
-  box-shadow: var(--shadow);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.08);
+}
+
+.font-schibsted {
+  font-family: var(--font-schibsted), var(--font-inter), sans-serif;
+}
+
+.font-inter {
+  font-family: var(--font-inter), var(--font-noto), sans-serif;
+}
+
+.font-noto {
+  font-family: var(--font-noto), var(--font-inter), sans-serif;
+}
+
+.font-fustat {
+  font-family: var(--font-fustat), var(--font-inter), sans-serif;
 }
 
 .section-title {

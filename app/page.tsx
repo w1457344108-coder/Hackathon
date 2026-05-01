@@ -1,5 +1,5 @@
-import { AnalystDashboard } from "@/components/analyst-dashboard";
+import { ChatLegalWorkspace } from "@/components/chat-legal-workspace";
 
 export default function HomePage() {
-  return <AnalystDashboard />;
+  return <ChatLegalWorkspace />;
 }
