@@ -9,6 +9,21 @@ export type RiskLevel = "Low" | "Moderate" | "High";
 
 export type AgentStatus = "idle" | "running" | "completed" | "error";
 
+export type Pillar6IndicatorEnum =
+  | "P6_1_BAN_LOCAL_PROCESSING"
+  | "P6_2_LOCAL_STORAGE"
+  | "P6_3_INFRASTRUCTURE"
+  | "P6_4_CONDITIONAL_FLOW"
+  | "P6_5_BINDING_COMMITMENT";
+
+export interface AgentResult<T> {
+  status: "success" | "error";
+  agentId: TenAgentId;
+  data: T | null;
+  message: string;
+  downstreamAgent?: TenAgentId;
+}
+
 export interface RdtiiStyleScore {
   banLocalProcessing: 0 | 0.5 | 1;
   localStorage: 0 | 0.5 | 1;
@@ -113,6 +128,72 @@ export interface WorkflowAgentTrace {
   nextAgent: TenAgentId | null;
 }
 
+export interface IntentArbiterOutput {
+  normalizedIntent: string;
+  workflowMode: "single-jurisdiction" | "cross-jurisdiction";
+  pillar6ScopeConfirmed: true;
+  focusIndicators: Pillar6IndicatorEnum[];
+}
+
+export interface CandidateSource {
+  sourceId: string;
+  evidenceId: string;
+  title: string;
+  jurisdiction: string;
+  sourceType: string;
+  sourceUrl: string;
+  relevanceNote: string;
+}
+
+export interface SourceDiscoveryOutput {
+  candidateSources: CandidateSource[];
+}
+
+export interface LegalPassage {
+  evidenceId: string;
+  sourceId: string;
+  lawTitle: string;
+  citationRef: string;
+  sourceUrl: string;
+  text: string;
+}
+
+export interface DocumentReaderOutput {
+  passages: LegalPassage[];
+}
+
+export interface MappedEvidenceItem {
+  evidenceId: string;
+  indicatorId: Pillar6IndicatorEnum;
+  mappingReason: string;
+  citationRef: string;
+}
+
+export interface IndicatorMappingOutput {
+  mappedEvidence: MappedEvidenceItem[];
+}
+
+export interface LegalFinding {
+  conclusionId: string;
+  jurisdiction: string;
+  indicatorId: Pillar6IndicatorEnum;
+  conclusion: string;
+  legalEffect: string;
+  evidenceIds: string[];
+}
+
+export interface LegalReasonerOutput {
+  legalFindings: LegalFinding[];
+}
+
+export interface MainlineAgentResults {
+  intentArbiter: AgentResult<IntentArbiterOutput>;
+  sourceDiscovery: AgentResult<SourceDiscoveryOutput>;
+  documentReader: AgentResult<DocumentReaderOutput>;
+  indicatorMapping: AgentResult<IndicatorMappingOutput>;
+  legalReasoner: AgentResult<LegalReasonerOutput>;
+}
+
 export interface DemoNarrative {
   title: string;
   scenario: string;
@@ -128,6 +209,7 @@ export interface WorkflowResult {
   policyAnalysis: PolicyAnalysisResult[];
   comparison: ComparisonAgentResult | null;
   report: ReportAgentResult;
+  mainlineAgentResults: MainlineAgentResults;
   agentTrace: WorkflowAgentTrace[];
   demoNarrative: DemoNarrative;
   generatedAt: string;

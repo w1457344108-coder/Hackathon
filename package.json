@@ -6,7 +6,8 @@
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "start": "next start",
-    "validate:agents": "node scripts/validate-agent-readiness.mjs"
+    "validate:agents": "node scripts/validate-agent-readiness.mjs",
+    "validate:mainline": "node scripts/validate-mainline-agents.mjs"
   },
   "dependencies": {
     "next": "16.2.4",

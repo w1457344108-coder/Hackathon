@@ -1,10 +1,19 @@
 import { countryPolicyProfiles } from "@/lib/mock-data";
 import { filterEvidenceByCountries, mockEvidenceRecords } from "@/lib/mock-evidence";
 import {
+  AgentResult,
+  CandidateSource,
   ComparisonAgentResult,
   ComparisonRow,
   CountryPolicyProfile,
   DemoNarrative,
+  DocumentReaderOutput,
+  IndicatorMappingOutput,
+  IntentArbiterOutput,
+  LegalReasonerOutput,
+  MainlineAgentResults,
+  MappedEvidenceItem,
+  Pillar6IndicatorEnum,
   PolicyAnalysisResult,
   ReportAgentResult,
   ResearchAgentResult,
@@ -19,6 +28,14 @@ const SOURCE_BASIS = [
   "UN ESCAP RDTII initiative structure",
   "ESCAP RDTII 2.1 Guide, Pillar 6 scoring logic",
   "ESCAP coverage of Pillar 6: cross-border data policies"
+];
+
+const ALL_PILLAR6_INDICATORS: Pillar6IndicatorEnum[] = [
+  "P6_1_BAN_LOCAL_PROCESSING",
+  "P6_2_LOCAL_STORAGE",
+  "P6_3_INFRASTRUCTURE",
+  "P6_4_CONDITIONAL_FLOW",
+  "P6_5_BINDING_COMMITMENT"
 ];
 
 const TEN_AGENT_ORDER: TenAgentId[] = [
@@ -49,6 +66,21 @@ const agentNames: Record<TenAgentId, string> = {
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function success<T>(
+  agentId: AgentResult<T>["agentId"],
+  data: T,
+  message: string,
+  downstreamAgent?: AgentResult<T>["downstreamAgent"]
+): AgentResult<T> {
+  return {
+    status: "success",
+    agentId,
+    data,
+    message,
+    downstreamAgent
+  };
 }
 
 function getCountryProfile(country: SupportedCountry): CountryPolicyProfile {
@@ -210,6 +242,196 @@ export async function reportAgent(results: {
       "Prioritize interoperable markets for pilot launches, then expand into higher-friction jurisdictions with localized controls.",
       "Keep this demo ready for an OpenAI-powered upgrade by preserving structured agent inputs and outputs."
     ]
+  };
+}
+
+export function intentArbiterAgent(input: {
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  businessScenario: string;
+  userQuery: string;
+}): AgentResult<IntentArbiterOutput> {
+  const workflowMode = input.countryB ? "cross-jurisdiction" : "single-jurisdiction";
+  const focusIndicators = ALL_PILLAR6_INDICATORS.filter((indicator) => {
+    const query = `${input.userQuery} ${input.businessScenario}`.toLowerCase();
+
+    if (query.includes("storage") || query.includes("localization")) {
+      return indicator === "P6_2_LOCAL_STORAGE" || indicator === "P6_3_INFRASTRUCTURE";
+    }
+
+    if (query.includes("agreement") || query.includes("commitment")) {
+      return indicator === "P6_5_BINDING_COMMITMENT";
+    }
+
+    if (query.includes("approval") || query.includes("condition") || query.includes("transfer")) {
+      return indicator === "P6_4_CONDITIONAL_FLOW";
+    }
+
+    return true;
+  });
+
+  return success(
+    "intent-arbiter",
+    {
+      normalizedIntent: `Assess ${input.businessScenario} cross-border data policy constraints for ${input.countryA}${
+        input.countryB ? ` and ${input.countryB}` : ""
+      } under Pillar 6.`,
+      workflowMode,
+      pillar6ScopeConfirmed: true,
+      focusIndicators: focusIndicators.length ? focusIndicators : ALL_PILLAR6_INDICATORS
+    },
+    "Intent normalized and constrained to Pillar 6.",
+    "source-discovery"
+  );
+}
+
+export function sourceDiscoveryAgent(input: {
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  focusIndicators: Pillar6IndicatorEnum[];
+}): AgentResult<{ candidateSources: CandidateSource[] }> {
+  const candidateSources = filterEvidenceByCountries(
+    mockEvidenceRecords,
+    input.countryA,
+    input.countryB ?? ""
+  )
+    .filter((record) => input.focusIndicators.includes(record.indicatorCode))
+    .map((record) => ({
+      sourceId: `SRC-${record.evidenceId}`,
+      evidenceId: record.evidenceId,
+      title: record.lawTitle,
+      jurisdiction: record.country,
+      sourceType: record.sourceType,
+      sourceUrl: record.sourceUrl,
+      relevanceNote: `Candidate source for ${record.indicatorCode} based on ${record.discoveryTags.join(
+        ", "
+      )}.`
+    }));
+
+  return success(
+    "source-discovery",
+    { candidateSources },
+    "Candidate legal sources selected from Pillar 6 mock evidence.",
+    "document-reader"
+  );
+}
+
+export function documentReaderAgent(input: {
+  candidateSources: CandidateSource[];
+}): AgentResult<DocumentReaderOutput> {
+  const passages = input.candidateSources.flatMap((source) => {
+    const record = mockEvidenceRecords.find((item) => item.evidenceId === source.evidenceId);
+
+    if (!record) {
+      return [];
+    }
+
+    return [
+      {
+        evidenceId: record.evidenceId,
+        sourceId: source.sourceId,
+        lawTitle: record.lawTitle,
+        citationRef: record.citation,
+        sourceUrl: record.sourceUrl,
+        text: record.originalLegalText
+      }
+    ];
+  });
+
+  return success(
+    "document-reader",
+    { passages },
+    "Candidate sources normalized into citation-ready legal passages.",
+    "indicator-mapping"
+  );
+}
+
+export function indicatorMappingAgent(input: {
+  passages: DocumentReaderOutput["passages"];
+}): AgentResult<IndicatorMappingOutput> {
+  const mappedEvidence: MappedEvidenceItem[] = input.passages.flatMap((passage) => {
+    const record = mockEvidenceRecords.find((item) => item.evidenceId === passage.evidenceId);
+
+    if (!record) {
+      return [];
+    }
+
+    return [
+      {
+        evidenceId: record.evidenceId,
+        indicatorId: record.indicatorCode,
+        mappingReason: record.mappingRationale,
+        citationRef: record.citation
+      }
+    ];
+  });
+
+  return success(
+    "indicator-mapping",
+    { mappedEvidence },
+    "Legal passages mapped to canonical Pillar 6 indicator codes.",
+    "legal-reasoner"
+  );
+}
+
+export function legalReasonerAgent(input: {
+  mappedEvidence: MappedEvidenceItem[];
+}): AgentResult<LegalReasonerOutput> {
+  const legalFindings = input.mappedEvidence.flatMap((item) => {
+    const record = mockEvidenceRecords.find((evidence) => evidence.evidenceId === item.evidenceId);
+
+    if (!record) {
+      return [];
+    }
+
+    return [
+      {
+        conclusionId: `CON-${record.evidenceId}`,
+        jurisdiction: record.country,
+        indicatorId: item.indicatorId,
+        conclusion: record.aiExtraction,
+        legalEffect: record.riskImplication,
+        evidenceIds: [record.evidenceId]
+      }
+    ];
+  });
+
+  return success(
+    "legal-reasoner",
+    { legalFindings },
+    "Evidence-backed legal findings generated for downstream risk and audit agents.",
+    "risk-cost-quantifier"
+  );
+}
+
+export function runMainlineAgents(input: {
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  businessScenario: string;
+  userQuery: string;
+}): MainlineAgentResults {
+  const intentArbiter = intentArbiterAgent(input);
+  const sourceDiscovery = sourceDiscoveryAgent({
+    countryA: input.countryA,
+    countryB: input.countryB,
+    focusIndicators: intentArbiter.data?.focusIndicators ?? ALL_PILLAR6_INDICATORS
+  });
+  const documentReader = documentReaderAgent({
+    candidateSources: sourceDiscovery.data?.candidateSources ?? []
+  });
+  const indicatorMapping = indicatorMappingAgent({
+    passages: documentReader.data?.passages ?? []
+  });
+  const legalReasoner = legalReasonerAgent({
+    mappedEvidence: indicatorMapping.data?.mappedEvidence ?? []
+  });
+
+  return {
+    intentArbiter,
+    sourceDiscovery,
+    documentReader,
+    indicatorMapping,
+    legalReasoner
   };
 }
 
@@ -414,6 +636,12 @@ export async function runMultiAgentWorkflow(
   const userQuery =
     options?.userQuery ??
     "Find legal evidence describing how cross-border data transfers are permitted, conditioned, or restricted.";
+  const mainlineAgentResults = runMainlineAgents({
+    countryA,
+    countryB,
+    businessScenario,
+    userQuery
+  });
   const firstProfile = await researchAgent(countryA);
   const secondProfile = countryB ? await researchAgent(countryB) : null;
 
@@ -449,6 +677,7 @@ export async function runMultiAgentWorkflow(
     policyAnalysis,
     comparison,
     report,
+    mainlineAgentResults,
     agentTrace: buildTenAgentTrace({
       countryA,
       countryB,

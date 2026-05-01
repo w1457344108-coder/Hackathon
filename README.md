@@ -54,6 +54,18 @@ The canonical order is:
 
 Internal app and API fields use camelCase. Export adapters may transform fields for CSV or external JSON consumers, but TypeScript contracts, mock data, and future real-agent payloads should stay aligned with the camelCase app schema.
 
+## Mainline agent orchestration
+
+The five mainline agents are now wired into the mock workflow result through `mainlineAgentResults`:
+
+1. `intentArbiter`: normalizes the user request, chooses single-jurisdiction or cross-jurisdiction mode, and confirms Pillar 6 scope.
+2. `sourceDiscovery`: selects candidate legal sources from the Pillar 6 mock evidence set.
+3. `documentReader`: converts candidate sources into citation-ready passages.
+4. `indicatorMapping`: maps each passage to one canonical Pillar 6 indicator code.
+5. `legalReasoner`: produces evidence-backed legal findings with conclusion IDs and evidence IDs.
+
+These agents are deterministic mock implementations for the hackathon version, but their outputs follow the same contract shape expected from future API-backed agents.
+
 ## Demo narrative
 
 The recommended demo story is a fintech market-entry review: a team wants to understand whether data can move from China to Singapore while staying inside Pillar 6 scope. The walkthrough is:
@@ -83,6 +95,10 @@ npm run build
 
 ```bash
 npm run validate:agents
+```
+
+```bash
+npm run validate:mainline
 ```
 
 ## Source basis
