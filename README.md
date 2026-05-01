@@ -66,7 +66,7 @@ The five mainline agents are now wired into the mock workflow result through `ma
 
 These agents are deterministic mock implementations for the hackathon version, but their outputs follow the same contract shape expected from future API-backed agents.
 
-The supporting `queryBuilder` agent is now adapted to the mainline flow as a pre-discovery input layer. Its output is exposed through `supportingAgentResults.queryBuilder`, and the mainline `sourceDiscovery` step consumes the generated `queryPlan`.
+The five supporting agents are exposed through `supportingAgentResults`. They read the completed mainline results, add review-oriented structure, and prepare export-ready outputs without changing the mainline execution logic.
 
 ## Demo narrative
 

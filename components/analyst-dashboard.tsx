@@ -1,7 +1,11 @@
 "use client";
 
 import { startTransition, useDeferredValue, useEffect, useState } from "react";
-import { supportedCountries } from "@/lib/mock-data";
+import { supportedCountries, countryPolicyProfiles } from "@/lib/mock-data";
+import { Pillar6IndicatorCards } from "@/components/pillar6-indicator-cards";
+import { LegalSearchWorkspace } from "@/components/legal-search-workspace";
+import { AgentPipelineViewer } from "@/components/agent-pipeline-viewer";
+import { DevelopmentRoadmap } from "@/components/development-roadmap";
 import { EvidenceTable } from "@/components/evidence-table";
 import { AuditView } from "@/components/audit-view";
 import { ExportPanel } from "@/components/export-panel";
@@ -18,9 +22,21 @@ export function AnalystDashboard() {
 
   const deferredWorkflowResult = useDeferredValue(workflowResult);
   const deferredReport = deferredWorkflowResult?.report ?? null;
+  const selectedProfile = countryPolicyProfiles[countryA];
   const evidenceRecords = filterEvidenceByCountries(mockEvidenceRecords, countryA, countryB);
   const selectedEvidenceRecord =
     evidenceRecords.find((record) => record.citation === selectedCitation) ?? evidenceRecords[0];
+  const auditItems = workflowResult?.supportingAgentResults.auditCitation.data?.auditItems ?? [];
+  const auditCoverageSummary =
+    workflowResult?.supportingAgentResults.auditCitation.data?.coverageSummary ?? null;
+  const linkedRiskSummary =
+    workflowResult?.supportingAgentResults.riskCostQuantifier.data?.riskSummary ?? null;
+  const selectedAuditItem =
+    auditItems.find(
+      (item) =>
+        item.citationRef === selectedCitation || item.evidenceId === selectedEvidenceRecord?.evidenceId
+    ) ?? null;
+  const exportPackage = workflowResult?.supportingAgentResults.legalReviewExport.data ?? null;
 
   useEffect(() => {
     if (evidenceRecords.length > 0) {
@@ -97,31 +113,32 @@ export function AnalystDashboard() {
   }
 
   return (
-    <main className="mx-auto min-h-screen max-w-7xl px-6 py-8 sm:px-8 lg:px-10">
-      <section className="glass-panel stagger-in rounded-2xl px-8 py-10 sm:px-10">
+    <main className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <section className="glass-panel stagger-in overflow-hidden rounded-[2rem] border border-white/70 px-6 py-8 sm:px-8 lg:px-10">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl space-y-4">
-            <span className="section-title inline-flex rounded-md border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-500">
+            <span className="section-title inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-semibold text-blue-700">
               United Nations AI Hackathon Demo
             </span>
             <div className="space-y-3">
-              <h1 className="max-w-4xl text-3xl font-medium tracking-tight text-slate-900 sm:text-4xl">
-                Cross-Border Data Policy<br />Multi-Agent Analyst
+              <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
+                Cross-Border Data Policy Multi-Agent Analyst
               </h1>
-              <p className="max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
-                Analyze cross-border data policy scenarios using UN ESCAP RDTII Pillar 6 logic.
-                Select countries below and run the multi-agent analysis workflow.
+              <p className="max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">
+                A hackathon-ready dashboard for cross-border data policy analysis based on UN ESCAP
+                RDTII Pillar 6 logic. This phase uses structured mock data, but the agent workflow
+                and API surface are already prepared for future OpenAI integration.
               </p>
             </div>
           </div>
 
           <div className="grid w-full gap-3 sm:grid-cols-2 lg:w-auto">
-            <label className="rounded-xl border border-slate-200 bg-white p-4">
-              <span className="mb-1.5 block text-xs font-medium text-slate-500">Country A</span>
+            <label className="rounded-3xl border border-white/80 bg-white/80 p-4 shadow-sm">
+              <span className="mb-2 block text-sm font-medium text-slate-600">Country A</span>
               <select
                 value={countryA}
                 onChange={(event) => setCountryA(event.target.value as SupportedCountry)}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-900 outline-none transition focus:border-slate-400"
+                className="w-full rounded-2xl border border-blue-100 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-blue-400"
               >
                 {supportedCountries.map((country) => (
                   <option key={country} value={country}>
@@ -131,12 +148,12 @@ export function AnalystDashboard() {
               </select>
             </label>
 
-            <label className="rounded-xl border border-slate-200 bg-white p-4">
-              <span className="mb-1.5 block text-xs font-medium text-slate-500">Country B</span>
+            <label className="rounded-3xl border border-white/80 bg-white/80 p-4 shadow-sm">
+              <span className="mb-2 block text-sm font-medium text-slate-600">Country B</span>
               <select
                 value={countryB}
                 onChange={(event) => setCountryB(event.target.value as SupportedCountry | "")}
-                className="w-full rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm font-medium text-slate-900 outline-none transition focus:border-slate-400"
+                className="w-full rounded-2xl border border-blue-100 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-blue-400"
               >
                 <option value="">None</option>
                 {supportedCountries.map((country) => (
@@ -149,8 +166,8 @@ export function AnalystDashboard() {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col gap-4 border-t border-slate-100 pt-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex gap-3">
+        <div className="mt-6 flex flex-col gap-4 border-t border-blue-100 pt-6 lg:flex-row lg:items-center lg:justify-between">
+          <div className="grid gap-3 sm:grid-cols-3">
             <StatChip label="Mode" value="Mock + Streaming Agents" />
             <StatChip label="Framework" value="Next.js App Router" />
             <StatChip label="Ready For" value="Vercel Deployment" />
@@ -160,43 +177,45 @@ export function AnalystDashboard() {
             type="button"
             onClick={runAnalysis}
             disabled={isRunning}
-            className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
+            className="inline-flex items-center justify-center rounded-2xl bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400"
           >
-            {isRunning ? "Running..." : "Run Analysis"}
+            {isRunning ? "Multi-Agent Analysis Running..." : "Run Multi-Agent Analysis"}
           </button>
         </div>
 
-        <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm leading-6 text-slate-500">
-          Built on UN ESCAP RDTII structure. Models Pillar 6 policy dimensions including local processing, storage requirements, and conditional transfer regimes.
+        <div className="mt-5 rounded-3xl border border-blue-100 bg-blue-50/70 p-4 text-sm leading-6 text-slate-600">
+          Built on official source structure from UN ESCAP RDTII. The demo models Pillar 6 policy
+          dimensions such as local processing, local storage, infrastructure requirements,
+          conditional transfer regimes, and binding data transfer commitments.
         </div>
 
         {errorMessage ? (
-          <div className="mt-4 rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-600">
+          <div className="mt-4 rounded-3xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
             {errorMessage}
           </div>
         ) : null}
       </section>
 
       <section className="mt-8 grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <div className="glass-panel rounded-2xl p-6">
+        <div className="glass-panel stagger-in rounded-[2rem] border border-white/70 p-6">
           <div className="mb-5 flex items-center justify-between">
             <div>
-              <p className="section-title text-xs font-medium text-slate-400">Final Report</p>
-              <h2 className="mt-2 text-xl font-medium text-slate-900">Executive Brief</h2>
+              <p className="section-title text-xs font-semibold text-blue-700">Final Report</p>
+              <h2 className="mt-2 text-2xl font-semibold text-slate-950">Executive Brief</h2>
             </div>
             <RiskPill risk={deferredReport?.overallRisk ?? workflowResult?.report.overallRisk ?? "Low"} />
           </div>
 
-          <p className="text-sm leading-7 text-slate-600">
+          <p className="text-base leading-8 text-slate-700">
             {deferredReport?.finalNarrative ??
               "Run the workflow to generate a synthesized cross-border policy report, risk score, and action-oriented recommendations."}
           </p>
 
           <div className="mt-6 grid gap-4 md:grid-cols-2">
             <PanelBox title="Policy Recommendations">
-              <ul className="space-y-2 text-sm leading-6 text-slate-600">
+              <ul className="space-y-3 text-sm leading-6 text-slate-700">
                 {(deferredReport?.policyRecommendations ?? defaultRecommendations).map((item) => (
-                  <li key={item} className="rounded-lg bg-slate-50 px-4 py-3">
+                  <li key={item} className="rounded-2xl bg-slate-50 px-4 py-3">
                     {item}
                   </li>
                 ))}
@@ -204,7 +223,7 @@ export function AnalystDashboard() {
             </PanelBox>
 
             <PanelBox title="Source Basis">
-              <div className="space-y-2 text-sm leading-6 text-slate-600">
+              <div className="space-y-3 text-sm leading-6 text-slate-700">
                 <SourceLink
                   href="https://www.unescap.org/projects/rcdtra"
                   label="UN ESCAP RDTII initiative"
@@ -222,27 +241,27 @@ export function AnalystDashboard() {
           </div>
         </div>
 
-        <div className="glass-panel rounded-2xl p-6">
-          <p className="section-title text-xs font-medium text-slate-400">Risk Snapshot</p>
-          <h2 className="mt-2 text-xl font-medium text-slate-900">Country Policy Signals</h2>
+        <div className="glass-panel rounded-[2rem] border border-white/70 p-6">
+          <p className="section-title text-xs font-semibold text-blue-700">Risk Snapshot</p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-950">Country Policy Signals</h2>
 
           <div className="mt-5 space-y-4">
             {(workflowResult?.policyAnalysis ?? []).length > 0 ? (
               workflowResult?.policyAnalysis.map((item) => (
-                <div key={item.country} className="rounded-xl border border-slate-100 bg-white p-4">
+                <div key={item.country} className="rounded-3xl border border-blue-100 bg-white/80 p-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-base font-medium text-slate-900">{item.country}</h3>
+                    <h3 className="text-lg font-semibold text-slate-900">{item.country}</h3>
                     <RiskPill risk={item.riskLevel} />
                   </div>
                   <div className="mt-4 space-y-3">
                     <MetricBar label="Restriction Score" value={item.restrictionScore} />
                     <MetricBar label="Openness Score" value={item.opennessScore} />
                   </div>
-                  <p className="mt-3 text-sm leading-6 text-slate-500">{item.executiveSummary}</p>
+                  <p className="mt-3 text-sm leading-6 text-slate-600">{item.executiveSummary}</p>
                 </div>
               ))
             ) : (
-              <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm leading-6 text-slate-400">
+              <div className="rounded-3xl border border-dashed border-blue-100 bg-white/70 p-6 text-sm leading-6 text-slate-500">
                 Policy scores will appear here after the workflow completes the analysis step.
               </div>
             )}
@@ -250,47 +269,65 @@ export function AnalystDashboard() {
         </div>
       </section>
 
+      <Pillar6IndicatorCards profile={selectedProfile} />
+
+      <LegalSearchWorkspace
+        defaultJurisdiction={countryA}
+        linkedQueryBuilder={workflowResult?.supportingAgentResults.queryBuilder.data ?? null}
+        linkedSourceDiscovery={workflowResult?.mainlineAgentResults.sourceDiscovery.data ?? null}
+        linkedRelevanceFilter={workflowResult?.supportingAgentResults.relevanceFilter.data ?? null}
+      />
+
+      <AgentPipelineViewer isRunning={isRunning} hasResult={Boolean(workflowResult)} />
+
+      <DevelopmentRoadmap />
+
       <section className="mt-8 grid gap-6 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
         <EvidenceTable
           records={evidenceRecords}
           selectedCitation={selectedEvidenceRecord.citation}
           onSelect={setSelectedCitation}
         />
-        <AuditView record={selectedEvidenceRecord} />
+        <AuditView
+          record={selectedEvidenceRecord}
+          linkedAuditItem={selectedAuditItem}
+          linkedCoverageSummary={auditCoverageSummary}
+          linkedRiskSummary={linkedRiskSummary}
+        />
       </section>
 
-      <ExportPanel records={evidenceRecords} />
+      <ExportPanel records={evidenceRecords} exportPackage={exportPackage} />
 
-      <section className="glass-panel mt-8 rounded-2xl p-6">
+      <section className="glass-panel mt-8 rounded-[2rem] border border-white/70 p-6">
         <div className="mb-5">
-          <p className="section-title text-xs font-medium text-slate-400">Comparison Table</p>
-          <h2 className="mt-2 text-xl font-medium text-slate-900">Cross-Jurisdiction View</h2>
+          <p className="section-title text-xs font-semibold text-blue-700">Comparison Table</p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-950">Cross-Jurisdiction View</h2>
         </div>
 
         {workflowResult?.report.comparisonTable.length ? (
           <div className="overflow-x-auto">
-            <table className="min-w-full border-separate border-spacing-y-2">
+            <table className="min-w-full border-separate border-spacing-y-3">
               <thead>
-                <tr className="text-left text-xs uppercase tracking-wider text-slate-400">
-                  <th className="px-4 py-2 font-medium">Metric</th>
-                  <th className="px-4 py-2 font-medium">{workflowResult.input.countryA}</th>
-                  <th className="px-4 py-2 font-medium">{workflowResult.input.countryB}</th>
-                  <th className="px-4 py-2 font-medium">Insight</th>
+                <tr className="text-left text-xs uppercase tracking-[0.18em] text-slate-500">
+                  <th className="px-4">Metric</th>
+                  <th className="px-4">{workflowResult.input.countryA}</th>
+                  <th className="px-4">{workflowResult.input.countryB}</th>
+                  <th className="px-4">Insight</th>
                 </tr>
               </thead>
               <tbody>
                 {workflowResult.report.comparisonTable.map((row) => (
                   <tr key={row.metric} className="align-top">
-                    <td className="rounded-l-lg border border-slate-100 bg-white px-4 py-3 text-sm font-medium text-slate-900">
+                    <td className="rounded-l-3xl border border-blue-100 bg-white px-4 py-4 text-sm font-semibold text-slate-900">
                       {row.metric}
                     </td>
-                    <td className="border-y border-slate-100 bg-white px-4 py-3 text-sm leading-6 text-slate-600">
+                    <td className="border-y border-blue-100 bg-white px-4 py-4 text-sm leading-6 text-slate-600">
                       {row.countryA}
                     </td>
-                    <td className="border-y border-slate-100 bg-white px-4 py-3 text-sm leading-6 text-slate-600">
+                    <td className="border-y border-blue-100 bg-white px-4 py-4 text-sm leading-6 text-slate-600">
                       {row.countryB}
                     </td>
-                    <td className="rounded-r-lg border border-slate-100 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
+                    <td className="rounded-r-3xl border border-blue-100 bg-blue-50/70 px-4 py-4 text-sm leading-6 text-slate-700">
                       {row.insight}
                     </td>
                   </tr>
@@ -299,7 +336,7 @@ export function AnalystDashboard() {
             </table>
           </div>
         ) : (
-          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm leading-6 text-slate-400">
+          <div className="rounded-3xl border border-dashed border-blue-100 bg-white/70 p-6 text-sm leading-6 text-slate-500">
             Add a second country to activate the Comparison Agent and populate the policy gap table.
           </div>
         )}
@@ -311,13 +348,13 @@ export function AnalystDashboard() {
 function MetricBar({ label, value }: { label: string; value: number }) {
   return (
     <div>
-      <div className="mb-1.5 flex items-center justify-between text-xs text-slate-500">
+      <div className="mb-2 flex items-center justify-between text-sm text-slate-600">
         <span>{label}</span>
         <span>{value}/100</span>
       </div>
-      <div className="h-1.5 rounded-full bg-slate-100">
+      <div className="h-2 rounded-full bg-blue-100">
         <div
-          className="h-1.5 rounded-full bg-slate-700"
+          className="h-2 rounded-full bg-gradient-to-r from-blue-500 to-cyan-400"
           style={{ width: `${value}%` }}
         />
       </div>
@@ -327,21 +364,21 @@ function MetricBar({ label, value }: { label: string; value: number }) {
 
 function RiskPill({ risk }: { risk: "Low" | "Moderate" | "High" }) {
   const map = {
-    Low: "bg-emerald-50 text-emerald-600 border-emerald-200",
-    Moderate: "bg-amber-50 text-amber-600 border-amber-200",
-    High: "bg-red-50 text-red-600 border-red-200"
+    Low: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    Moderate: "bg-amber-50 text-amber-700 border-amber-200",
+    High: "bg-red-50 text-red-700 border-red-200"
   };
 
   return (
-    <span className={`rounded-md border px-2.5 py-0.5 text-xs font-medium ${map[risk]}`}>{risk}</span>
+    <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${map[risk]}`}>{risk} Risk</span>
   );
 }
 
 function PanelBox({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <div className="rounded-xl border border-slate-100 bg-white p-4">
-      <h3 className="text-xs font-medium uppercase tracking-wider text-slate-400">{title}</h3>
-      <div className="mt-3">{children}</div>
+    <div className="rounded-[1.5rem] border border-blue-100 bg-white/80 p-4">
+      <h3 className="text-sm font-semibold uppercase tracking-[0.16em] text-slate-500">{title}</h3>
+      <div className="mt-4">{children}</div>
     </div>
   );
 }
@@ -352,7 +389,7 @@ function SourceLink({ href, label }: { href: string; label: string }) {
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="block rounded-lg border border-slate-100 bg-white px-4 py-2.5 text-slate-600 transition hover:border-slate-200 hover:text-slate-900"
+      className="block rounded-2xl border border-blue-100 bg-slate-50 px-4 py-3 text-slate-700 transition hover:border-blue-300 hover:text-blue-700"
     >
       {label}
     </a>
@@ -361,9 +398,9 @@ function SourceLink({ href, label }: { href: string; label: string }) {
 
 function StatChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-slate-100 bg-white px-3 py-2">
-      <p className="text-[10px] uppercase tracking-wider text-slate-400">{label}</p>
-      <p className="mt-0.5 text-xs font-medium text-slate-800">{value}</p>
+    <div className="rounded-2xl border border-white/80 bg-white/75 px-4 py-3 shadow-sm">
+      <p className="text-xs uppercase tracking-[0.16em] text-slate-500">{label}</p>
+      <p className="mt-1 text-sm font-semibold text-slate-900">{value}</p>
     </div>
   );
 }
