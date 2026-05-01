@@ -16,6 +16,29 @@ export type Pillar6IndicatorEnum =
   | "P6_4_CONDITIONAL_FLOW"
   | "P6_5_BINDING_COMMITMENT";
 
+export type PreferredSourceType =
+  | "Official legislation portal"
+  | "Regulator guidance"
+  | "Government ministry website"
+  | "International agreement database"
+  | "RDTII / UN ESCAP source";
+
+export type SearchQueryPriority = "High" | "Medium";
+
+export type SearchQueryLanguage = "English" | "Local + English";
+
+export type SearchQueryReviewStatus =
+  | "Suggested"
+  | "Approved"
+  | "Needs Revision"
+  | "Rejected";
+
+export type SourceAuthorityLevel = "Primary" | "Supporting";
+
+export type SourceJurisdictionMatch = "Direct" | "Regional / Comparative";
+
+export type SourceRetrievalStatus = "Ready for Reading" | "Needs Human Check";
+
 export interface AgentResult<T> {
   status: "success" | "error";
   agentId: TenAgentId;
@@ -135,14 +158,47 @@ export interface IntentArbiterOutput {
   focusIndicators: Pillar6IndicatorEnum[];
 }
 
+export interface QueryPlanItem {
+  queryId: string;
+  jurisdiction: string;
+  indicatorCode: Pillar6IndicatorEnum;
+  indicatorLabel: string;
+  targetSourceType: PreferredSourceType;
+  priority: SearchQueryPriority;
+  languageHint: SearchQueryLanguage;
+  mustTerms: string[];
+  shouldTerms: string[];
+  excludeTerms: string[];
+  queryText: string;
+  whyThisQuery: string;
+  reviewerStatus: SearchQueryReviewStatus;
+  reviewerNote: string;
+}
+
+export interface QueryBuilderOutput {
+  normalizedIntent: string;
+  sourcePriorityOrder: PreferredSourceType[];
+  queryPlan: QueryPlanItem[];
+  searchQueries: string[];
+  targetIndicators: Pillar6IndicatorEnum[];
+  reviewChecklist: string[];
+}
+
 export interface CandidateSource {
   sourceId: string;
   evidenceId: string;
+  queryId?: string;
+  indicatorId?: Pillar6IndicatorEnum;
   title: string;
   jurisdiction: string;
-  sourceType: string;
+  sourceType: PreferredSourceType | string;
   sourceUrl: string;
   relevanceNote: string;
+  authorityLevel?: SourceAuthorityLevel;
+  jurisdictionMatch?: SourceJurisdictionMatch;
+  discoveryReason?: string;
+  retrievalStatus?: SourceRetrievalStatus;
+  matchedTerms?: string[];
 }
 
 export interface SourceDiscoveryOutput {
@@ -194,6 +250,10 @@ export interface MainlineAgentResults {
   legalReasoner: AgentResult<LegalReasonerOutput>;
 }
 
+export interface SupportingAgentResults {
+  queryBuilder: AgentResult<QueryBuilderOutput>;
+}
+
 export interface DemoNarrative {
   title: string;
   scenario: string;
@@ -210,6 +270,7 @@ export interface WorkflowResult {
   comparison: ComparisonAgentResult | null;
   report: ReportAgentResult;
   mainlineAgentResults: MainlineAgentResults;
+  supportingAgentResults: SupportingAgentResults;
   agentTrace: WorkflowAgentTrace[];
   demoNarrative: DemoNarrative;
   generatedAt: string;

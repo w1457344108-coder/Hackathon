@@ -9,9 +9,12 @@ The Source Discovery Agent identifies official or authoritative source locations
 ## 3. Input Schema
 ```ts
 interface SourceDiscoveryInput {
-  jurisdiction: string;
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  queryPlan: QueryPlanItem[];
+  normalizedIntent: string;
   searchQueries: string[];
-  preferredSources?: string[];
+  focusIndicators: Pillar6IndicatorCode[];
 }
 ```
 
@@ -19,20 +22,30 @@ interface SourceDiscoveryInput {
 ```ts
 interface SourceDiscoveryOutput {
   candidateSources: Array<{
+    sourceId: string;
+    evidenceId: string;
+    queryId?: string;
+    indicatorId?: Pillar6IndicatorCode;
     title: string;
-    sourceType: string;
-    url: string;
+    jurisdiction: string;
+    sourceType: PreferredSourceType;
+    sourceUrl: string;
+    authorityLevel?: "Primary" | "Supporting";
+    jurisdictionMatch?: "Direct" | "Regional / Comparative";
     relevanceNote: string;
+    discoveryReason?: string;
+    retrievalStatus?: "Ready for Reading" | "Needs Human Check";
+    matchedTerms?: string[];
   }>;
 }
 ```
 
 ## 5. Core Logic
-1. Receive structured queries from the Query Builder Agent.
-2. Search for likely statutes, regulations, treaty texts, and regulator guidance.
+1. Receive structured query plans from the Query Builder Agent.
+2. Route each query to the most relevant authority channel first, such as legislation portals, regulator guidance, ministry sites, treaty databases, or RDTII references.
 3. Rank sources by official status and Pillar 6 relevance.
-4. Discard clearly off-topic privacy-only or domestic compliance material.
-5. Return a candidate source list for reading and parsing.
+4. Discard clearly off-topic privacy-only or domestic compliance material before the reading stage.
+5. Return a candidate source list with traceability back to query ID, indicator code, evidence ID, and authority rationale.
 
 ## 6. Pillar 6 Relevance
 This agent locates the evidence base for all five Pillar 6 indicators, especially:
@@ -55,11 +68,23 @@ interface SourceDiscoveryFailure {
 Mock input:
 ```json
 {
-  "jurisdiction": "Singapore",
+  "countryA": "Singapore",
+  "queryPlan": [
+    {
+      "queryId": "QB-4-1",
+      "indicatorCode": "P6_4_CONDITIONAL_FLOW",
+      "targetSourceType": "Regulator guidance",
+      "priority": "High",
+      "queryText": "Singapore \"Conditional flow regimes\" overseas transfer comparable protection official guidance",
+      "reviewerStatus": "Approved"
+    }
+  ],
   "searchQueries": [
     "Singapore overseas transfer comparable protection official guidance",
     "Singapore digital agreement cross-border data transfer"
-  ]
+  ],
+  "normalizedIntent": "Assess Singapore transfer safeguards under Pillar 6.",
+  "focusIndicators": ["P6_4_CONDITIONAL_FLOW"]
 }
 ```
 
@@ -68,10 +93,20 @@ Mock output:
 {
   "candidateSources": [
     {
-      "title": "Mock Accountability Transfer Guidance",
-      "sourceType": "Regulator Guidance",
-      "url": "https://example.pdpc.gov.sg/mock-guidance",
-      "relevanceNote": "Likely evidence for conditional flow regimes."
+      "sourceId": "SRC-001",
+      "evidenceId": "ev_001",
+      "queryId": "QB-4-1",
+      "indicatorId": "P6_4_CONDITIONAL_FLOW",
+      "title": "Singapore Conditional flow regimes Compliance Guidance",
+      "jurisdiction": "Singapore",
+      "sourceType": "Regulator guidance",
+      "sourceUrl": "https://regulator.example.sg/conditional-flow-regimes",
+      "authorityLevel": "Primary",
+      "jurisdictionMatch": "Direct",
+      "relevanceNote": "Likely evidence for conditional flow regimes.",
+      "discoveryReason": "Spawned from QB-4-1 because the query prioritized regulator guidance.",
+      "retrievalStatus": "Ready for Reading",
+      "matchedTerms": ["Singapore", "overseas transfer", "comparable protection"]
     }
   ]
 }

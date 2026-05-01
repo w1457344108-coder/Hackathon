@@ -1,5 +1,13 @@
 import { countryPolicyProfiles } from "@/lib/mock-data";
-import { filterEvidenceByCountries, mockEvidenceRecords } from "@/lib/mock-evidence";
+import {
+  buildAiSuggestedTerms,
+  buildSearchProfile,
+  buildSourceDiscoveryCandidates,
+  filterEvidenceByCountries,
+  mockEvidenceRecords,
+  preferredSourceOptions,
+  toQueryBuilderOutput
+} from "@/lib/mock-evidence";
 import {
   AgentResult,
   CandidateSource,
@@ -15,9 +23,12 @@ import {
   MappedEvidenceItem,
   Pillar6IndicatorEnum,
   PolicyAnalysisResult,
+  QueryBuilderOutput,
+  QueryPlanItem,
   ReportAgentResult,
   ResearchAgentResult,
   RiskLevel,
+  SupportingAgentResults,
   SupportedCountry,
   TenAgentId,
   WorkflowAgentTrace,
@@ -281,6 +292,43 @@ export function intentArbiterAgent(input: {
       focusIndicators: focusIndicators.length ? focusIndicators : ALL_PILLAR6_INDICATORS
     },
     "Intent normalized and constrained to Pillar 6.",
+    "query-builder"
+  );
+}
+
+export function queryBuilderAgent(input: {
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  businessScenario: string;
+  userQuery: string;
+  intent: IntentArbiterOutput;
+}): AgentResult<QueryBuilderOutput> {
+  const preferredSources = preferredSourceOptions.filter((source) => {
+    if (input.intent.focusIndicators.includes("P6_5_BINDING_COMMITMENT")) {
+      return true;
+    }
+
+    return source !== "International agreement database";
+  });
+
+  const profile = buildSearchProfile({
+    jurisdiction: input.countryA,
+    businessScenario: input.businessScenario,
+    plainLanguageQuery: input.userQuery,
+    aiGeneratedTerms: buildAiSuggestedTerms(input.countryA, input.businessScenario),
+    lawStudentTerms: input.countryB
+      ? `${input.countryB} transfer pathway, comparison evidence`
+      : "transfer mechanism, regulator approval",
+    exclusionTerms: "tax data, telecom tariffs, customs duty",
+    preferredSources,
+    focusIndicators: input.intent.focusIndicators,
+    normalizedIntent: input.intent.normalizedIntent
+  });
+
+  return success(
+    "query-builder",
+    toQueryBuilderOutput(profile),
+    "Structured query plan prepared for source discovery.",
     "source-discovery"
   );
 }
@@ -288,30 +336,36 @@ export function intentArbiterAgent(input: {
 export function sourceDiscoveryAgent(input: {
   countryA: SupportedCountry;
   countryB?: SupportedCountry | null;
+  queryPlan: QueryPlanItem[];
+  normalizedIntent: string;
+  searchQueries: string[];
   focusIndicators: Pillar6IndicatorEnum[];
 }): AgentResult<{ candidateSources: CandidateSource[] }> {
-  const candidateSources = filterEvidenceByCountries(
-    mockEvidenceRecords,
-    input.countryA,
-    input.countryB ?? ""
-  )
-    .filter((record) => input.focusIndicators.includes(record.indicatorCode))
-    .map((record) => ({
-      sourceId: `SRC-${record.evidenceId}`,
-      evidenceId: record.evidenceId,
-      title: record.lawTitle,
-      jurisdiction: record.country,
-      sourceType: record.sourceType,
-      sourceUrl: record.sourceUrl,
-      relevanceNote: `Candidate source for ${record.indicatorCode} based on ${record.discoveryTags.join(
-        ", "
-      )}.`
-    }));
+  const countryScope = [input.countryA, ...(input.countryB ? [input.countryB] : [])];
+  const candidateSources = buildSourceDiscoveryCandidates(
+    {
+      jurisdiction: input.countryA,
+      businessScenario: "mainline",
+      normalizedIntent: input.normalizedIntent,
+      userQuery: input.searchQueries[0] ?? input.normalizedIntent,
+      aiGeneratedTerms: [],
+      lawStudentTerms: [],
+      exclusionTerms: [],
+      preferredSources: [...new Set(input.queryPlan.map((query) => query.targetSourceType))],
+      sourcePriorityOrder: [...new Set(input.queryPlan.map((query) => query.targetSourceType))],
+      pillar6IndicatorTargets: input.focusIndicators,
+      queryPlan: input.queryPlan,
+      searchQueries: input.searchQueries,
+      reviewChecklist: [],
+      generatedAt: new Date().toISOString()
+    },
+    countryScope
+  ).candidateSources;
 
   return success(
     "source-discovery",
     { candidateSources },
-    "Candidate legal sources selected from Pillar 6 mock evidence.",
+    "Candidate legal sources selected from query-plan-aligned Pillar 6 mock evidence.",
     "document-reader"
   );
 }
@@ -409,11 +463,29 @@ export function runMainlineAgents(input: {
   countryB?: SupportedCountry | null;
   businessScenario: string;
   userQuery: string;
-}): MainlineAgentResults {
+}): {
+  mainlineAgentResults: MainlineAgentResults;
+  supportingAgentResults: SupportingAgentResults;
+} {
   const intentArbiter = intentArbiterAgent(input);
+  const queryBuilder = queryBuilderAgent({
+    countryA: input.countryA,
+    countryB: input.countryB,
+    businessScenario: input.businessScenario,
+    userQuery: input.userQuery,
+    intent: intentArbiter.data ?? {
+      normalizedIntent: input.userQuery,
+      workflowMode: input.countryB ? "cross-jurisdiction" : "single-jurisdiction",
+      pillar6ScopeConfirmed: true,
+      focusIndicators: ALL_PILLAR6_INDICATORS
+    }
+  });
   const sourceDiscovery = sourceDiscoveryAgent({
     countryA: input.countryA,
     countryB: input.countryB,
+    queryPlan: queryBuilder.data?.queryPlan ?? [],
+    normalizedIntent: queryBuilder.data?.normalizedIntent ?? input.userQuery,
+    searchQueries: queryBuilder.data?.searchQueries ?? [],
     focusIndicators: intentArbiter.data?.focusIndicators ?? ALL_PILLAR6_INDICATORS
   });
   const documentReader = documentReaderAgent({
@@ -427,11 +499,16 @@ export function runMainlineAgents(input: {
   });
 
   return {
-    intentArbiter,
-    sourceDiscovery,
-    documentReader,
-    indicatorMapping,
-    legalReasoner
+    mainlineAgentResults: {
+      intentArbiter,
+      sourceDiscovery,
+      documentReader,
+      indicatorMapping,
+      legalReasoner
+    },
+    supportingAgentResults: {
+      queryBuilder
+    }
   };
 }
 
@@ -480,7 +557,8 @@ function buildTenAgentTrace(input: {
       agentId: "query-builder",
       name: agentNames["query-builder"],
       inputSummary: "Normalized Pillar 6 intent, jurisdiction, scenario, and review terms.",
-      outputSummary: "Builds search queries and lets law students revise specialist legal terms.",
+      outputSummary:
+        "Builds a structured query plan with indicator targets, source priorities, and reviewer notes.",
       evidenceIds: [],
       humanReviewGate: {
         required: true,
@@ -492,8 +570,10 @@ function buildTenAgentTrace(input: {
     {
       agentId: "source-discovery",
       name: agentNames["source-discovery"],
-      inputSummary: "Search Profile JSON with preferred official source types.",
-      outputSummary: "Ranks candidate statutes, regulator guidance, official portals, and treaties.",
+      inputSummary:
+        "Reviewed query plan, preferred source types, and reviewer-scoped Pillar 6 targets.",
+      outputSummary:
+        "Ranks traceable candidate statutes, regulator guidance, official portals, treaties, and RDTII references.",
       evidenceIds,
       humanReviewGate: {
         required: true,
@@ -636,7 +716,7 @@ export async function runMultiAgentWorkflow(
   const userQuery =
     options?.userQuery ??
     "Find legal evidence describing how cross-border data transfers are permitted, conditioned, or restricted.";
-  const mainlineAgentResults = runMainlineAgents({
+  const { mainlineAgentResults, supportingAgentResults } = runMainlineAgents({
     countryA,
     countryB,
     businessScenario,
@@ -678,6 +758,7 @@ export async function runMultiAgentWorkflow(
     comparison,
     report,
     mainlineAgentResults,
+    supportingAgentResults,
     agentTrace: buildTenAgentTrace({
       countryA,
       countryB,

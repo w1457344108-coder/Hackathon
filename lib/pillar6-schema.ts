@@ -1,4 +1,16 @@
-import { CountryPolicyProfile } from "@/lib/types";
+import {
+  CandidateSource,
+  CountryPolicyProfile,
+  Pillar6IndicatorEnum,
+  PreferredSourceType,
+  QueryPlanItem,
+  SearchQueryLanguage,
+  SearchQueryPriority,
+  SearchQueryReviewStatus,
+  SourceAuthorityLevel,
+  SourceJurisdictionMatch,
+  SourceRetrievalStatus
+} from "@/lib/types";
 
 export type Pillar6IndicatorId =
   | "ban-local-processing"
@@ -17,13 +29,6 @@ export type Pillar6IndicatorScoreField =
       | "bindingAgreementGap"
     >;
 
-export type PreferredSourceType =
-  | "Official legislation portal"
-  | "Regulator guidance"
-  | "Government ministry website"
-  | "International agreement database"
-  | "RDTII / UN ESCAP source";
-
 export type EvidenceSourceType =
   | "Official Portal"
   | "Statute"
@@ -37,12 +42,7 @@ export type EvidenceReviewStatus =
   | "Needs Revision"
   | "Rejected";
 
-export type Pillar6IndicatorCode =
-  | "P6_1_BAN_LOCAL_PROCESSING"
-  | "P6_2_LOCAL_STORAGE"
-  | "P6_3_INFRASTRUCTURE"
-  | "P6_4_CONDITIONAL_FLOW"
-  | "P6_5_BINDING_COMMITMENT";
+export type Pillar6IndicatorCode = Pillar6IndicatorEnum;
 
 export interface Pillar6IndicatorCardData {
   id: Pillar6IndicatorId;
@@ -65,18 +65,28 @@ export interface LegalSearchWorkspaceInput {
   preferredSources: PreferredSourceType[];
 }
 
+export type SearchQueryPlan = QueryPlanItem;
+
 export interface SearchProfileJson {
   jurisdiction: string;
-  business_scenario: string;
-  user_query: string;
-  ai_generated_terms: string[];
-  law_student_terms: string[];
-  exclusion_terms: string[];
-  preferred_sources: PreferredSourceType[];
-  pillar6_indicator_targets: string[];
-  search_queries: string[];
-  review_checklist: string[];
-  generated_at: string;
+  businessScenario: string;
+  normalizedIntent: string;
+  userQuery: string;
+  aiGeneratedTerms: string[];
+  lawStudentTerms: string[];
+  exclusionTerms: string[];
+  preferredSources: PreferredSourceType[];
+  pillar6IndicatorTargets: Pillar6IndicatorCode[];
+  sourcePriorityOrder: PreferredSourceType[];
+  queryPlan: SearchQueryPlan[];
+  searchQueries: string[];
+  reviewChecklist: string[];
+  generatedAt: string;
+}
+
+export interface SourceDiscoveryResult {
+  jurisdiction: string;
+  candidateSources: CandidateSource[];
 }
 
 export interface PipelineAgentStage {

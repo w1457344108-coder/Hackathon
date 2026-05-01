@@ -1,10 +1,19 @@
-import { CountryPolicyProfile, SupportedCountry } from "@/lib/types";
+import {
+  CandidateSource,
+  CountryPolicyProfile,
+  Pillar6IndicatorEnum,
+  PreferredSourceType,
+  QueryBuilderOutput,
+  QueryPlanItem,
+  SupportedCountry
+} from "@/lib/types";
 import {
   EvidenceRecord,
   PipelineAgentStage,
   Pillar6IndicatorCardData,
+  Pillar6IndicatorCode,
   Pillar6IndicatorId,
-  PreferredSourceType,
+  SourceDiscoveryResult,
   SearchProfileJson
 } from "@/lib/pillar6-schema";
 
@@ -111,27 +120,210 @@ function splitTerms(value: string) {
     .filter(Boolean);
 }
 
-export function buildAiSuggestedTerms(jurisdiction: string, businessScenario: string) {
+const jurisdictionTermMap: Record<string, string[]> = {
+  China: ["security assessment", "important data export", "cross-border transfer"],
+  Singapore: ["comparable protection", "overseas transfer", "accountability standard"],
+  "European Union": ["third country transfer", "appropriate safeguards", "adequacy decision"],
+  Japan: ["foreign transfer consent", "equivalent protection", "outsourcing transfer"]
+};
+
+const indicatorQueryBlueprints: Array<{
+  id: Pillar6IndicatorId;
+  code: Pillar6IndicatorCode;
+  label: string;
+  mustTerms: string[];
+  sourceStrategy: PreferredSourceType[];
+}> = [
+  {
+    id: "ban-local-processing",
+    code: "P6_1_BAN_LOCAL_PROCESSING",
+    label: "Ban and local processing requirements",
+    mustTerms: ["local processing", "offshore processing restriction", "domestic processing"],
+    sourceStrategy: ["Official legislation portal", "Government ministry website"]
+  },
+  {
+    id: "local-storage",
+    code: "P6_2_LOCAL_STORAGE",
+    label: "Local storage requirements",
+    mustTerms: ["local storage", "data localization", "domestic storage"],
+    sourceStrategy: ["Official legislation portal", "Regulator guidance"]
+  },
+  {
+    id: "infrastructure",
+    code: "P6_3_INFRASTRUCTURE",
+    label: "Infrastructure requirements",
+    mustTerms: ["local server", "infrastructure requirement", "regulator access"],
+    sourceStrategy: ["Government ministry website", "Regulator guidance"]
+  },
+  {
+    id: "conditional-flow",
+    code: "P6_4_CONDITIONAL_FLOW",
+    label: "Conditional flow regimes",
+    mustTerms: ["cross-border transfer approval", "security assessment", "transfer mechanism"],
+    sourceStrategy: ["Regulator guidance", "Official legislation portal"]
+  },
+  {
+    id: "binding-commitments",
+    code: "P6_5_BINDING_COMMITMENT",
+    label: "Binding commitments on data transfer",
+    mustTerms: ["digital trade agreement", "cross-border data flow commitment", "treaty obligation"],
+    sourceStrategy: ["International agreement database", "RDTII / UN ESCAP source"]
+  }
+];
+
+function getScenarioTerms(businessScenario: string) {
   const scenario = businessScenario.toLowerCase();
-  const scenarioTerms = [
+
+  return [
     scenario.includes("fintech") ? "payment data transfer" : null,
     scenario.includes("e-commerce") ? "merchant data export" : null,
     scenario.includes("cloud") ? "cross-border cloud hosting" : null,
-    scenario.includes("health") ? "sensitive health data transfer" : null
+    scenario.includes("health") ? "sensitive health data transfer" : null,
+    businessScenario.trim() ? businessScenario.trim() : null
   ].filter(Boolean) as string[];
+}
 
-  const jurisdictionTerms =
-    jurisdiction === "China"
-      ? ["security assessment", "important data export", "cross-border transfer"]
-      : jurisdiction === "Singapore"
-        ? ["comparable protection", "overseas transfer", "accountability standard"]
-        : jurisdiction === "European Union"
-          ? ["third country transfer", "appropriate safeguards", "adequacy decision"]
-          : jurisdiction === "Japan"
-            ? ["foreign transfer consent", "equivalent protection", "outsourcing transfer"]
-            : ["cross-border data flow", "transfer condition", "regulatory openness"];
+function getJurisdictionTerms(jurisdiction: string) {
+  return (
+    jurisdictionTermMap[jurisdiction] ?? [
+      "cross-border data flow",
+      "transfer condition",
+      "regulatory openness"
+    ]
+  );
+}
 
-  return [...new Set([...jurisdictionTerms, ...scenarioTerms, "data localization"])].join(", ");
+function getSourceTerms(sourceType: PreferredSourceType) {
+  switch (sourceType) {
+    case "Official legislation portal":
+      return ["official law", "statute", "regulation"];
+    case "Regulator guidance":
+      return ["official guidance", "regulator notice", "compliance guidance"];
+    case "Government ministry website":
+      return ["ministry notice", "government circular", "official website"];
+    case "International agreement database":
+      return ["digital trade agreement", "FTA", "international commitment"];
+    case "RDTII / UN ESCAP source":
+      return ["RDTII", "UN ESCAP", "regulatory database"];
+  }
+
+  return [];
+}
+
+function getLanguageHint(jurisdiction: string): QueryPlanItem["languageHint"] {
+  return jurisdiction === "China" || jurisdiction === "Japan" ? "Local + English" : "English";
+}
+
+function slugify(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function getJurisdictionSlug(jurisdiction: string) {
+  const slugs: Record<string, string> = {
+    China: "cn",
+    Singapore: "sg",
+    Japan: "jp",
+    "European Union": "eu",
+    "United States": "us"
+  };
+
+  return slugs[jurisdiction] ?? slugify(jurisdiction);
+}
+
+function getSourceUrl(jurisdiction: string, sourceType: PreferredSourceType, indicatorLabel: string) {
+  const jurisdictionSlug = getJurisdictionSlug(jurisdiction);
+  const indicatorSlug = slugify(indicatorLabel);
+
+  switch (sourceType) {
+    case "Official legislation portal":
+      return `https://laws.example.${jurisdictionSlug}/${indicatorSlug}`;
+    case "Regulator guidance":
+      return `https://regulator.example.${jurisdictionSlug}/${indicatorSlug}`;
+    case "Government ministry website":
+      return `https://ministry.example.${jurisdictionSlug}/${indicatorSlug}`;
+    case "International agreement database":
+      return `https://treaties.example.org/${jurisdictionSlug}/${indicatorSlug}`;
+    case "RDTII / UN ESCAP source":
+      return `https://rdtii.example.org/${jurisdictionSlug}/${indicatorSlug}`;
+  }
+}
+
+function getSourceTitle(jurisdiction: string, sourceType: PreferredSourceType, indicatorLabel: string) {
+  switch (sourceType) {
+    case "Official legislation portal":
+      return `${jurisdiction} ${indicatorLabel} Regulation Portal`;
+    case "Regulator guidance":
+      return `${jurisdiction} ${indicatorLabel} Compliance Guidance`;
+    case "Government ministry website":
+      return `${jurisdiction} ${indicatorLabel} Ministry Notice`;
+    case "International agreement database":
+      return `${jurisdiction} ${indicatorLabel} Treaty Database Entry`;
+    case "RDTII / UN ESCAP source":
+      return `${jurisdiction} RDTII Pillar 6 ${indicatorLabel} Reference`;
+  }
+}
+
+function getAuthorityLevel(sourceType: PreferredSourceType): CandidateSource["authorityLevel"] {
+  return sourceType === "RDTII / UN ESCAP source" ? "Supporting" : "Primary";
+}
+
+function getJurisdictionMatch(sourceType: PreferredSourceType): CandidateSource["jurisdictionMatch"] {
+  return sourceType === "RDTII / UN ESCAP source" ||
+    sourceType === "International agreement database"
+    ? "Regional / Comparative"
+    : "Direct";
+}
+
+function getRetrievalStatus(
+  sourceType: PreferredSourceType,
+  priority: QueryPlanItem["priority"]
+): CandidateSource["retrievalStatus"] {
+  if (sourceType === "RDTII / UN ESCAP source" || priority === "Medium") {
+    return "Needs Human Check";
+  }
+
+  return "Ready for Reading";
+}
+
+function matchesPreferredSourceType(record: EvidenceRecord, sourceType: PreferredSourceType) {
+  switch (sourceType) {
+    case "Official legislation portal":
+      return record.sourceType === "Statute" || record.sourceType === "Official Portal";
+    case "Regulator guidance":
+      return record.sourceType === "Regulator Guidance" || record.sourceType === "Policy Notice";
+    case "Government ministry website":
+      return record.sourceType === "Official Portal" || record.sourceType === "Policy Notice";
+    case "International agreement database":
+      return record.sourceType === "International Agreement";
+    case "RDTII / UN ESCAP source":
+      return true;
+  }
+}
+
+function isPillar6ScopedQuery(query: QueryPlanItem) {
+  const offTopicMarkers = [
+    "consumer rights",
+    "general privacy",
+    "tax data",
+    "telecom tariffs",
+    "customs duty"
+  ];
+  const searchableTerms = [...query.mustTerms, ...query.shouldTerms].join(" ").toLowerCase();
+
+  return !offTopicMarkers.some((term) => searchableTerms.includes(term));
+}
+
+export function buildAiSuggestedTerms(jurisdiction: string, businessScenario: string) {
+  return [
+    ...new Set([
+      ...getJurisdictionTerms(jurisdiction),
+      ...getScenarioTerms(businessScenario),
+      "data localization"
+    ])
+  ].join(", ");
 }
 
 export const pipelineStages: PipelineAgentStage[] = [
@@ -144,8 +336,9 @@ export const pipelineStages: PipelineAgentStage[] = [
   {
     id: "source-discovery",
     name: "Source Discovery Agent",
-    purpose: "Finds likely statutes, regulator portals, and treaty materials worth checking first.",
-    output: "Candidate source inventory"
+    purpose:
+      "Executes reviewed query-plan items against the right authority channel and returns traceable candidate sources first.",
+    output: "Authority-ranked candidate source inventory"
   },
   {
     id: "document-reader",
@@ -393,42 +586,156 @@ export const buildSearchProfile = (
     lawStudentTerms: string;
     exclusionTerms: string;
     preferredSources: PreferredSourceType[];
+    focusIndicators?: Pillar6IndicatorEnum[];
+    normalizedIntent?: string;
   }
 ): SearchProfileJson => {
   const aiGeneratedTerms = splitTerms(input.aiGeneratedTerms);
   const lawStudentTerms = splitTerms(input.lawStudentTerms);
   const exclusionTerms = splitTerms(input.exclusionTerms);
-  const indicatorTargets = indicatorDefinitions.map((item) => item.title);
   const baseTerms = [...aiGeneratedTerms, ...lawStudentTerms].filter(Boolean);
+  const scenarioTerms = getScenarioTerms(input.businessScenario);
+  const jurisdictionTerms = getJurisdictionTerms(input.jurisdiction);
+  const selectedIndicators =
+    input.focusIndicators && input.focusIndicators.length > 0
+      ? indicatorQueryBlueprints.filter((item) => input.focusIndicators?.includes(item.code))
+      : indicatorQueryBlueprints;
+  const indicatorTargets = selectedIndicators.map((item) => item.code);
+  const sourcePriorityOrder =
+    input.preferredSources.length > 0 ? input.preferredSources : preferredSourceOptions;
+  const queryPlan: QueryPlanItem[] = [];
 
-  const searchQueries = [
-    `${input.jurisdiction} ${input.businessScenario} ${input.plainLanguageQuery}`.trim(),
-    `${input.jurisdiction} (${baseTerms.join(" OR ") || "data transfer"}) official guidance`,
-    `${input.jurisdiction} ${input.businessScenario} (${indicatorTargets.join(" OR ")})`,
-    `${input.jurisdiction} cross-border data policy ${input.businessScenario} site:gov`
-  ];
+  selectedIndicators.forEach((indicator, indicatorIndex) => {
+    const prioritizedSources = sourcePriorityOrder.filter((source) =>
+      indicator.sourceStrategy.includes(source)
+    );
+    const selectedSources =
+      prioritizedSources.length > 0 ? prioritizedSources : [indicator.sourceStrategy[0]];
+
+    selectedSources.slice(0, 2).forEach((sourceType, sourceIndex) => {
+      const mustTerms = [...new Set([input.jurisdiction, ...indicator.mustTerms])];
+      const shouldTerms = [
+        ...new Set([
+          ...jurisdictionTerms,
+          ...scenarioTerms,
+          ...baseTerms,
+          ...getSourceTerms(sourceType)
+        ])
+      ];
+      const exclusionSuffix = exclusionTerms.map((term) => `-${term}`).join(" ");
+      const queryText = [
+        input.jurisdiction,
+        input.businessScenario,
+        `"${indicator.label}"`,
+        mustTerms.join(" "),
+        shouldTerms.length > 0 ? `(${shouldTerms.join(" OR ")})` : null,
+        exclusionSuffix || null
+      ]
+        .filter(Boolean)
+        .join(" ");
+
+      queryPlan.push({
+        queryId: `QB-${indicatorIndex + 1}-${sourceIndex + 1}`,
+        jurisdiction: input.jurisdiction,
+        indicatorCode: indicator.code,
+        indicatorLabel: indicator.label,
+        targetSourceType: sourceType,
+        priority: sourceIndex === 0 ? "High" : "Medium",
+        languageHint: getLanguageHint(input.jurisdiction),
+        mustTerms,
+        shouldTerms,
+        excludeTerms: exclusionTerms,
+        queryText,
+        whyThisQuery: `Targets ${indicator.label} first through ${sourceType.toLowerCase()} so the downstream source discovery step can prioritize authoritative Pillar 6 evidence.`,
+        reviewerStatus: "Suggested",
+        reviewerNote: ""
+      });
+    });
+  });
 
   return {
     jurisdiction: input.jurisdiction,
-    business_scenario: input.businessScenario,
-    user_query: input.plainLanguageQuery,
-    ai_generated_terms: aiGeneratedTerms,
-    law_student_terms: lawStudentTerms,
-    exclusion_terms: exclusionTerms,
-    preferred_sources: input.preferredSources,
-    pillar6_indicator_targets: indicatorTargets,
-    search_queries: searchQueries,
-    review_checklist: [
+    businessScenario: input.businessScenario,
+    normalizedIntent:
+      input.normalizedIntent ??
+      `Find Pillar 6 evidence for ${input.businessScenario} operations in ${input.jurisdiction}, limited to cross-border transfer, localization, infrastructure, conditional flow, and binding commitments.`,
+    userQuery: input.plainLanguageQuery,
+    aiGeneratedTerms,
+    lawStudentTerms,
+    exclusionTerms,
+    preferredSources: input.preferredSources,
+    sourcePriorityOrder,
+    pillar6IndicatorTargets: indicatorTargets,
+    queryPlan,
+    searchQueries: queryPlan.map((item) => item.queryText),
+    reviewChecklist: [
       "Confirm the source is official, current, and relevant to cross-border data transfers.",
       "Check whether the text is binding law, regulator guidance, ministry material, or international commitment.",
-      "Let law students add or revise specialist legal terms before finalizing the search set.",
+      "Let law students approve, revise, or reject each query before finalizing the retrieval plan.",
       "Extract verbatim language before scoring or summarizing a Pillar 6 indicator.",
       "Record uncertainty where the text affects architecture or supervision but not explicit transfer bans.",
       "Keep the search limited to Pillar 6 and avoid drifting into general domestic privacy compliance."
     ],
-    generated_at: new Date().toISOString()
+    generatedAt: new Date().toISOString()
   };
 };
+
+export function buildSourceDiscoveryCandidates(
+  profile: SearchProfileJson,
+  countries?: SupportedCountry[]
+): SourceDiscoveryResult {
+  const eligibleRecords =
+    countries && countries.length > 0
+      ? mockEvidenceRecords.filter((record) => countries.includes(record.country as SupportedCountry))
+      : mockEvidenceRecords.filter((record) => record.country === profile.jurisdiction);
+
+  const candidateSources: CandidateSource[] = profile.queryPlan
+    .filter((query) => query.reviewerStatus !== "Rejected")
+    .filter(isPillar6ScopedQuery)
+    .flatMap((query) =>
+      eligibleRecords
+        .filter((record) => record.indicatorCode === query.indicatorCode)
+        .filter((record) => matchesPreferredSourceType(record, query.targetSourceType))
+        .map((record) => ({
+          sourceId: `SRC-${record.evidenceId}`,
+          evidenceId: record.evidenceId,
+          queryId: query.queryId,
+          indicatorId: query.indicatorCode,
+          title: record.lawTitle,
+          jurisdiction: record.country,
+          sourceType: query.targetSourceType,
+          sourceUrl: record.sourceUrl,
+          relevanceNote: `${record.indicator} evidence matched from ${query.queryId}.`,
+          authorityLevel: getAuthorityLevel(query.targetSourceType),
+          jurisdictionMatch:
+            record.country === query.jurisdiction ? "Direct" : getJurisdictionMatch(query.targetSourceType),
+          discoveryReason: `Matched ${record.evidenceId} to ${query.queryId} because ${record.indicatorCode} and ${query.targetSourceType.toLowerCase()} align with the query plan.`,
+          retrievalStatus: getRetrievalStatus(query.targetSourceType, query.priority),
+          matchedTerms: [...record.discoveryTags, ...query.mustTerms].slice(0, 6)
+        }))
+    )
+    .filter(
+      (source, index, collection) =>
+        collection.findIndex((item) => item.evidenceId === source.evidenceId) === index
+    )
+    .slice(0, 8);
+
+  return {
+    jurisdiction: profile.jurisdiction,
+    candidateSources
+  };
+}
+
+export function toQueryBuilderOutput(profile: SearchProfileJson): QueryBuilderOutput {
+  return {
+    normalizedIntent: profile.normalizedIntent,
+    sourcePriorityOrder: profile.sourcePriorityOrder,
+    queryPlan: profile.queryPlan,
+    searchQueries: profile.searchQueries,
+    targetIndicators: profile.pillar6IndicatorTargets,
+    reviewChecklist: profile.reviewChecklist
+  };
+}
 
 export function filterEvidenceByCountries(
   records: EvidenceRecord[],

@@ -9,36 +9,47 @@ The Query Builder Agent transforms a plain-language legal research goal into str
 ## 3. Input Schema
 ```ts
 interface QueryBuilderInput {
-  jurisdiction: string;
-  userObjective: string;
-  legalTerms: string[];
-  synonyms?: string[];
-  exclusionTerms?: string[];
-  preferredSources?: string[];
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  businessScenario: string;
+  userQuery: string;
+  intent: IntentArbiterOutput;
 }
 ```
 
 ## 4. Output Schema
 ```ts
 interface QueryBuilderOutput {
+  normalizedIntent: string;
+  sourcePriorityOrder: PreferredSourceType[];
+  queryPlan: Array<{
+    queryId: string;
+    indicatorCode: Pillar6IndicatorCode;
+    indicatorLabel: string;
+    targetSourceType: PreferredSourceType;
+    priority: "High" | "Medium";
+    languageHint: "English" | "Local + English";
+    mustTerms: string[];
+    shouldTerms: string[];
+    excludeTerms: string[];
+    queryText: string;
+    whyThisQuery: string;
+    reviewerStatus: "Suggested" | "Approved" | "Needs Revision" | "Rejected";
+    reviewerNote: string;
+  }>;
   searchQueries: string[];
-  sourceHints: string[];
-  indicatorTargets: Array<
-    | "ban-local-processing"
-    | "local-storage"
-    | "infrastructure"
-    | "conditional-flow"
-    | "binding-commitments"
-  >;
+  targetIndicators: Pillar6IndicatorCode[];
+  reviewChecklist: string[];
 }
 ```
 
 ## 5. Core Logic
-1. Parse the normalized legal objective.
-2. Expand user terms with Pillar 6-specific legal synonyms.
-3. Generate jurisdiction-aware query strings.
-4. Add exclusion terms to suppress non-relevant material.
-5. Return structured search queries for source discovery.
+1. Consume the mainline `Intent Arbiter` result instead of re-deciding Pillar 6 scope.
+2. Expand business-scenario and jurisdiction terms with Pillar 6-specific legal vocabulary.
+3. Generate indicator-specific query plans rather than one generic search string.
+4. Prioritize official sources before softer secondary materials.
+5. Add exclusion terms to suppress non-relevant material.
+6. Return a structured query plan plus a flat search string projection for downstream discovery.
 
 ## 6. Pillar 6 Relevance
 The agent creates queries specifically aligned with:
@@ -62,23 +73,47 @@ interface QueryBuilderFailure {
 Mock input:
 ```json
 {
-  "jurisdiction": "European Union",
-  "userObjective": "Find rules governing transfer of data to third countries.",
-  "legalTerms": ["third country transfer", "appropriate safeguards"],
-  "synonyms": ["adequacy decision", "standard contractual clauses"],
-  "exclusionTerms": ["consumer rights"],
-  "preferredSources": ["Official legislation portal", "Regulator guidance"]
+  "countryA": "European Union",
+  "businessScenario": "cloud service",
+  "userQuery": "Find rules governing transfer of data to third countries under Pillar 6.",
+  "intent": {
+    "normalizedIntent": "Find rules governing transfer of data to third countries under Pillar 6.",
+    "workflowMode": "single-jurisdiction",
+    "pillar6ScopeConfirmed": true,
+    "focusIndicators": ["P6_4_CONDITIONAL_FLOW", "P6_5_BINDING_COMMITMENT"]
+  }
 }
 ```
 
 Mock output:
 ```json
 {
-  "searchQueries": [
-    "European Union third country transfer appropriate safeguards",
-    "EU adequacy decision standard contractual clauses official source"
+  "normalizedIntent": "Find rules governing transfer of data to third countries under Pillar 6.",
+  "sourcePriorityOrder": ["Official legislation portal", "Regulator guidance"],
+  "queryPlan": [
+    {
+      "queryId": "QB-4-1",
+      "indicatorCode": "P6_4_CONDITIONAL_FLOW",
+      "indicatorLabel": "Conditional flow regimes",
+      "targetSourceType": "Official legislation portal",
+      "priority": "High",
+      "languageHint": "English",
+      "mustTerms": ["European Union", "cross-border transfer approval", "security assessment"],
+      "shouldTerms": ["third country transfer", "appropriate safeguards", "adequacy decision"],
+      "excludeTerms": ["consumer rights"],
+      "queryText": "European Union \"Conditional flow regimes\" cross-border transfer approval security assessment (third country transfer OR appropriate safeguards OR adequacy decision) -consumer rights",
+      "whyThisQuery": "Targets conditional transfer rules first through official legislation.",
+      "reviewerStatus": "Suggested",
+      "reviewerNote": ""
+    }
   ],
-  "sourceHints": ["eur-lex", "commission guidance"],
-  "indicatorTargets": ["conditional-flow", "binding-commitments"]
+  "searchQueries": [
+    "European Union \"Conditional flow regimes\" cross-border transfer approval security assessment (third country transfer OR appropriate safeguards OR adequacy decision) -consumer rights"
+  ],
+  "targetIndicators": ["P6_4_CONDITIONAL_FLOW", "P6_5_BINDING_COMMITMENT"],
+  "reviewChecklist": [
+    "Check whether the query stays within Pillar 6 transfer-policy scope.",
+    "Confirm the preferred source order still prioritizes official materials."
+  ]
 }
 ```

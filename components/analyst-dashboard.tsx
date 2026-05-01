@@ -260,7 +260,11 @@ export function AnalystDashboard() {
 
       <Pillar6IndicatorCards profile={selectedProfile} />
 
-      <LegalSearchWorkspace defaultJurisdiction={countryA} />
+      <LegalSearchWorkspace
+        defaultJurisdiction={countryA}
+        linkedQueryBuilder={workflowResult?.supportingAgentResults.queryBuilder.data ?? null}
+        linkedSourceDiscovery={workflowResult?.mainlineAgentResults.sourceDiscovery.data ?? null}
+      />
 
       <AgentPipelineViewer isRunning={isRunning} hasResult={Boolean(workflowResult)} />
 

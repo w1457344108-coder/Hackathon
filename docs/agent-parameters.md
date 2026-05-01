@@ -117,10 +117,10 @@ Indicator meanings:
 
 ```ts
 interface IntentArbiterInput {
-  jurisdiction: string;
-  comparison_jurisdiction?: string;
-  user_query: string;
-  requested_outputs?: string[];
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  businessScenario: string;
+  userQuery: string;
 }
 ```
 
@@ -128,19 +128,19 @@ interface IntentArbiterInput {
 
 ```ts
 interface IntentArbiterOutput {
-  normalized_intent: string;
-  workflow_mode: "single-jurisdiction" | "cross-jurisdiction";
-  pillar6_scope_confirmed: true;
-  focus_indicators: Pillar6IndicatorEnum[];
+  normalizedIntent: string;
+  workflowMode: "single-jurisdiction" | "cross-jurisdiction";
+  pillar6ScopeConfirmed: true;
+  focusIndicators: Pillar6IndicatorEnum[];
 }
 ```
 
 - `required_fields`
-  - `jurisdiction`
-  - `user_query`
+  - `countryA`
+  - `businessScenario`
+  - `userQuery`
 - `optional_fields`
-  - `comparison_jurisdiction`
-  - `requested_outputs`
+  - `countryB`
 - `downstream_agent`
   - `query-builder`
 
@@ -151,33 +151,50 @@ interface IntentArbiterOutput {
 
 ```ts
 interface QueryBuilderInput {
-  jurisdiction: string;
-  normalized_intent: string;
-  focus_indicators: Pillar6IndicatorEnum[];
-  legal_terms?: string[];
-  synonyms?: string[];
-  exclusion_terms?: string[];
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  businessScenario: string;
+  userQuery: string;
+  intent: IntentArbiterOutput;
 }
 ```
 
 - `output`
 
 ```ts
+interface QueryPlanItem {
+  queryId: string;
+  jurisdiction: string;
+  indicatorCode: Pillar6IndicatorEnum;
+  indicatorLabel: string;
+  targetSourceType: PreferredSourceType;
+  priority: "High" | "Medium";
+  languageHint: "English" | "Local + English";
+  mustTerms: string[];
+  shouldTerms: string[];
+  excludeTerms: string[];
+  queryText: string;
+  whyThisQuery: string;
+  reviewerStatus: "Suggested" | "Approved" | "Needs Revision" | "Rejected";
+  reviewerNote: string;
+}
+
 interface QueryBuilderOutput {
-  search_queries: string[];
-  preferred_source_types: string[];
-  target_indicators: Pillar6IndicatorEnum[];
+  normalizedIntent: string;
+  sourcePriorityOrder: PreferredSourceType[];
+  queryPlan: QueryPlanItem[];
+  searchQueries: string[];
+  targetIndicators: Pillar6IndicatorEnum[];
 }
 ```
 
 - `required_fields`
-  - `jurisdiction`
-  - `normalized_intent`
-  - `focus_indicators`
+  - `countryA`
+  - `businessScenario`
+  - `userQuery`
+  - `intent`
 - `optional_fields`
-  - `legal_terms`
-  - `synonyms`
-  - `exclusion_terms`
+  - `countryB`
 - `downstream_agent`
   - `source-discovery`
 
@@ -188,9 +205,12 @@ interface QueryBuilderOutput {
 
 ```ts
 interface SourceDiscoveryInput {
-  jurisdiction: string;
-  search_queries: string[];
-  preferred_source_types: string[];
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  queryPlan: QueryPlanItem[];
+  normalizedIntent: string;
+  searchQueries: string[];
+  focusIndicators: Pillar6IndicatorEnum[];
 }
 ```
 
@@ -198,21 +218,33 @@ interface SourceDiscoveryInput {
 
 ```ts
 interface SourceDiscoveryOutput {
-  candidate_sources: Array<{
-    source_id: string;
+  candidateSources: Array<{
+    sourceId: string;
+    evidenceId: string;
+    queryId?: string;
+    indicatorId?: Pillar6IndicatorEnum;
     title: string;
-    source_type: string;
-    source_url: string;
-    relevance_note: string;
+    jurisdiction: string;
+    sourceType: PreferredSourceType | string;
+    sourceUrl: string;
+    authorityLevel?: "Primary" | "Supporting";
+    jurisdictionMatch?: "Direct" | "Regional / Comparative";
+    relevanceNote: string;
+    discoveryReason?: string;
+    retrievalStatus?: "Ready for Reading" | "Needs Human Check";
+    matchedTerms?: string[];
   }>;
 }
 ```
 
 - `required_fields`
-  - `jurisdiction`
-  - `search_queries`
+  - `countryA`
+  - `queryPlan`
+  - `normalizedIntent`
+  - `searchQueries`
+  - `focusIndicators`
 - `optional_fields`
-  - `preferred_source_types`
+  - `countryB`
 - `downstream_agent`
   - `document-reader`
 
@@ -223,11 +255,12 @@ interface SourceDiscoveryOutput {
 
 ```ts
 interface DocumentReaderInput {
-  candidate_sources: Array<{
-    source_id: string;
+  candidateSources: Array<{
+    sourceId: string;
+    evidenceId: string;
     title: string;
-    source_url: string;
-    source_type: string;
+    sourceUrl: string;
+    sourceType: string;
   }>;
 }
 ```
@@ -237,18 +270,18 @@ interface DocumentReaderInput {
 ```ts
 interface DocumentReaderOutput {
   passages: Array<{
-    evidence_id: string;
-    source_id: string;
-    law_title: string;
-    citation_ref: string;
-    source_url: string;
+    evidenceId: string;
+    sourceId: string;
+    lawTitle: string;
+    citationRef: string;
+    sourceUrl: string;
     text: string;
   }>;
 }
 ```
 
 - `required_fields`
-  - `candidate_sources`
+  - `candidateSources`
 - `optional_fields`
   - none
 - `downstream_agent`
@@ -263,12 +296,12 @@ interface DocumentReaderOutput {
 interface RelevanceFilterInput {
   jurisdiction: string;
   passages: Array<{
-    evidence_id: string;
-    citation_ref: string;
-    source_url: string;
+    evidenceId: string;
+    citationRef: string;
+    sourceUrl: string;
     text: string;
   }>;
-  focus_indicators: Pillar6IndicatorEnum[];
+  focusIndicators: Pillar6IndicatorEnum[];
 }
 ```
 
@@ -276,12 +309,12 @@ interface RelevanceFilterInput {
 
 ```ts
 interface RelevanceFilterOutput {
-  shortlisted_evidence: Array<{
-    evidence_id: string;
-    citation_ref: string;
-    source_url: string;
+  shortlistedEvidence: Array<{
+    evidenceId: string;
+    citationRef: string;
+    sourceUrl: string;
     text: string;
-    relevance_reason: string;
+    relevanceReason: string;
   }>;
 }
 ```
@@ -289,7 +322,7 @@ interface RelevanceFilterOutput {
 - `required_fields`
   - `jurisdiction`
   - `passages`
-  - `focus_indicators`
+  - `focusIndicators`
 - `optional_fields`
   - none
 - `downstream_agent`
@@ -302,10 +335,10 @@ interface RelevanceFilterOutput {
 
 ```ts
 interface IndicatorMappingInput {
-  shortlisted_evidence: Array<{
-    evidence_id: string;
-    citation_ref: string;
-    source_url: string;
+  shortlistedEvidence: Array<{
+    evidenceId: string;
+    citationRef: string;
+    sourceUrl: string;
     text: string;
   }>;
 }
@@ -315,16 +348,16 @@ interface IndicatorMappingInput {
 
 ```ts
 interface IndicatorMappingOutput {
-  mapped_evidence: Array<{
-    evidence_id: string;
-    indicator_id: Pillar6IndicatorEnum;
-    mapping_reason: string;
+  mappedEvidence: Array<{
+    evidenceId: string;
+    indicatorId: Pillar6IndicatorEnum;
+    mappingReason: string;
   }>;
 }
 ```
 
 - `required_fields`
-  - `shortlisted_evidence`
+  - `shortlistedEvidence`
 - `optional_fields`
   - none
 - `downstream_agent`
@@ -338,12 +371,12 @@ interface IndicatorMappingOutput {
 ```ts
 interface LegalReasonerInput {
   jurisdiction: string;
-  mapped_evidence: Array<{
-    evidence_id: string;
-    indicator_id: Pillar6IndicatorEnum;
-    mapping_reason: string;
+  mappedEvidence: Array<{
+    evidenceId: string;
+    indicatorId: Pillar6IndicatorEnum;
+    mappingReason: string;
   }>;
-  evidence_text_lookup: Record<string, string>;
+  evidenceTextLookup: Record<string, string>;
 }
 ```
 
@@ -351,19 +384,19 @@ interface LegalReasonerInput {
 
 ```ts
 interface LegalReasonerOutput {
-  legal_findings: Array<{
-    conclusion_id: string;
-    indicator_id: Pillar6IndicatorEnum;
+  legalFindings: Array<{
+    conclusionId: string;
+    indicatorId: Pillar6IndicatorEnum;
     conclusion: string;
-    evidence_ids: string[];
+    evidenceIds: string[];
   }>;
 }
 ```
 
 - `required_fields`
   - `jurisdiction`
-  - `mapped_evidence`
-  - `evidence_text_lookup`
+  - `mappedEvidence`
+  - `evidenceTextLookup`
 - `optional_fields`
   - none
 - `downstream_agent`
@@ -377,11 +410,11 @@ interface LegalReasonerOutput {
 ```ts
 interface RiskCostQuantifierInput {
   jurisdiction: string;
-  legal_findings: Array<{
-    conclusion_id: string;
-    indicator_id: Pillar6IndicatorEnum;
+  legalFindings: Array<{
+    conclusionId: string;
+    indicatorId: Pillar6IndicatorEnum;
     conclusion: string;
-    evidence_ids: string[];
+    evidenceIds: string[];
   }>;
 }
 ```
@@ -390,17 +423,17 @@ interface RiskCostQuantifierInput {
 
 ```ts
 interface RiskCostQuantifierOutput {
-  risk_summary: {
-    risk_level: "Low" | "Moderate" | "High";
-    business_cost_drivers: string[];
-    operational_impact: string;
+  riskSummary: {
+    riskLevel: "Low" | "Moderate" | "High";
+    businessCostDrivers: string[];
+    operationalImpact: string;
   };
 }
 ```
 
 - `required_fields`
   - `jurisdiction`
-  - `legal_findings`
+  - `legalFindings`
 - `optional_fields`
   - none
 - `downstream_agent`
@@ -413,17 +446,17 @@ interface RiskCostQuantifierOutput {
 
 ```ts
 interface AuditCitationInput {
-  legal_findings: Array<{
-    conclusion_id: string;
-    indicator_id: Pillar6IndicatorEnum;
+  legalFindings: Array<{
+    conclusionId: string;
+    indicatorId: Pillar6IndicatorEnum;
     conclusion: string;
-    evidence_ids: string[];
+    evidenceIds: string[];
   }>;
-  evidence_lookup: Record<
+  evidenceLookup: Record<
     string,
     {
-      citation_ref?: string;
-      source_url?: string;
+      citationRef?: string;
+      sourceUrl?: string;
       text: string;
     }
   >;
@@ -434,20 +467,20 @@ interface AuditCitationInput {
 
 ```ts
 interface AuditCitationOutput {
-  audit_items: Array<{
-    conclusion_id: string;
-    evidence_id: string;
-    citation_ref?: string;
-    source_url?: string;
-    original_text: string;
-    extracted_claim: string;
+  auditItems: Array<{
+    conclusionId: string;
+    evidenceId: string;
+    citationRef?: string;
+    sourceUrl?: string;
+    originalText: string;
+    extractedClaim: string;
   }>;
 }
 ```
 
 - `required_fields`
-  - `legal_findings`
-  - `evidence_lookup`
+  - `legalFindings`
+  - `evidenceLookup`
 - `optional_fields`
   - none
 - `downstream_agent`
@@ -460,20 +493,20 @@ interface AuditCitationOutput {
 
 ```ts
 interface LegalReviewExportInput {
-  audit_items: Array<{
-    conclusion_id: string;
-    evidence_id: string;
-    citation_ref?: string;
-    source_url?: string;
-    original_text: string;
-    extracted_claim: string;
+  auditItems: Array<{
+    conclusionId: string;
+    evidenceId: string;
+    citationRef?: string;
+    sourceUrl?: string;
+    originalText: string;
+    extractedClaim: string;
   }>;
-  risk_summary: {
-    risk_level: "Low" | "Moderate" | "High";
-    business_cost_drivers: string[];
-    operational_impact: string;
+  riskSummary: {
+    riskLevel: "Low" | "Moderate" | "High";
+    businessCostDrivers: string[];
+    operationalImpact: string;
   };
-  comparison_view?: Record<string, string>;
+  comparisonView?: Record<string, string>;
 }
 ```
 
@@ -481,20 +514,20 @@ interface LegalReviewExportInput {
 
 ```ts
 interface LegalReviewExportOutput {
-  final_report: string;
-  export_bundle: {
+  finalReport: string;
+  exportBundle: {
     json: Record<string, unknown>;
-    csv_rows: Array<Record<string, string | number>>;
+    csvRows: Array<Record<string, string | number>>;
     markdown: string;
   };
 }
 ```
 
 - `required_fields`
-  - `audit_items`
-  - `risk_summary`
+  - `auditItems`
+  - `riskSummary`
 - `optional_fields`
-  - `comparison_view`
+  - `comparisonView`
 - `downstream_agent`
   - `none`
 
@@ -506,8 +539,9 @@ Below is a simplified JSON-compatible example of the expected data flow from use
 
 ```json
 {
-  "jurisdiction": "China",
-  "user_query": "What approvals or security reviews apply to outbound transfer of important data under Pillar 6?"
+  "countryA": "China",
+  "businessScenario": "fintech",
+  "userQuery": "What approvals or security reviews apply to outbound transfer of important data under Pillar 6?"
 }
 ```
 
@@ -518,10 +552,10 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "status": "success",
   "agent_id": "intent-arbiter",
   "data": {
-    "normalized_intent": "Assess outbound transfer approval conditions in China under Pillar 6.",
-    "workflow_mode": "single-jurisdiction",
-    "pillar6_scope_confirmed": true,
-    "focus_indicators": ["P6_4_CONDITIONAL_FLOW"]
+    "normalizedIntent": "Assess outbound transfer approval conditions in China under Pillar 6.",
+    "workflowMode": "single-jurisdiction",
+    "pillar6ScopeConfirmed": true,
+    "focusIndicators": ["P6_4_CONDITIONAL_FLOW"]
   }
 }
 ```
@@ -533,12 +567,31 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "status": "success",
   "agent_id": "query-builder",
   "data": {
-    "search_queries": [
-      "China outbound transfer important data security review",
-      "China cross-border data transfer approval assessment"
+    "normalizedIntent": "Assess transfer approval conditions in China under Pillar 6.",
+    "sourcePriorityOrder": ["Regulator guidance", "Official legislation portal"],
+    "queryPlan": [
+      {
+        "queryId": "QB-4-1",
+        "indicatorCode": "P6_4_CONDITIONAL_FLOW",
+        "targetSourceType": "Regulator guidance",
+        "priority": "High",
+        "languageHint": "Local + English",
+        "mustTerms": ["China", "cross-border transfer approval", "security assessment"],
+        "shouldTerms": ["important data export", "transfer mechanism"],
+        "excludeTerms": ["consumer rights"],
+        "queryText": "China \"Conditional flow regimes\" cross-border transfer approval security assessment (important data export OR transfer mechanism) -consumer rights",
+        "whyThisQuery": "Prioritizes regulator materials that usually explain transfer approvals first.",
+        "reviewerStatus": "Suggested",
+        "reviewerNote": ""
+      }
     ],
-    "preferred_source_types": ["Statute", "Regulator Guidance"],
-    "target_indicators": ["P6_4_CONDITIONAL_FLOW"]
+    "searchQueries": [
+      "China \"Conditional flow regimes\" cross-border transfer approval security assessment (important data export OR transfer mechanism) -consumer rights"
+    ],
+    "targetIndicators": ["P6_4_CONDITIONAL_FLOW"],
+    "reviewChecklist": [
+      "Check whether the query stays within Pillar 6 transfer-policy scope."
+    ]
   }
 }
 ```
@@ -550,13 +603,22 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "status": "success",
   "agent_id": "source-discovery",
   "data": {
-    "candidate_sources": [
+    "candidateSources": [
       {
-        "source_id": "src_001",
-        "title": "Mock Personal Information Export Compliance Notice",
-        "source_type": "Regulator Guidance",
-        "source_url": "https://example.gov.cn/mock-export-notice",
-        "relevance_note": "Likely contains transfer approval conditions."
+        "sourceId": "src_001",
+        "evidenceId": "ev_001",
+        "queryId": "QB-4-1",
+        "indicatorId": "P6_4_CONDITIONAL_FLOW",
+        "title": "China Conditional flow regimes Compliance Guidance",
+        "jurisdiction": "China",
+        "sourceType": "Regulator guidance",
+        "sourceUrl": "https://regulator.example.cn/conditional-flow-regimes",
+        "authorityLevel": "Primary",
+        "jurisdictionMatch": "Direct",
+        "relevanceNote": "Likely contains transfer approval conditions.",
+        "discoveryReason": "Spawned from QB-4-1 because the query prioritized regulator guidance first.",
+        "retrievalStatus": "Ready for Reading",
+        "matchedTerms": ["China", "cross-border transfer approval", "security assessment"]
       }
     ]
   }
@@ -572,11 +634,11 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "data": {
     "passages": [
       {
-        "evidence_id": "ev_001",
-        "source_id": "src_001",
-        "law_title": "Mock Personal Information Export Compliance Notice",
-        "citation_ref": "Art. 12",
-        "source_url": "https://example.gov.cn/mock-export-notice",
+        "evidenceId": "ev_001",
+        "sourceId": "src_001",
+        "lawTitle": "Mock Personal Information Export Compliance Notice",
+        "citationRef": "Art. 12",
+        "sourceUrl": "https://example.gov.cn/mock-export-notice",
         "text": "Outbound transfer of important datasets shall complete the designated security review before the transfer is activated."
       }
     ]
@@ -591,13 +653,13 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "status": "success",
   "agent_id": "relevance-filter",
   "data": {
-    "shortlisted_evidence": [
+    "shortlistedEvidence": [
       {
-        "evidence_id": "ev_001",
-        "citation_ref": "Art. 12",
-        "source_url": "https://example.gov.cn/mock-export-notice",
+        "evidenceId": "ev_001",
+        "citationRef": "Art. 12",
+        "sourceUrl": "https://example.gov.cn/mock-export-notice",
         "text": "Outbound transfer of important datasets shall complete the designated security review before the transfer is activated.",
-        "relevance_reason": "Directly describes a transfer condition."
+        "relevanceReason": "Directly describes a transfer condition."
       }
     ]
   }
@@ -611,11 +673,11 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "status": "success",
   "agent_id": "indicator-mapping",
   "data": {
-    "mapped_evidence": [
+    "mappedEvidence": [
       {
-        "evidence_id": "ev_001",
-        "indicator_id": "P6_4_CONDITIONAL_FLOW",
-        "mapping_reason": "Transfer is conditioned on prior review."
+        "evidenceId": "ev_001",
+        "indicatorId": "P6_4_CONDITIONAL_FLOW",
+        "mappingReason": "Transfer is conditioned on prior review."
       }
     ]
   }
@@ -629,12 +691,12 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "status": "success",
   "agent_id": "legal-reasoner",
   "data": {
-    "legal_findings": [
+    "legalFindings": [
       {
-        "conclusion_id": "con_001",
-        "indicator_id": "P6_4_CONDITIONAL_FLOW",
+        "conclusionId": "con_001",
+        "indicatorId": "P6_4_CONDITIONAL_FLOW",
         "conclusion": "Outbound transfer is legally allowed only after an ex ante security review.",
-        "evidence_ids": ["ev_001"]
+        "evidenceIds": ["ev_001"]
       }
     ]
   }
@@ -648,14 +710,14 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "status": "success",
   "agent_id": "audit-citation",
   "data": {
-    "audit_items": [
+    "auditItems": [
       {
-        "conclusion_id": "con_001",
-        "evidence_id": "ev_001",
-        "citation_ref": "Art. 12",
-        "source_url": "https://example.gov.cn/mock-export-notice",
-        "original_text": "Outbound transfer of important datasets shall complete the designated security review before the transfer is activated.",
-        "extracted_claim": "Outbound transfer is legally allowed only after an ex ante security review."
+        "conclusionId": "con_001",
+        "evidenceId": "ev_001",
+        "citationRef": "Art. 12",
+        "sourceUrl": "https://example.gov.cn/mock-export-notice",
+        "originalText": "Outbound transfer of important datasets shall complete the designated security review before the transfer is activated.",
+        "extractedClaim": "Outbound transfer is legally allowed only after an ex ante security review."
       }
     ]
   }
@@ -669,17 +731,17 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "status": "success",
   "agent_id": "legal-review-export",
   "data": {
-    "final_report": "China applies a conditional transfer regime for important outbound data transfers, with pre-transfer security review as a legal gate.",
-    "export_bundle": {
+    "finalReport": "China applies a conditional transfer regime for important outbound data transfers, with pre-transfer security review as a legal gate.",
+    "exportBundle": {
       "json": {
-        "overall_risk": "High",
-        "indicator_results": ["P6_4_CONDITIONAL_FLOW"]
+        "overallRisk": "High",
+        "indicatorResults": ["P6_4_CONDITIONAL_FLOW"]
       },
-      "csv_rows": [
+      "csvRows": [
         {
-          "citation_ref": "Art. 12",
-          "indicator_id": "P6_4_CONDITIONAL_FLOW",
-          "risk_level": "High"
+          "citationRef": "Art. 12",
+          "indicatorId": "P6_4_CONDITIONAL_FLOW",
+          "riskLevel": "High"
         }
       ],
       "markdown": "# Pillar 6 Report\n\n- Indicator: P6_4_CONDITIONAL_FLOW\n- Finding: Pre-transfer security review required.\n- Risk: High"

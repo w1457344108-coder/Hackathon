@@ -66,6 +66,8 @@ The five mainline agents are now wired into the mock workflow result through `ma
 
 These agents are deterministic mock implementations for the hackathon version, but their outputs follow the same contract shape expected from future API-backed agents.
 
+The supporting `queryBuilder` agent is now adapted to the mainline flow as a pre-discovery input layer. Its output is exposed through `supportingAgentResults.queryBuilder`, and the mainline `sourceDiscovery` step consumes the generated `queryPlan`.
+
 ## Demo narrative
 
 The recommended demo story is a fintech market-entry review: a team wants to understand whether data can move from China to Singapore while staying inside Pillar 6 scope. The walkthrough is:
