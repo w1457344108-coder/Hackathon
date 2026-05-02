@@ -1,4 +1,4 @@
-import {
+import type {
   CandidateSource,
   CountryPolicyProfile,
   Pillar6IndicatorEnum,
@@ -7,7 +7,7 @@ import {
   QueryPlanItem,
   SupportedCountry
 } from "@/lib/types";
-import {
+import type {
   EvidenceRecord,
   PipelineAgentStage,
   Pillar6IndicatorCardData,

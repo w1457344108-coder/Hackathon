@@ -255,12 +255,10 @@ interface SourceDiscoveryOutput {
 
 ```ts
 interface DocumentReaderInput {
-  candidateSources: Array<{
-    sourceId: string;
-    evidenceId: string;
+  sources: Array<{
     title: string;
-    sourceUrl: string;
     sourceType: string;
+    url: string;
   }>;
 }
 ```
@@ -270,18 +268,16 @@ interface DocumentReaderInput {
 ```ts
 interface DocumentReaderOutput {
   passages: Array<{
-    evidenceId: string;
-    sourceId: string;
     lawTitle: string;
-    citationRef: string;
-    sourceUrl: string;
+    citationAnchor: string;
     text: string;
+    sourceUrl: string;
   }>;
 }
 ```
 
 - `required_fields`
-  - `candidateSources`
+  - `sources`
 - `optional_fields`
   - none
 - `downstream_agent`
@@ -309,13 +305,28 @@ interface RelevanceFilterInput {
 
 ```ts
 interface RelevanceFilterOutput {
-  shortlistedEvidence: Array<{
+  shortlistedPassages: Array<{
     evidenceId: string;
+    sourceId: string;
+    jurisdiction: string;
+    indicatorId: Pillar6IndicatorEnum;
+    lawTitle: string;
     citationRef: string;
     sourceUrl: string;
+    sourceType: string;
     text: string;
     relevanceReason: string;
+    relevanceBand: "Direct Match" | "Borderline";
+    humanReviewNeeded: boolean;
+    reviewerPrompt: string;
   }>;
+  filteredOutEvidenceIds: string[];
+  reviewSummary: {
+    shortlistedCount: number;
+    filteredOutCount: number;
+    humanReviewCount: number;
+  };
+  reviewerChecklist: string[];
 }
 ```
 
@@ -352,6 +363,7 @@ interface IndicatorMappingOutput {
     evidenceId: string;
     indicatorId: Pillar6IndicatorEnum;
     mappingReason: string;
+    citationRef: string;
   }>;
 }
 ```
@@ -386,8 +398,10 @@ interface LegalReasonerInput {
 interface LegalReasonerOutput {
   legalFindings: Array<{
     conclusionId: string;
+    jurisdiction: string;
     indicatorId: Pillar6IndicatorEnum;
     conclusion: string;
+    legalEffect: string;
     evidenceIds: string[];
   }>;
 }
@@ -412,8 +426,10 @@ interface RiskCostQuantifierInput {
   jurisdiction: string;
   legalFindings: Array<{
     conclusionId: string;
+    jurisdiction: string;
     indicatorId: Pillar6IndicatorEnum;
     conclusion: string;
+    legalEffect: string;
     evidenceIds: string[];
   }>;
 }
@@ -427,6 +443,8 @@ interface RiskCostQuantifierOutput {
     riskLevel: "Low" | "Moderate" | "High";
     businessCostDrivers: string[];
     operationalImpact: string;
+    uncertaintyLevel: "Low" | "Moderate" | "High";
+    humanReviewNeeded: boolean;
   };
 }
 ```
@@ -446,20 +464,8 @@ interface RiskCostQuantifierOutput {
 
 ```ts
 interface AuditCitationInput {
-  legalFindings: Array<{
-    conclusionId: string;
-    indicatorId: Pillar6IndicatorEnum;
-    conclusion: string;
-    evidenceIds: string[];
-  }>;
-  evidenceLookup: Record<
-    string,
-    {
-      citationRef?: string;
-      sourceUrl?: string;
-      text: string;
-    }
-  >;
+  shortlistedPassages: RelevanceFilterOutput["shortlistedPassages"];
+  legalFindings: LegalReasonerOutput["legalFindings"];
 }
 ```
 
@@ -470,11 +476,28 @@ interface AuditCitationOutput {
   auditItems: Array<{
     conclusionId: string;
     evidenceId: string;
-    citationRef?: string;
-    sourceUrl?: string;
-    originalText: string;
+    sourceId: string;
+    jurisdiction: string;
+    indicatorId: Pillar6IndicatorEnum;
+    lawTitle: string;
+    citationRef: string;
+    sourceUrl: string;
+    originalLegalText: string;
+    verbatimSnippet: string;
     extractedClaim: string;
+    legalEffect: string;
+    relevanceReason: string;
+    traceabilityStatus: "Complete" | "Needs Human Review";
+    traceabilityNote: string;
+    humanReviewNeeded: boolean;
+    reviewerNote: string;
+    reviewStatus: string;
   }>;
+  coverageSummary: {
+    totalFindings: number;
+    linkedFindings: number;
+    needsReviewCount: number;
+  };
 }
 ```
 
@@ -515,11 +538,17 @@ interface LegalReviewExportInput {
 ```ts
 interface LegalReviewExportOutput {
   finalReport: string;
-  exportBundle: {
-    json: Record<string, unknown>;
-    csvRows: Array<Record<string, string | number>>;
-    markdown: string;
+  judgeSummary: string;
+  exportReadiness: "Ready for Judge Review" | "Needs Human Review";
+  reviewSummary: {
+    approvedCount: number;
+    needsRevisionCount: number;
+    rejectedCount: number;
+    humanReviewCount: number;
   };
+  exportJson: Record<string, unknown>;
+  exportCsvRows: Array<Record<string, string | number>>;
+  exportMarkdown: string;
 }
 ```
 
@@ -634,12 +663,10 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "data": {
     "passages": [
       {
-        "evidenceId": "ev_001",
-        "sourceId": "src_001",
         "lawTitle": "Mock Personal Information Export Compliance Notice",
-        "citationRef": "Art. 12",
-        "sourceUrl": "https://example.gov.cn/mock-export-notice",
-        "text": "Outbound transfer of important datasets shall complete the designated security review before the transfer is activated."
+        "citationAnchor": "Art. 12",
+        "text": "Outbound transfer of important datasets shall complete the designated security review before the transfer is activated.",
+        "sourceUrl": "https://example.gov.cn/mock-export-notice"
       }
     ]
   }
@@ -653,14 +680,31 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "status": "success",
   "agent_id": "relevance-filter",
   "data": {
-    "shortlistedEvidence": [
+    "shortlistedPassages": [
       {
-        "evidenceId": "ev_001",
+        "evidenceId": "EV-CHN-001",
+        "sourceId": "SRC-EV-CHN-001",
+        "jurisdiction": "China",
+        "indicatorId": "P6_4_CONDITIONAL_FLOW",
+        "lawTitle": "Mock Personal Information Export Compliance Notice",
         "citationRef": "Art. 12",
         "sourceUrl": "https://example.gov.cn/mock-export-notice",
+        "sourceType": "Regulator guidance",
         "text": "Outbound transfer of important datasets shall complete the designated security review before the transfer is activated.",
-        "relevanceReason": "Directly describes a transfer condition."
+        "relevanceReason": "Directly describes transfer conditions, approvals, or safeguard gates.",
+        "relevanceBand": "Direct Match",
+        "humanReviewNeeded": false,
+        "reviewerPrompt": "This passage is a strong Pillar 6 fit and can move into audit packaging."
       }
+    ],
+    "filteredOutEvidenceIds": [],
+    "reviewSummary": {
+      "shortlistedCount": 1,
+      "filteredOutCount": 0,
+      "humanReviewCount": 0
+    },
+    "reviewerChecklist": [
+      "Confirm every shortlisted passage still belongs to Pillar 6 rather than general privacy compliance."
     ]
   }
 }
@@ -677,7 +721,8 @@ Below is a simplified JSON-compatible example of the expected data flow from use
       {
         "evidenceId": "ev_001",
         "indicatorId": "P6_4_CONDITIONAL_FLOW",
-        "mappingReason": "Transfer is conditioned on prior review."
+        "mappingReason": "Transfer is conditioned on prior review.",
+        "citationRef": "Art. 12"
       }
     ]
   }
@@ -694,11 +739,34 @@ Below is a simplified JSON-compatible example of the expected data flow from use
     "legalFindings": [
       {
         "conclusionId": "con_001",
+        "jurisdiction": "China",
         "indicatorId": "P6_4_CONDITIONAL_FLOW",
         "conclusion": "Outbound transfer is legally allowed only after an ex ante security review.",
+        "legalEffect": "Creates a conditional flow regime rather than an absolute ban.",
         "evidenceIds": ["ev_001"]
       }
     ]
+  }
+}
+```
+
+### Risk & Cost Quantifier Output
+
+```json
+{
+  "status": "success",
+  "agent_id": "risk-cost-quantifier",
+  "data": {
+    "riskSummary": {
+      "riskLevel": "Moderate",
+      "businessCostDrivers": [
+        "approval preparation burden",
+        "transfer assessment lead time"
+      ],
+      "operationalImpact": "The current legal findings indicate a moderate operational risk posture across 1 Pillar 6 indicator area. The resulting risk picture is relatively stable for demo planning and cost discussion.",
+      "uncertaintyLevel": "Low",
+      "humanReviewNeeded": false
+    }
   }
 }
 ```
@@ -712,14 +780,31 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "data": {
     "auditItems": [
       {
-        "conclusionId": "con_001",
-        "evidenceId": "ev_001",
+        "conclusionId": "CON-EV-CHN-001",
+        "evidenceId": "EV-CHN-001",
+        "sourceId": "SRC-EV-CHN-001",
+        "jurisdiction": "China",
+        "indicatorId": "P6_4_CONDITIONAL_FLOW",
+        "lawTitle": "Mock Personal Information Export Compliance Notice",
         "citationRef": "Art. 12",
         "sourceUrl": "https://example.gov.cn/mock-export-notice",
-        "originalText": "Outbound transfer of important datasets shall complete the designated security review before the transfer is activated.",
-        "extractedClaim": "Outbound transfer is legally allowed only after an ex ante security review."
+        "originalLegalText": "Outbound transfer of important datasets shall complete the designated security review before the transfer is activated.",
+        "verbatimSnippet": "\"Outbound transfer of important datasets shall complete the designated security review before the transfer is activated.\"",
+        "extractedClaim": "Outbound transfer is legally allowed only after an ex ante security review.",
+        "legalEffect": "Creates a conditional flow regime rather than an absolute ban.",
+        "relevanceReason": "Directly describes transfer conditions, approvals, or safeguard gates.",
+        "traceabilityStatus": "Complete",
+        "traceabilityNote": "The legal claim, source text, and citation are fully linked for demo review.",
+        "humanReviewNeeded": false,
+        "reviewerNote": "Accurately captures the pre-transfer approval point.",
+        "reviewStatus": "Approved"
       }
-    ]
+    ],
+    "coverageSummary": {
+      "totalFindings": 1,
+      "linkedFindings": 1,
+      "needsReviewCount": 0
+    }
   }
 }
 ```
@@ -731,21 +816,30 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "status": "success",
   "agent_id": "legal-review-export",
   "data": {
-    "finalReport": "China applies a conditional transfer regime for important outbound data transfers, with pre-transfer security review as a legal gate.",
-    "exportBundle": {
-      "json": {
-        "overallRisk": "High",
-        "indicatorResults": ["P6_4_CONDITIONAL_FLOW"]
-      },
-      "csvRows": [
-        {
-          "citationRef": "Art. 12",
-          "indicatorId": "P6_4_CONDITIONAL_FLOW",
-          "riskLevel": "High"
-        }
-      ],
-      "markdown": "# Pillar 6 Report\n\n- Indicator: P6_4_CONDITIONAL_FLOW\n- Finding: Pre-transfer security review required.\n- Risk: High"
-    }
+    "finalReport": "fintech scenario review for China indicates moderate risk with 1 mapped Pillar 6 indicator areas.",
+    "judgeSummary": "fintech scenario review for China indicates moderate risk with 1 mapped Pillar 6 indicator areas. 1 evidence item is approved for presentation, while 0 items still need human legal review.",
+    "exportReadiness": "Ready for Judge Review",
+    "reviewSummary": {
+      "approvedCount": 1,
+      "needsRevisionCount": 0,
+      "rejectedCount": 0,
+      "humanReviewCount": 0
+    },
+    "exportJson": {
+      "scope": "Pillar 6",
+      "mappedIndicators": ["P6_4_CONDITIONAL_FLOW"]
+    },
+    "exportCsvRows": [
+      {
+        "evidenceId": "EV-CHN-001",
+        "citationRef": "Art. 12",
+        "indicatorId": "P6_4_CONDITIONAL_FLOW",
+        "reviewStatus": "Approved",
+        "traceabilityStatus": "Complete",
+        "riskLevel": "Moderate"
+      }
+    ],
+    "exportMarkdown": "# Pillar 6 Review Package"
   }
 }
 ```

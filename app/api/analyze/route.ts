@@ -1,8 +1,10 @@
 import { runMultiAgentWorkflow } from "@/lib/agents";
+import { createWorkflowRun } from "@/lib/server/run-store";
 import { SupportedCountry, StreamEventName, WorkflowResult } from "@/lib/types";
 import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 function createEvent(event: StreamEventName, data: unknown) {
   return `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
@@ -53,20 +55,25 @@ export async function POST(request: NextRequest) {
           message: "Multi-agent workflow initiated."
         });
 
-        const result: WorkflowResult = await runMultiAgentWorkflow(body.countryA, body.countryB, {
+        const result = await runMultiAgentWorkflow(body.countryA, body.countryB, {
           businessScenario: body.businessScenario,
           userQuery: body.userQuery
         });
+        const persistedRun = await createWorkflowRun(result);
+        const persistedResult: WorkflowResult = {
+          ...result,
+          analysisRunId: persistedRun.runId
+        };
 
-        send("research", result.research);
-        send("policy", result.policyAnalysis);
+        send("research", persistedResult.research);
+        send("policy", persistedResult.policyAnalysis);
 
-        if (result.comparison) {
-          send("comparison", result.comparison);
+        if (persistedResult.comparison) {
+          send("comparison", persistedResult.comparison);
         }
 
-        send("report", result.report);
-        send("done", result);
+        send("report", persistedResult.report);
+        send("done", persistedResult);
       } catch (error) {
         send("error", {
           message:

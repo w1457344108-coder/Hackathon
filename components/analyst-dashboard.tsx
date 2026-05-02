@@ -15,6 +15,10 @@ import { StreamEventName, SupportedCountry, WorkflowResult } from "@/lib/types";
 export function AnalystDashboard() {
   const [countryA, setCountryA] = useState<SupportedCountry>("China");
   const [countryB, setCountryB] = useState<SupportedCountry | "">("Singapore");
+  const [businessScenario, setBusinessScenario] = useState("fintech");
+  const [userQuery, setUserQuery] = useState(
+    "Find legal evidence describing how cross-border data transfers are permitted, conditioned, or restricted."
+  );
   const [workflowResult, setWorkflowResult] = useState<WorkflowResult | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -23,9 +27,22 @@ export function AnalystDashboard() {
   const deferredWorkflowResult = useDeferredValue(workflowResult);
   const deferredReport = deferredWorkflowResult?.report ?? null;
   const selectedProfile = countryPolicyProfiles[countryA];
-  const evidenceRecords = filterEvidenceByCountries(mockEvidenceRecords, countryA, countryB);
+  const evidenceRecords =
+    workflowResult?.evidenceRecords ??
+    filterEvidenceByCountries(mockEvidenceRecords, countryA, countryB);
   const selectedEvidenceRecord =
     evidenceRecords.find((record) => record.citation === selectedCitation) ?? evidenceRecords[0];
+  const auditItems = workflowResult?.supportingAgentResults.auditCitation.data?.auditItems ?? [];
+  const auditCoverageSummary =
+    workflowResult?.supportingAgentResults.auditCitation.data?.coverageSummary ?? null;
+  const linkedRiskSummary =
+    workflowResult?.supportingAgentResults.riskCostQuantifier.data?.riskSummary ?? null;
+  const selectedAuditItem =
+    auditItems.find(
+      (item) =>
+        item.citationRef === selectedCitation || item.evidenceId === selectedEvidenceRecord?.evidenceId
+    ) ?? null;
+  const exportPackage = workflowResult?.supportingAgentResults.legalReviewExport.data ?? null;
 
   useEffect(() => {
     if (evidenceRecords.length > 0) {
@@ -46,7 +63,9 @@ export function AnalystDashboard() {
         },
         body: JSON.stringify({
           countryA,
-          countryB: countryB || null
+          countryB: countryB || null,
+          businessScenario,
+          userQuery
         })
       });
 
@@ -101,22 +120,63 @@ export function AnalystDashboard() {
     }
   }
 
+  function handleReviewSaved(payload: {
+    evidenceRecord: (typeof evidenceRecords)[number];
+    auditItem: (typeof auditItems)[number] | null;
+    exportPackage: typeof exportPackage;
+  }) {
+    setWorkflowResult((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const updatedAuditItems =
+        current.supportingAgentResults.auditCitation.data?.auditItems.map((item) =>
+          payload.auditItem && item.evidenceId === payload.auditItem.evidenceId ? payload.auditItem : item
+        ) ?? [];
+
+      return {
+        ...current,
+        evidenceRecords: current.evidenceRecords.map((record) =>
+          record.evidenceId === payload.evidenceRecord.evidenceId ? payload.evidenceRecord : record
+        ),
+        supportingAgentResults: {
+          ...current.supportingAgentResults,
+          auditCitation: {
+            ...current.supportingAgentResults.auditCitation,
+            data: current.supportingAgentResults.auditCitation.data
+              ? {
+                  ...current.supportingAgentResults.auditCitation.data,
+                  auditItems: updatedAuditItems
+                }
+              : current.supportingAgentResults.auditCitation.data
+          },
+          legalReviewExport: {
+            ...current.supportingAgentResults.legalReviewExport,
+            data: payload.exportPackage ?? current.supportingAgentResults.legalReviewExport.data
+          }
+        }
+      };
+    });
+  }
+
   return (
     <main className="mx-auto min-h-screen max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <section className="glass-panel stagger-in overflow-hidden rounded-[2rem] border border-white/70 px-6 py-8 sm:px-8 lg:px-10">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl space-y-4">
             <span className="section-title inline-flex rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-[11px] font-semibold text-blue-700">
-              United Nations AI Hackathon Demo
+              United Nations AI Hackathon Prototype
             </span>
             <div className="space-y-3">
               <h1 className="max-w-4xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl">
                 Cross-Border Data Policy Multi-Agent Analyst
               </h1>
               <p className="max-w-3xl text-base leading-7 text-slate-600 sm:text-lg">
-                A hackathon-ready dashboard for cross-border data policy analysis based on UN ESCAP
-                RDTII Pillar 6 logic. This phase uses structured mock data, but the agent workflow
-                and API surface are already prepared for future OpenAI integration.
+                A submission-ready dashboard for cross-border data policy analysis based on UN ESCAP
+                RDTII Pillar 6 logic. The workflow can use competition-designated RDTII sources
+                and a live model provider when configured, while preserving structured fallback
+                paths for unsupported jurisdictions.
               </p>
             </div>
           </div>
@@ -155,9 +215,37 @@ export function AnalystDashboard() {
           </div>
         </div>
 
+        <div className="mt-6 grid gap-4 lg:grid-cols-[0.42fr_0.58fr]">
+          <label className="rounded-3xl border border-white/80 bg-white/80 p-4 shadow-sm">
+            <span className="mb-2 block text-sm font-medium text-slate-600">Business scenario</span>
+            <input
+              value={businessScenario}
+              onChange={(event) => setBusinessScenario(event.target.value)}
+              className="w-full rounded-2xl border border-blue-100 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-blue-400"
+            />
+          </label>
+
+          <label className="rounded-3xl border border-white/80 bg-white/80 p-4 shadow-sm">
+            <span className="mb-2 block text-sm font-medium text-slate-600">Analysis question</span>
+            <textarea
+              value={userQuery}
+              onChange={(event) => setUserQuery(event.target.value)}
+              rows={3}
+              className="w-full rounded-2xl border border-blue-100 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition focus:border-blue-400"
+            />
+          </label>
+        </div>
+
         <div className="mt-6 flex flex-col gap-4 border-t border-blue-100 pt-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="grid gap-3 sm:grid-cols-3">
-            <StatChip label="Mode" value="Mock + Streaming Agents" />
+            <StatChip
+              label="Mode"
+              value={
+                workflowResult
+                  ? `${workflowResult.evidenceSourceMode} sources + ${workflowResult.providerId}`
+                  : "Real-ready + fallback"
+              }
+            />
             <StatChip label="Framework" value="Next.js App Router" />
             <StatChip label="Ready For" value="Vercel Deployment" />
           </div>
@@ -173,9 +261,9 @@ export function AnalystDashboard() {
         </div>
 
         <div className="mt-5 rounded-3xl border border-blue-100 bg-blue-50/70 p-4 text-sm leading-6 text-slate-600">
-          Built on official source structure from UN ESCAP RDTII. The demo models Pillar 6 policy
-          dimensions such as local processing, local storage, infrastructure requirements,
-          conditional transfer regimes, and binding data transfer commitments.
+          Built on UN ESCAP RDTII Pillar 6 structure with competition-designated source adapters,
+          evidence traceability, and reviewer persistence. When a jurisdiction is not yet covered
+          by the live source registry, the workflow falls back to the existing mock evidence set.
         </div>
 
         {errorMessage ? (
@@ -264,6 +352,7 @@ export function AnalystDashboard() {
         defaultJurisdiction={countryA}
         linkedQueryBuilder={workflowResult?.supportingAgentResults.queryBuilder.data ?? null}
         linkedSourceDiscovery={workflowResult?.mainlineAgentResults.sourceDiscovery.data ?? null}
+        linkedRelevanceFilter={workflowResult?.supportingAgentResults.relevanceFilter.data ?? null}
       />
 
       <AgentPipelineViewer isRunning={isRunning} hasResult={Boolean(workflowResult)} />
@@ -273,13 +362,20 @@ export function AnalystDashboard() {
       <section className="mt-8 grid gap-6 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
         <EvidenceTable
           records={evidenceRecords}
-          selectedCitation={selectedEvidenceRecord.citation}
+          selectedCitation={selectedEvidenceRecord?.citation ?? ""}
           onSelect={setSelectedCitation}
         />
-        <AuditView record={selectedEvidenceRecord} />
+        <AuditView
+          record={selectedEvidenceRecord}
+          analysisRunId={workflowResult?.analysisRunId ?? null}
+          linkedAuditItem={selectedAuditItem}
+          linkedCoverageSummary={auditCoverageSummary}
+          linkedRiskSummary={linkedRiskSummary}
+          onReviewSaved={handleReviewSaved}
+        />
       </section>
 
-      <ExportPanel records={evidenceRecords} />
+      <ExportPanel records={evidenceRecords} exportPackage={exportPackage} />
 
       <section className="glass-panel mt-8 rounded-[2rem] border border-white/70 p-6">
         <div className="mb-5">
@@ -391,5 +487,5 @@ function StatChip({ label, value }: { label: string; value: string }) {
 const defaultRecommendations = [
   "Choose one country or two countries and launch the analysis workflow.",
   "Use the comparison view to explain regulatory openness and business friction to judges.",
-  "Upgrade the API route later with real LLM-backed agents without changing the UI contract."
+  "Review evidence items in the audit panel before exporting the package."
 ];

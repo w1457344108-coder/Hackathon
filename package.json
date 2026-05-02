@@ -4,10 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "next dev --webpack",
-    "build": "next build --webpack",
+    "build": "node scripts/run-next-build.mjs",
     "start": "next start",
+    "lint": "node_modules/typescript/bin/tsc --noEmit",
+    "test": "node --test --experimental-strip-types --loader ./tests/alias-loader.mjs tests/*.test.ts",
     "validate:agents": "node scripts/validate-agent-readiness.mjs",
-    "validate:mainline": "node scripts/validate-mainline-agents.mjs"
+    "validate:mainline": "node scripts/validate-mainline-agents.mjs",
+    "test:smoke": "node --test --experimental-strip-types --loader ./tests/alias-loader.mjs tests/*.test.ts"
   },
   "dependencies": {
     "next": "16.2.4",

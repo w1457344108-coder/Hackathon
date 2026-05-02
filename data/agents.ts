@@ -27,10 +27,10 @@ export const pillar6Agents: AgentMeta[] = [
     id: "risk-cost-quantifier",
     name: "Risk & Cost Quantifier Agent",
     layer: "Strategic Control & Reasoning Layer",
-    role: "Translates legal restrictions into practical business friction, compliance burden, and operational risk signals.",
-    input: "Reasoned legal conclusions, transfer constraints, approval gates, and localization obligations.",
-    output: "Structured risk tier, compliance cost notes, and business impact narrative.",
-    status: "Mock",
+    role: "Translates reasoned legal findings into practical business friction, compliance burden, and operational risk signals with uncertainty handling.",
+    input: "Reasoned legal conclusions, transfer constraints, approval gates, localization obligations, and review flags.",
+    output: "Structured risk summary, business cost drivers, uncertainty level, and business impact narrative.",
+    status: "Ready",
     agent_type: "supporting",
     owner_track: "my-supporting"
   },
@@ -52,7 +52,7 @@ export const pillar6Agents: AgentMeta[] = [
     role: "Transforms scoped Pillar 6 intent into a structured query plan with indicator targets, source priorities, and reviewable search expressions.",
     input: "Normalized intent, target jurisdiction, business scenario, legal terms, and exclusions.",
     output: "Search profile JSON, structured query plan, and retrieval query strings.",
-    status: "Mock",
+    status: "Ready",
     agent_type: "supporting",
     owner_track: "my-supporting"
   },
@@ -74,7 +74,7 @@ export const pillar6Agents: AgentMeta[] = [
     role: "Structures raw source material into readable passages suitable for legal extraction, including PDF/OCR handling.",
     input: "Source URLs, downloaded legal texts, PDF pages, scanned notices, and OCR output.",
     output: "Normalized passages, section anchors, and machine-readable legal text segments.",
-    status: "Ready",
+    status: "API-ready",
     agent_type: "mainline",
     owner_track: "teammate-mainline"
   },

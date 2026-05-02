@@ -1,6 +1,7 @@
 "use client";
 
 import { EvidenceRecord } from "@/lib/pillar6-schema";
+import { LegalReviewExportOutput } from "@/lib/types";
 
 function downloadFile(filename: string, content: string, type: string) {
   const blob = new Blob([content], { type });
@@ -61,7 +62,7 @@ function toMarkdown(records: EvidenceRecord[]) {
   const intro = [
     "# Pillar 6 Evidence Report",
     "",
-    "Mock evidence export for Cross-Border Data Policy Multi-Agent Analyst.",
+    "Evidence export for Cross-Border Data Policy Multi-Agent Analyst.",
     ""
   ];
 
@@ -95,7 +96,31 @@ function toMarkdown(records: EvidenceRecord[]) {
   return [...intro, ...sections].join("\n");
 }
 
-export function ExportPanel({ records }: { records: EvidenceRecord[] }) {
+function toExportCsv(rows: Array<Record<string, string | number>>) {
+  if (rows.length === 0) {
+    return "";
+  }
+
+  const headers = Object.keys(rows[0]);
+  const body = rows.map((row) => headers.map((header) => escapeCsv(row[header] ?? "")).join(","));
+
+  return [headers.join(","), ...body].join("\n");
+}
+
+export function ExportPanel({
+  records,
+  exportPackage
+}: {
+  records: EvidenceRecord[];
+  exportPackage?: LegalReviewExportOutput | null;
+}) {
+  const jsonPayload = exportPackage?.exportJson ?? records;
+  const csvPayload =
+    exportPackage && exportPackage.exportCsvRows.length > 0
+      ? toExportCsv(exportPackage.exportCsvRows)
+      : toCsv(records);
+  const markdownPayload = exportPackage?.exportMarkdown ?? toMarkdown(records);
+
   return (
     <section className="glass-panel mt-8 rounded-[2rem] border border-white/70 p-6">
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -104,9 +129,42 @@ export function ExportPanel({ records }: { records: EvidenceRecord[] }) {
           <h2 className="mt-2 text-2xl font-semibold text-slate-950">Download Evidence Packages</h2>
         </div>
         <span className="rounded-full border border-blue-100 bg-white/80 px-4 py-2 text-sm text-slate-600">
-          Mock export only, API-ready later
+          {exportPackage ? "Review-linked export package ready" : "Fallback export from current evidence set"}
         </span>
       </div>
+
+      {exportPackage ? (
+        <div className="mb-5 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
+          <div className="rounded-[1.5rem] border border-blue-100 bg-white/90 p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
+              Judge-Facing Summary
+            </p>
+            <p className="mt-3 text-sm leading-6 text-slate-700">{exportPackage.judgeSummary}</p>
+            <p className="mt-3 text-sm leading-6 text-slate-600">{exportPackage.finalReport}</p>
+          </div>
+
+          <div className="rounded-[1.5rem] border border-blue-100 bg-blue-50/70 p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-blue-700">
+              Export Readiness
+            </p>
+            <p className="mt-3 text-lg font-semibold text-slate-950">
+              {exportPackage.exportReadiness}
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <SummaryMetric label="Approved" value={exportPackage.reviewSummary.approvedCount} />
+              <SummaryMetric
+                label="Needs Revision"
+                value={exportPackage.reviewSummary.needsRevisionCount}
+              />
+              <SummaryMetric label="Rejected" value={exportPackage.reviewSummary.rejectedCount} />
+              <SummaryMetric
+                label="Human Review"
+                value={exportPackage.reviewSummary.humanReviewCount}
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 md:grid-cols-3">
         <button
@@ -114,7 +172,7 @@ export function ExportPanel({ records }: { records: EvidenceRecord[] }) {
           onClick={() =>
             downloadFile(
               "pillar6-evidence.json",
-              JSON.stringify(records, null, 2),
+              JSON.stringify(jsonPayload, null, 2),
               "application/json"
             )
           }
@@ -128,7 +186,7 @@ export function ExportPanel({ records }: { records: EvidenceRecord[] }) {
 
         <button
           type="button"
-          onClick={() => downloadFile("pillar6-evidence.csv", toCsv(records), "text/csv")}
+          onClick={() => downloadFile("pillar6-evidence.csv", csvPayload, "text/csv")}
           className="rounded-[1.5rem] border border-blue-100 bg-white/85 p-5 text-left transition hover:border-blue-300"
         >
           <p className="text-lg font-semibold text-slate-950">Export CSV</p>
@@ -139,17 +197,24 @@ export function ExportPanel({ records }: { records: EvidenceRecord[] }) {
 
         <button
           type="button"
-          onClick={() =>
-            downloadFile("pillar6-report.md", toMarkdown(records), "text/markdown")
-          }
+          onClick={() => downloadFile("pillar6-report.md", markdownPayload, "text/markdown")}
           className="rounded-[1.5rem] border border-blue-100 bg-white/85 p-5 text-left transition hover:border-blue-300"
         >
           <p className="text-lg font-semibold text-slate-950">Export Markdown Report</p>
           <p className="mt-2 text-sm leading-6 text-slate-600">
-            Lightweight narrative report with citations, snippets, and review notes for demo sharing.
+            Lightweight narrative report with citations, snippets, and review notes for submission sharing.
           </p>
         </button>
       </div>
     </section>
+  );
+}
+
+function SummaryMetric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-2xl border border-white/80 bg-white/90 px-4 py-3">
+      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
+      <p className="mt-2 text-xl font-semibold text-slate-950">{value}</p>
+    </div>
   );
 }

@@ -14,7 +14,7 @@ export function EvidenceTable({
       <div className="mb-5 flex items-end justify-between gap-4">
         <div>
           <p className="section-title text-xs font-semibold text-blue-700">Evidence Table</p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-950">Mock EvidenceRecord[] Review Queue</h2>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-950">Evidence Review Queue</h2>
         </div>
         <span className="rounded-full border border-blue-100 bg-white/80 px-4 py-2 text-sm text-slate-600">
           {records.length} records

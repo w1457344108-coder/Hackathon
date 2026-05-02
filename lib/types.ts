@@ -1,3 +1,5 @@
+import type { EvidenceRecord } from "./pillar6-schema";
+
 export type SupportedCountry =
   | "China"
   | "Singapore"
@@ -242,6 +244,92 @@ export interface LegalReasonerOutput {
   legalFindings: LegalFinding[];
 }
 
+export interface RelevanceShortlistItem {
+  evidenceId: string;
+  sourceId: string;
+  jurisdiction: string;
+  indicatorId: Pillar6IndicatorEnum;
+  lawTitle: string;
+  citationRef: string;
+  sourceUrl: string;
+  sourceType: string;
+  text: string;
+  relevanceReason: string;
+  relevanceBand: "Direct Match" | "Borderline";
+  humanReviewNeeded: boolean;
+  reviewerPrompt: string;
+}
+
+export interface RelevanceFilterOutput {
+  shortlistedPassages: RelevanceShortlistItem[];
+  filteredOutEvidenceIds: string[];
+  reviewSummary: {
+    shortlistedCount: number;
+    filteredOutCount: number;
+    humanReviewCount: number;
+  };
+  reviewerChecklist: string[];
+}
+
+export type ReasoningUncertaintyLevel = "Low" | "Moderate" | "High";
+
+export interface RiskSummary {
+  riskLevel: RiskLevel;
+  businessCostDrivers: string[];
+  operationalImpact: string;
+  uncertaintyLevel: ReasoningUncertaintyLevel;
+  humanReviewNeeded: boolean;
+}
+
+export interface RiskCostQuantifierOutput {
+  riskSummary: RiskSummary;
+}
+
+export interface AuditCitationItem {
+  evidenceId: string;
+  sourceId: string;
+  conclusionId: string;
+  jurisdiction: string;
+  indicatorId: Pillar6IndicatorEnum;
+  lawTitle: string;
+  citationRef: string;
+  sourceUrl: string;
+  originalLegalText: string;
+  verbatimSnippet: string;
+  extractedClaim: string;
+  legalEffect: string;
+  relevanceReason: string;
+  traceabilityStatus: "Complete" | "Needs Human Review";
+  traceabilityNote: string;
+  humanReviewNeeded: boolean;
+  reviewerNote: string;
+  reviewStatus: string;
+}
+
+export interface AuditCitationOutput {
+  auditItems: AuditCitationItem[];
+  coverageSummary: {
+    totalFindings: number;
+    linkedFindings: number;
+    needsReviewCount: number;
+  };
+}
+
+export interface LegalReviewExportOutput {
+  finalReport: string;
+  judgeSummary: string;
+  exportReadiness: "Ready for Judge Review" | "Needs Human Review";
+  reviewSummary: {
+    approvedCount: number;
+    needsRevisionCount: number;
+    rejectedCount: number;
+    humanReviewCount: number;
+  };
+  exportJson: Record<string, unknown>;
+  exportCsvRows: Array<Record<string, string | number>>;
+  exportMarkdown: string;
+}
+
 export interface MainlineAgentResults {
   intentArbiter: AgentResult<IntentArbiterOutput>;
   sourceDiscovery: AgentResult<SourceDiscoveryOutput>;
@@ -252,6 +340,10 @@ export interface MainlineAgentResults {
 
 export interface SupportingAgentResults {
   queryBuilder: AgentResult<QueryBuilderOutput>;
+  relevanceFilter: AgentResult<RelevanceFilterOutput>;
+  riskCostQuantifier: AgentResult<RiskCostQuantifierOutput>;
+  auditCitation: AgentResult<AuditCitationOutput>;
+  legalReviewExport: AgentResult<LegalReviewExportOutput>;
 }
 
 export interface DemoNarrative {
@@ -264,6 +356,11 @@ export interface DemoNarrative {
 }
 
 export interface WorkflowResult {
+  analysisRunId: string | null;
+  providerId: string;
+  providerModel: string | null;
+  evidenceSourceMode: "real" | "mock" | "hybrid";
+  evidenceRecords: EvidenceRecord[];
   input: WorkflowInput;
   research: ResearchAgentResult;
   policyAnalysis: PolicyAnalysisResult[];

@@ -1,41 +1,45 @@
 # Risk & Cost Quantifier Agent
 
 ## 1. Purpose
-The Risk & Cost Quantifier Agent converts Pillar 6 legal findings into operational risk and compliance burden signals for business users.
+The Risk & Cost Quantifier Agent converts completed mainline legal findings into business-facing risk and cost signals without changing the mainline reasoning logic.
 
 ## 2. Position in Workflow
-`Evidence & Reasoning Layer`
+`Strategic Control & Reasoning Layer`
 
 ## 3. Input Schema
 ```ts
 interface RiskCostQuantifierInput {
   jurisdiction: string;
-  reasonedFindings: Array<{
-    indicator: string;
+  legalFindings: Array<{
+    conclusionId: string;
+    jurisdiction: string;
+    indicatorId: Pillar6IndicatorEnum;
     conclusion: string;
     legalEffect: string;
+    evidenceIds: string[];
   }>;
-  contextSnapshot?: {
-    unresolvedIssues: string[];
-  };
 }
 ```
 
 ## 4. Output Schema
 ```ts
 interface RiskCostQuantifierOutput {
-  riskLevel: "Low" | "Moderate" | "High";
-  costDrivers: string[];
-  businessImpactSummary: string;
+  riskSummary: {
+    riskLevel: "Low" | "Moderate" | "High";
+    businessCostDrivers: string[];
+    operationalImpact: string;
+    uncertaintyLevel: "Low" | "Moderate" | "High";
+    humanReviewNeeded: boolean;
+  };
 }
 ```
 
 ## 5. Core Logic
-1. Inspect the legal effect of each Pillar 6 finding.
-2. Estimate how much compliance burden it creates.
-3. Translate approval gates, localization, and infrastructure rules into cost drivers.
-4. Produce a risk level and a concise impact summary.
-5. Pass quantification results to review and export.
+1. Inspect the legal effect and indicator mix in the completed mainline findings.
+2. Estimate likely compliance friction and operational burden.
+3. Add review sensitivity if any underlying evidence still needs human confirmation.
+4. Produce a risk level, uncertainty level, and cost-driver summary.
+5. Pass the result to audit and export sidecars.
 
 ## 6. Pillar 6 Relevance
 This agent interprets the business effect of:
@@ -52,29 +56,5 @@ interface RiskCostQuantifierFailure {
   errorType: "MISSING_COST_SIGNAL" | "UNRESOLVED_RISK_LOGIC";
   message: string;
   fallbackRiskLevel?: "Moderate";
-}
-```
-
-## 8. Example
-Mock input:
-```json
-{
-  "jurisdiction": "China",
-  "reasonedFindings": [
-    {
-      "indicator": "conditional-flow",
-      "conclusion": "Transfers are allowed only after formal review.",
-      "legalEffect": "Adds ex ante approval friction."
-    }
-  ]
-}
-```
-
-Mock output:
-```json
-{
-  "riskLevel": "High",
-  "costDrivers": ["security review lead time", "approval preparation burden"],
-  "businessImpactSummary": "Outbound data operations face material pre-transfer compliance friction."
 }
 ```

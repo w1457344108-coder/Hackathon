@@ -1,7 +1,7 @@
 # Audit View & Citation Agent
 
 ## 1. Purpose
-The Audit View & Citation Agent ties every extracted policy claim back to its original legal text, citation anchor, and source URL for traceability.
+The Audit View & Citation Agent is a supporting sidecar that links mainline legal findings back to shortlisted evidence, verbatim source text, and reviewer context.
 
 ## 2. Position in Workflow
 `Review & Delivery Layer`
@@ -9,16 +9,8 @@ The Audit View & Citation Agent ties every extracted policy claim back to its or
 ## 3. Input Schema
 ```ts
 interface AuditViewCitationInput {
-  evidenceItems: Array<{
-    lawTitle: string;
-    citation: string;
-    verbatimSnippet: string;
-    sourceUrl: string;
-  }>;
-  reasonedFindings: Array<{
-    indicator: string;
-    conclusion: string;
-  }>;
+  shortlistedPassages: RelevanceFilterOutput["shortlistedPassages"];
+  legalFindings: LegalReasonerOutput["legalFindings"];
 }
 ```
 
@@ -26,31 +18,42 @@ interface AuditViewCitationInput {
 ```ts
 interface AuditViewCitationOutput {
   auditItems: Array<{
-    citation: string;
-    originalLegalText: string;
-    extractedText: string;
-    indicatorMapping: string;
+    evidenceId: string;
+    sourceId: string;
+    conclusionId: string;
+    jurisdiction: string;
+    indicatorId: Pillar6IndicatorEnum;
+    lawTitle: string;
+    citationRef: string;
     sourceUrl: string;
+    originalLegalText: string;
+    verbatimSnippet: string;
+    extractedClaim: string;
+    legalEffect: string;
+    relevanceReason: string;
+    traceabilityStatus: "Complete" | "Needs Human Review";
+    traceabilityNote: string;
+    humanReviewNeeded: boolean;
+    reviewerNote: string;
+    reviewStatus: string;
   }>;
+  coverageSummary: {
+    totalFindings: number;
+    linkedFindings: number;
+    needsReviewCount: number;
+  };
 }
 ```
 
 ## 5. Core Logic
-1. Receive reviewed evidence and reasoned conclusions.
-2. Link each conclusion to a specific citation and source text.
-3. Preserve the verbatim snippet and source URL.
-4. Build UI-ready audit objects for front-end review.
-5. Pass the traceable evidence chain to the export layer.
+1. Read completed mainline legal findings.
+2. Match each finding to the sidecar relevance shortlist.
+3. Preserve citation, verbatim snippet, original legal text, and review status together.
+4. Mark whether the citation chain is complete or still needs human confirmation.
+5. Return UI-ready audit objects for legal review and final export.
 
 ## 6. Pillar 6 Relevance
-This agent is crucial because Pillar 6 scoring must be evidence-backed. It ensures that claims about:
-- processing bans
-- storage obligations
-- infrastructure rules
-- conditional transfer mechanisms
-- treaty commitments
-
-are visibly anchored in source text.
+This agent ensures every Pillar 6 claim about transfer restrictions or commitments remains visibly anchored in legal text before presentation.
 
 ## 7. Failure Handling
 ```ts
@@ -63,37 +66,35 @@ interface AuditViewCitationFailure {
 ```
 
 ## 8. Example
-Mock input:
-```json
-{
-  "evidenceItems": [
-    {
-      "lawTitle": "Mock Personal Information Export Compliance Notice",
-      "citation": "Art. 12",
-      "verbatimSnippet": "Outbound transfer of important datasets shall complete the designated security review before the transfer is activated.",
-      "sourceUrl": "https://example.gov.cn/mock-export-notice"
-    }
-  ],
-  "reasonedFindings": [
-    {
-      "indicator": "conditional-flow",
-      "conclusion": "Transfer is legally conditioned on prior review."
-    }
-  ]
-}
-```
-
 Mock output:
 ```json
 {
   "auditItems": [
     {
-      "citation": "Art. 12",
+      "evidenceId": "EV-CHN-001",
+      "sourceId": "SRC-EV-CHN-001",
+      "conclusionId": "CON-EV-CHN-001",
+      "jurisdiction": "China",
+      "indicatorId": "P6_4_CONDITIONAL_FLOW",
+      "lawTitle": "Mock Personal Information Export Compliance Notice",
+      "citationRef": "Art. 12",
+      "sourceUrl": "https://example.gov.cn/mock-export-notice",
       "originalLegalText": "Outbound transfer of important datasets shall complete the designated security review before the transfer is activated.",
-      "extractedText": "Transfer is legally conditioned on prior review.",
-      "indicatorMapping": "conditional-flow",
-      "sourceUrl": "https://example.gov.cn/mock-export-notice"
+      "verbatimSnippet": "\"Outbound transfer of important datasets shall complete the designated security review before the transfer is activated.\"",
+      "extractedClaim": "Outbound transfer is legally allowed only after an ex ante security review.",
+      "legalEffect": "Creates a conditional flow regime rather than an absolute ban.",
+      "relevanceReason": "Directly describes transfer conditions, approvals, or safeguard gates.",
+      "traceabilityStatus": "Complete",
+      "traceabilityNote": "The legal claim, source text, and citation are fully linked for demo review.",
+      "humanReviewNeeded": false,
+      "reviewerNote": "Accurately captures the pre-transfer approval point.",
+      "reviewStatus": "Approved"
     }
-  ]
+  ],
+  "coverageSummary": {
+    "totalFindings": 1,
+    "linkedFindings": 1,
+    "needsReviewCount": 0
+  }
 }
 ```
