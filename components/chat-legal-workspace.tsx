@@ -10,6 +10,7 @@ interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   mode?: CoreModeId;
+  status?: "loading" | "complete";
 }
 
 interface ConversationItem {
@@ -118,6 +119,27 @@ export function ChatLegalWorkspace() {
     const userMessageId = `user-${Date.now()}`;
     const assistantMessageId = `assistant-${Date.now()}`;
 
+    if (!isLegalScopedQuestion(trimmed, selectedFiles)) {
+      setMessages((current) => [
+        ...current,
+        {
+          id: userMessageId,
+          role: "user",
+          content: trimmed,
+          mode: selectedMode
+        },
+        {
+          id: assistantMessageId,
+          role: "assistant",
+          mode: selectedMode,
+          content: buildOutOfScopeGuidance(selectedMode),
+          status: "complete"
+        }
+      ]);
+      setInputValue("");
+      return;
+    }
+
     setMessages((current) => [
       ...current,
       {
@@ -130,7 +152,8 @@ export function ChatLegalWorkspace() {
         id: assistantMessageId,
         role: "assistant",
         mode: selectedMode,
-        content: "Running the multi-agent legal analysis..."
+        content: "Running the multi-agent legal analysis...",
+        status: "loading"
       }
     ]);
     setInputValue("");
@@ -144,7 +167,8 @@ export function ChatLegalWorkspace() {
           message.id === assistantMessageId
             ? {
                 ...message,
-                content: formatBackendAnswer(result, selectedMode)
+                content: formatBackendAnswer(result, selectedMode),
+                status: "complete"
               }
             : message
         )
@@ -158,7 +182,8 @@ export function ChatLegalWorkspace() {
                 content:
                   error instanceof Error
                     ? `The backend analysis could not complete: ${error.message}`
-                    : "The backend analysis could not complete."
+                    : "The backend analysis could not complete.",
+                status: "complete"
               }
             : message
         )
@@ -608,6 +633,16 @@ function SearchComposer({
             id="legal-chat-input"
             value={inputValue}
             onChange={(event) => onInputChange(event.target.value)}
+            onKeyDown={(event) => {
+              if (
+                event.key === "Enter" &&
+                !event.shiftKey &&
+                !event.nativeEvent.isComposing
+              ) {
+                event.preventDefault();
+                event.currentTarget.form?.requestSubmit();
+              }
+            }}
             placeholder="Type question..."
             rows={3}
             maxLength={3000}
@@ -831,6 +866,10 @@ function ConversationMessages({ messages }: { messages: ChatMessage[] }) {
           );
         }
 
+        if (message.status === "loading") {
+          return <AnalysisLoadingMessage key={message.id} modeLabel={modeLabel} />;
+        }
+
         return (
           <article key={message.id} className="max-w-[760px]">
             {modeLabel ? (
@@ -845,6 +884,40 @@ function ConversationMessages({ messages }: { messages: ChatMessage[] }) {
         );
       })}
     </div>
+  );
+}
+
+function AnalysisLoadingMessage({ modeLabel }: { modeLabel: string | null | undefined }) {
+  return (
+    <article className="max-w-[760px]">
+      {modeLabel ? (
+        <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-black/40">
+          {modeLabel}
+        </p>
+      ) : null}
+      <div className="overflow-hidden rounded-[18px] border border-black/10 bg-white px-5 py-4 text-[15px] leading-7 text-black shadow-[0_12px_34px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center gap-3">
+          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-black text-white">
+            <AISparkleIcon className="h-4 w-4 animate-pulse" />
+            <span className="absolute inset-0 rounded-full border border-black/20 animate-ping" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="font-semibold tracking-[-0.2px]">Multi-agent legal workflow is running</p>
+            <p className="text-[13px] leading-5 text-black/55">
+              DeepSeek is preparing evidence retrieval, legal reasoning, and compliance synthesis.
+            </p>
+          </div>
+          <div className="flex items-center gap-1" aria-hidden="true">
+            <span className="h-2 w-2 animate-bounce rounded-full bg-black [animation-delay:-0.2s]" />
+            <span className="h-2 w-2 animate-bounce rounded-full bg-black [animation-delay:-0.1s]" />
+            <span className="h-2 w-2 animate-bounce rounded-full bg-black" />
+          </div>
+        </div>
+        <div className="mt-4 h-1.5 overflow-hidden rounded-full bg-black/5">
+          <div className="h-full w-full animate-pulse rounded-full bg-black/70" />
+        </div>
+      </div>
+    </article>
   );
 }
 
@@ -914,6 +987,46 @@ const supportedCountries: SupportedCountry[] = [
   "United States"
 ];
 
+const legalScopeKeywords = [
+  "law",
+  "legal",
+  "regulation",
+  "regulatory",
+  "compliance",
+  "policy",
+  "privacy",
+  "data",
+  "cross-border",
+  "transfer",
+  "jurisdiction",
+  "risk",
+  "pillar",
+  "rdtii",
+  "gdpr",
+  "china",
+  "singapore",
+  "japan",
+  "european union",
+  "eu",
+  "united states",
+  "contract",
+  "localization",
+  "security assessment",
+  "\u6cd5\u5f8b",
+  "\u6cd5\u89c4",
+  "\u5408\u89c4",
+  "\u653f\u7b56",
+  "\u9690\u79c1",
+  "\u6570\u636e",
+  "\u8de8\u5883",
+  "\u4f20\u8f93",
+  "\u76d1\u7ba1",
+  "\u98ce\u9669",
+  "\u6761\u6587",
+  "\u6848\u4f8b",
+  "\u54a8\u8be2"
+];
+
 function inferCountries(question: string): {
   countryA: SupportedCountry;
   countryB: SupportedCountry | null;
@@ -939,6 +1052,31 @@ function getScenarioLabel(mode: CoreModeId) {
   }
 
   return "forward-looking advisory";
+}
+
+function isLegalScopedQuestion(question: string, files: File[]) {
+  if (files.length) {
+    return true;
+  }
+
+  const normalizedQuestion = question.toLowerCase();
+
+  if (normalizedQuestion.length < 6) {
+    return false;
+  }
+
+  return legalScopeKeywords.some((keyword) =>
+    normalizedQuestion.includes(keyword.toLowerCase())
+  );
+}
+
+function buildOutOfScopeGuidance(mode: CoreModeId) {
+  const modeName = coreModes.find((item) => item.id === mode)?.english ?? "legal analysis";
+
+  return [
+    `This workspace is focused on ${modeName} for cross-border data law and Pillar 6/7 compliance.`,
+    "Please ask a legal or compliance question, such as which rule applies to a data transfer, what risks a business scenario creates, or what barriers a planned market entry may face."
+  ].join("\n\n");
 }
 
 async function runBackendAnalysis(question: string, mode: CoreModeId, files: File[] = []) {
