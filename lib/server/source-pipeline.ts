@@ -1,8 +1,5 @@
 import { createRequire } from "node:module";
-import type {
-  EvidenceRecord,
-  Pillar6IndicatorCode
-} from "../pillar6-schema";
+import type { EvidenceRecord, Pillar6IndicatorCode } from "../pillar6-schema";
 import type { SupportedCountry } from "../types";
 import { filterEvidenceByCountries, mockEvidenceRecords } from "../mock-evidence";
 import { getCuratedSourcesForCountries } from "./source-registry";
@@ -14,8 +11,19 @@ type PdfParseResult = {
 
 type PdfParseFn = (buffer: Buffer) => Promise<PdfParseResult>;
 
+type SourceStrength = NonNullable<EvidenceRecord["sourceStrength"]>;
+type TraceabilityTier = NonNullable<EvidenceRecord["traceabilityTier"]>;
+
+type ParsedSourceText = {
+  text: string;
+  pages: string[];
+  resolvedUrl: string;
+};
+
 const require = createRequire(import.meta.url);
 const pdfParse = require("pdf-parse/lib/pdf-parse.js") as PdfParseFn;
+
+const ALLOWED_SOURCE_HOSTS = new Set(["www.unescap.org", "unescap.org", "dtri.uneca.org"]);
 
 export type EvidenceSourceMode = "real" | "mock" | "hybrid";
 
@@ -48,16 +56,39 @@ function toSourceBasisLabel(source: CuratedSourceRecord) {
   return `${source.country}: ${source.title} (${new URL(source.sourceUrl).host})`;
 }
 
-function getSourceStrengthLabel(entry: CuratedSourceRecord) {
+function getSourceStrength(entry: CuratedSourceRecord): SourceStrength {
   if (entry.title.includes("Economy Profile")) {
-    return "country profile";
+    return "country-profile";
   }
 
   if (entry.title.includes("Regulatory Database")) {
-    return "database entrypoint";
+    return "database-entrypoint";
   }
 
-  return "methodology support";
+  return "methodology-support";
+}
+
+function getTraceabilityTier(entry: CuratedSourceRecord, pageNumber: number | null): TraceabilityTier {
+  if (pageNumber !== null) {
+    return "page-level";
+  }
+
+  if (getSourceStrength(entry) === "database-entrypoint") {
+    return "entrypoint-level";
+  }
+
+  return "page-level";
+}
+
+function getSourceStrengthLabel(entry: CuratedSourceRecord) {
+  switch (getSourceStrength(entry)) {
+    case "country-profile":
+      return "country profile";
+    case "database-entrypoint":
+      return "database entrypoint";
+    case "methodology-support":
+      return "methodology support";
+  }
 }
 
 function mapIndicatorLabel(indicatorCode: Pillar6IndicatorCode) {
@@ -75,15 +106,47 @@ function mapIndicatorLabel(indicatorCode: Pillar6IndicatorCode) {
   }
 }
 
-function getReviewNote(entry: CuratedSourceRecord, foundLiveExcerpt: boolean) {
-  if (foundLiveExcerpt) {
-    return `${entry.reviewerNote} Source strength: ${getSourceStrengthLabel(entry)}. Live retrieval succeeded.`;
+function formatSourceLocator(entry: CuratedSourceRecord, pageNumber: number | null) {
+  if (pageNumber !== null) {
+    return `Page ${pageNumber}`;
   }
 
-  return `${entry.reviewerNote} Source strength: ${getSourceStrengthLabel(entry)}. Live retrieval fell back to curated excerpt text.`;
+  if (entry.title.includes("Regulatory Database")) {
+    return `Pillar 6 economy entry for ${entry.country}`;
+  }
+
+  if (entry.title.includes("Economy Profile")) {
+    return "Pillar 6 section in economy profile";
+  }
+
+  return "Pillar 6 methodology section";
+}
+
+function getReviewNote(
+  entry: CuratedSourceRecord,
+  foundLiveExcerpt: boolean,
+  pageNumber: number | null
+) {
+  const locatorNote = pageNumber !== null ? ` Locator: page ${pageNumber}.` : "";
+
+  if (foundLiveExcerpt) {
+    return `${entry.reviewerNote} Source strength: ${getSourceStrengthLabel(entry)}.${locatorNote} Live retrieval succeeded.`;
+  }
+
+  return `${entry.reviewerNote} Source strength: ${getSourceStrengthLabel(entry)}.${locatorNote} Live retrieval fell back to curated excerpt text.`;
+}
+
+function ensureAllowedSourceUrl(sourceUrl: string) {
+  const host = new URL(sourceUrl).host;
+
+  if (!ALLOWED_SOURCE_HOSTS.has(host)) {
+    throw new Error(`Source host ${host} is outside the competition-designated source set.`);
+  }
 }
 
 async function fetchSourceResponse(sourceUrl: string) {
+  ensureAllowedSourceUrl(sourceUrl);
+
   const response = await fetch(sourceUrl, {
     headers: {
       "User-Agent": "CrossBorderDataPolicyMultiAgentAnalyst/1.0"
@@ -98,48 +161,108 @@ async function fetchSourceResponse(sourceUrl: string) {
   return response;
 }
 
-async function parsePdfText(response: Response) {
+function splitPdfPages(rawText: string) {
+  const byFormFeed = rawText
+    .split("\f")
+    .map((page) => collapseWhitespace(page))
+    .filter(Boolean);
+
+  if (byFormFeed.length > 0) {
+    return byFormFeed;
+  }
+
+  const singlePage = collapseWhitespace(rawText);
+  return singlePage ? [singlePage] : [];
+}
+
+async function parsePdfText(response: Response, resolvedUrl: string): Promise<ParsedSourceText> {
   const arrayBuffer = await response.arrayBuffer();
   const parsed = await pdfParse(Buffer.from(arrayBuffer));
-  return collapseWhitespace(parsed.text ?? "");
+  const rawText = parsed.text ?? "";
+  const pages = splitPdfPages(rawText);
+
+  return {
+    text: collapseWhitespace(rawText),
+    pages,
+    resolvedUrl
+  };
 }
 
-async function fetchSourceText(sourceUrl: string) {
+async function fetchSourceText(sourceUrl: string): Promise<ParsedSourceText> {
   const response = await fetchSourceResponse(sourceUrl);
   const contentType = response.headers.get("content-type") ?? "";
+  const resolvedUrl = response.url || sourceUrl;
 
   if (contentType.includes("application/pdf") || sourceUrl.toLowerCase().endsWith(".pdf")) {
-    return parsePdfText(response);
+    return parsePdfText(response, resolvedUrl);
   }
 
-  if (contentType.includes("text/html") || contentType.includes("text/plain")) {
-    return stripHtml(await response.text());
-  }
+  const text = contentType.includes("text/html") || contentType.includes("text/plain")
+    ? stripHtml(await response.text())
+    : collapseWhitespace(await response.text());
 
-  return collapseWhitespace(await response.text());
+  return {
+    text,
+    pages: text ? [text] : [],
+    resolvedUrl
+  };
 }
 
-function extractExcerptContext(fullText: string, excerptHints: string[], fallback: string) {
+function extractExcerptFromPage(pageText: string, hint: string) {
+  const index = pageText.indexOf(hint);
+
+  if (index === -1) {
+    return null;
+  }
+
+  const start = Math.max(0, index - 120);
+  const end = Math.min(pageText.length, index + hint.length + 260);
+
+  return {
+    excerpt: collapseWhitespace(pageText.slice(start, end)),
+    anchorIndex: index
+  };
+}
+
+function extractExcerptContext(
+  fullText: string,
+  pages: string[],
+  excerptHints: string[],
+  fallback: string
+) {
   const normalizedText = collapseWhitespace(fullText);
 
   for (const hint of excerptHints) {
-    const index = normalizedText.indexOf(hint);
+    for (const [pageIndex, pageText] of pages.entries()) {
+      const pageMatch = extractExcerptFromPage(pageText, hint);
 
-    if (index === -1) {
-      continue;
+      if (pageMatch) {
+        return {
+          excerpt: pageMatch.excerpt,
+          anchorIndex: normalizedText.indexOf(hint),
+          pageNumber: pageIndex + 1
+        };
+      }
     }
 
-    const start = Math.max(0, index - 120);
-    const end = Math.min(normalizedText.length, index + hint.length + 260);
-    return {
-      excerpt: collapseWhitespace(normalizedText.slice(start, end)),
-      anchorIndex: index
-    };
+    const index = normalizedText.indexOf(hint);
+
+    if (index !== -1) {
+      const start = Math.max(0, index - 120);
+      const end = Math.min(normalizedText.length, index + hint.length + 260);
+
+      return {
+        excerpt: collapseWhitespace(normalizedText.slice(start, end)),
+        anchorIndex: index,
+        pageNumber: null
+      };
+    }
   }
 
   return {
     excerpt: fallback,
-    anchorIndex: -1
+    anchorIndex: -1,
+    pageNumber: null
   };
 }
 
@@ -155,12 +278,17 @@ function extractOriginalTextWindow(fullText: string, anchorIndex: number) {
 
 async function resolveCuratedEvidenceRecord(entry: CuratedSourceRecord): Promise<EvidenceRecord> {
   try {
-    const liveText = await fetchSourceText(entry.sourceUrl);
-    const excerptContext = extractExcerptContext(liveText, entry.excerptHints, entry.excerptFallback);
+    const liveSource = await fetchSourceText(entry.sourceUrl);
+    const excerptContext = extractExcerptContext(
+      liveSource.text,
+      liveSource.pages,
+      entry.excerptHints,
+      entry.excerptFallback
+    );
     const originalLegalText =
-      liveText.length > 200
-        ? extractOriginalTextWindow(liveText, excerptContext.anchorIndex)
-        : liveText;
+      liveSource.text.length > 200
+        ? extractOriginalTextWindow(liveSource.text, excerptContext.anchorIndex)
+        : liveSource.text;
 
     return {
       evidenceId: `EV-${entry.id}`,
@@ -171,12 +299,15 @@ async function resolveCuratedEvidenceRecord(entry: CuratedSourceRecord): Promise
       lawTitle: entry.title,
       citation: entry.citation,
       verbatimSnippet: excerptContext.excerpt,
-      sourceUrl: entry.sourceUrl,
+      sourceUrl: liveSource.resolvedUrl,
+      sourceLocator: formatSourceLocator(entry, excerptContext.pageNumber),
+      sourceStrength: getSourceStrength(entry),
+      traceabilityTier: getTraceabilityTier(entry, excerptContext.pageNumber),
       sourceType: entry.sourceType,
       discoveryTags: entry.discoveryTags,
       confidence: entry.confidence,
       reviewStatus: entry.reviewStatus,
-      reviewerNote: getReviewNote(entry, true),
+      reviewerNote: getReviewNote(entry, true, excerptContext.pageNumber),
       originalLegalText,
       aiExtraction: entry.aiExtractionFallback,
       pillar6Mapping: entry.pillar6Mapping,
@@ -194,11 +325,14 @@ async function resolveCuratedEvidenceRecord(entry: CuratedSourceRecord): Promise
       citation: entry.citation,
       verbatimSnippet: entry.excerptFallback,
       sourceUrl: entry.sourceUrl,
+      sourceLocator: formatSourceLocator(entry, null),
+      sourceStrength: getSourceStrength(entry),
+      traceabilityTier: getTraceabilityTier(entry, null),
       sourceType: entry.sourceType,
       discoveryTags: entry.discoveryTags,
       confidence: entry.confidence,
       reviewStatus: entry.reviewStatus,
-      reviewerNote: getReviewNote(entry, false),
+      reviewerNote: getReviewNote(entry, false, null),
       originalLegalText: entry.originalTextFallback,
       aiExtraction: entry.aiExtractionFallback,
       pillar6Mapping: entry.pillar6Mapping,
@@ -241,7 +375,7 @@ export async function resolveEvidenceContext(
     evidenceRecords,
     sourceMode: fallbackEvidenceRecords.length > 0 ? "hybrid" : "real",
     sourceBasis: [
-      "Competition-designated source set: UN ESCAP RCDTRA portal and RDTII 2.1 guide",
+      "Competition-designated source set from ai_hackathon.pptx: ESCAP RCDTRA portal, RDTII 2.1 guide, and official RDTII files hosted under dtri.uneca.org",
       ...curatedSources.map((source) => toSourceBasisLabel(source))
     ],
     realEvidenceCount: realEvidenceRecords.length,

@@ -30,8 +30,6 @@ export interface CuratedSourceRecord {
 const RCDTRA_PROJECT_URL = "https://www.unescap.org/projects/rcdtra";
 const RDTII_GUIDE_URL =
   "https://dtri.uneca.org/assets/data/publications/ESCAP-2025-MN-RDTII-2.1-guide-en.pdf";
-const RDTII_AP_REVIEW_URL =
-  "https://dtri.uneca.org/assets/data/publications/ESCAP-2025-RP-Digital-trade-regulatory-review-AP-en.pdf";
 const RDTII_SGP_PROFILE_URL =
   "https://dtri.uneca.org/v1/uploads/country-profile/sgp-country-profile-en.pdf";
 const RDTII_JPN_PROFILE_URL =
@@ -66,35 +64,6 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
     riskImplication:
       "Reviewer should confirm the exact China database row and linked law before relying on this record as final legal support, but the prototype now points analysts to the required competition source first.",
     excerptHints: ["RDTII 2.1 Regulatory Database", "currently active digital trade related regulations"]
-  },
-  {
-    id: "RDTII-CHN-003",
-    country: "China",
-    title: "Digital Trade Regulatory Review for Asia and the Pacific, 2025",
-    citation:
-      "ESCAP-ECA-ECLAC Initiative on Digital Trade Regulatory Integration, 2025 regional review",
-    sourceUrl: RDTII_AP_REVIEW_URL,
-    sourceType: "Official Portal",
-    indicator: "Conditional flow regimes",
-    indicatorCode: "P6_4_CONDITIONAL_FLOW",
-    discoveryTags: ["China", "RDTII review", "Pillar 6", "Asia-Pacific"],
-    confidence: 0.65,
-    reviewStatus: "Pending Review",
-    reviewerNote:
-      "Competition-designated PDF source. Use it as a region-level evidentiary file and extract China-relevant context cautiously, because it is not a jurisdiction-only legal text.",
-    excerptFallback:
-      "The report presents the digital trade policy landscape in Asia and the Pacific using the RDTII 2.1 framework and includes China within the covered Asia-Pacific economies.",
-    originalTextFallback:
-      "Digital Trade Regulatory Review for Asia and the Pacific, 2025. The report states that the RDTII 2.1 framework covers 48 economies in the Asia-Pacific region, including China, and uses Pillar 6 to assess cross-border data policies. This is a competition-designated supporting file rather than a stand-alone China legal text.",
-    aiExtractionFallback:
-      "The ESCAP regional review is a valid competition-designated file that supports China's inclusion in the RDTII Pillar 6 evidence framework, but it should remain secondary to row-level database or legal texts.",
-    pillar6Mapping:
-      "Maps to Conditional flow regimes as a competition-designated supporting file for China-related Pillar 6 interpretation.",
-    mappingRationale:
-      "The regional review is not a statute, but it is part of the designated RDTII file set and can support traceability for how China is analyzed under Pillar 6.",
-    riskImplication:
-      "Useful for judges and methodology traceability, but reviewers should not treat it as conclusive legal proof without deeper source linkage.",
-    excerptHints: ["including China", "Pillar 6", "Cross-border data policies"]
   },
   {
     id: "RDTII-CHN-002",

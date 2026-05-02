@@ -356,6 +356,9 @@ export function ChatAnalysisPanels({
                 </div>
                 <h3 className="mt-2 text-[15px] font-semibold leading-6 text-black">{record.lawTitle}</h3>
                 <p className="mt-1 text-sm leading-6 text-black/72">{record.citation}</p>
+                {record.sourceLocator ? (
+                  <p className="mt-1 text-xs leading-5 text-black/55">{`Locator: ${record.sourceLocator}`}</p>
+                ) : null}
                 <p className="mt-2 text-sm leading-6 text-black/72">{record.verbatimSnippet}</p>
                 <a
                   href={record.sourceUrl}
@@ -394,6 +397,9 @@ export function ChatAnalysisPanels({
             <div className="rounded-[16px] border border-black/10 bg-[#fcfcfc] px-4 py-4">
               <p className="text-[13px] font-semibold text-black">Selected evidence</p>
               <p className="mt-2 text-sm font-medium leading-6 text-black">{selectedRecord.lawTitle}</p>
+              {selectedRecord.sourceLocator ? (
+                <p className="mt-1 text-xs leading-5 text-black/55">{`Locator: ${selectedRecord.sourceLocator}`}</p>
+              ) : null}
               <p className="mt-2 text-sm leading-6 text-black/72">{selectedRecord.aiExtraction}</p>
               <p className="mt-3 text-sm leading-6 text-black/72">{selectedRecord.pillar6Mapping}</p>
               {selectedAuditItem ? (

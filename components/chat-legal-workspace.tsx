@@ -5,6 +5,11 @@ import {
   ChatAnalysisPanels,
   type ChatAnalysisResult
 } from "@/components/chat-analysis-panels";
+import {
+  detectUnsupportedJurisdictions,
+  inferCountries,
+  supportedCountries
+} from "@/lib/jurisdiction-inference";
 
 type CoreModeId = "regulation" | "case" | "advisory";
 type SupportedCountry = "China" | "Singapore" | "Japan" | "European Union" | "United States";
@@ -138,6 +143,29 @@ export function ChatLegalWorkspace() {
           role: "assistant",
           mode: selectedMode,
           content: buildOutOfScopeGuidance(selectedMode),
+          status: "complete"
+        }
+      ]);
+      setInputValue("");
+      return;
+    }
+
+    const unsupportedJurisdictions = detectUnsupportedJurisdictions(trimmed);
+
+    if (unsupportedJurisdictions.length > 0) {
+      setMessages((current) => [
+        ...current,
+        {
+          id: userMessageId,
+          role: "user",
+          content: trimmed,
+          mode: selectedMode
+        },
+        {
+          id: assistantMessageId,
+          role: "assistant",
+          mode: selectedMode,
+          content: buildUnsupportedJurisdictionGuidance(unsupportedJurisdictions),
           status: "complete"
         }
       ]);
@@ -935,6 +963,18 @@ interface BackendWorkflowResult extends ChatAnalysisResult {
     finalNarrative?: string;
     overallRisk?: string;
   };
+  mainlineAgentResults?: {
+    legalReasoner?: {
+      data?: {
+        legalFindings?: Array<{
+          conclusion?: string;
+          legalEffect?: string;
+          evidenceIds?: string[];
+          jurisdiction?: string;
+        }>;
+      } | null;
+    };
+  };
   supportingAgentResults?: ChatAnalysisResult["supportingAgentResults"] & {
     queryBuilder?: {
       data?: QueryBuilderData | null;
@@ -972,14 +1012,6 @@ interface QueryBuilderData {
     sourceType?: string;
   }>;
 }
-
-const supportedCountries: SupportedCountry[] = [
-  "China",
-  "Singapore",
-  "Japan",
-  "European Union",
-  "United States"
-];
 
 const legalScopeKeywords = [
   "law",
@@ -1021,21 +1053,6 @@ const legalScopeKeywords = [
   "\u54a8\u8be2"
 ];
 
-function inferCountries(question: string): {
-  countryA: SupportedCountry;
-  countryB: SupportedCountry | null;
-} {
-  const lowerQuestion = question.toLowerCase();
-  const matchedCountries = supportedCountries.filter((country) =>
-    lowerQuestion.includes(country.toLowerCase())
-  );
-
-  return {
-    countryA: matchedCountries[0] ?? "China",
-    countryB: matchedCountries[1] ?? null
-  };
-}
-
 function getScenarioLabel(mode: CoreModeId) {
   if (mode === "regulation") {
     return "regulation interpretation";
@@ -1070,6 +1087,14 @@ function buildOutOfScopeGuidance(mode: CoreModeId) {
   return [
     `This workspace is focused on ${modeName} for cross-border data law and Pillar 6/7 compliance.`,
     "Please ask a legal or compliance question, such as which rule applies to a data transfer, what risks a business scenario creates, or what barriers a planned market entry may face."
+  ].join("\n\n");
+}
+
+function buildUnsupportedJurisdictionGuidance(jurisdictions: string[]) {
+  return [
+    `This prototype cannot yet analyze ${jurisdictions.join(", ")} with real competition-designated evidence.`,
+    `Current supported jurisdictions are ${supportedCountries.join(", ")}.`,
+    "Please ask about one of the supported jurisdictions, or expand the source registry and row-level legal pipeline before using this workspace for additional countries."
   ].join("\n\n");
 }
 
@@ -1206,6 +1231,65 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
     .map((record) => record.citation || record.lawTitle || record.sourceUrl)
     .filter(Boolean);
   const sourceBasis = result.research?.sourceBasis?.slice(0, 2) ?? [];
+  const legalFindings = result.mainlineAgentResults?.legalReasoner?.data?.legalFindings ?? [];
+  const findingHighlights = legalFindings.slice(0, 2).map((finding, index) =>
+    [
+      `Finding ${index + 1}: ${finding.conclusion ?? "No conclusion returned."}`,
+      finding.legalEffect ? `Effect: ${finding.legalEffect}` : null
+    ]
+      .filter(Boolean)
+      .join(" ")
+  );
+  const evidenceHighlights = (result.evidenceRecords ?? []).slice(0, 2).map((record) =>
+    [
+      record.lawTitle,
+      record.sourceLocator ? `Locator: ${record.sourceLocator}` : null,
+      record.verbatimSnippet ? `Excerpt: ${record.verbatimSnippet}` : null,
+      record.sourceUrl ? `Source: ${record.sourceUrl}` : null
+    ]
+      .filter(Boolean)
+      .join(" | ")
+  );
+  const lacksClauseLevelEvidence =
+    (result.evidenceRecords ?? []).length > 0 &&
+    (result.evidenceRecords ?? []).every((record) =>
+      ["Regulatory Database", "Guide", "Economy Profile"].some((label) =>
+        record.lawTitle.includes(label)
+      )
+    );
+  const coverageDetail = Array.from(
+    new Map(
+      (result.evidenceRecords ?? []).map((record) => [
+        record.country,
+        {
+          country: record.country,
+          strengths: new Set<string>(),
+          locators: new Set<string>()
+        }
+      ])
+    ).values()
+  )
+    .map((entry) => {
+      (result.evidenceRecords ?? [])
+        .filter((record) => record.country === entry.country)
+        .forEach((record) => {
+          if (record.sourceStrength) {
+            entry.strengths.add(record.sourceStrength);
+          }
+
+          if (record.sourceLocator) {
+            entry.locators.add(record.sourceLocator);
+          }
+        });
+
+      return `${entry.country}: ${[...entry.strengths].join(", ") || "unspecified"}${
+        entry.locators.size ? ` (${[...entry.locators].slice(0, 2).join(" | ")})` : ""
+      }`;
+    })
+    .join(" || ");
+  const traceabilityLimitation = lacksClauseLevelEvidence
+    ? "Current retrieval did not yet pinpoint row-level statutes or article-level clauses; this run is grounded in competition-designated database, profile, and methodology files and still needs human drill-down."
+    : null;
 
   return [
     `${coreModes.find((item) => item.id === mode)?.english ?? "Legal analysis"} result:`,
@@ -1220,6 +1304,10 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
       : null,
     exportReadiness ? `Export readiness: ${exportReadiness}.` : null,
     citations.length ? `Key citations: ${citations.join(" | ")}` : null,
+    findingHighlights.length ? `Legal findings: ${findingHighlights.join(" || ")}` : null,
+    evidenceHighlights.length ? `Evidence highlights: ${evidenceHighlights.join(" || ")}` : null,
+    coverageDetail ? `Coverage detail: ${coverageDetail}` : null,
+    traceabilityLimitation,
     sourceBasis.length ? `Source basis: ${sourceBasis.join(" | ")}` : null,
     result.analysisRunId ? `Review run ID: ${result.analysisRunId}` : null,
     "Open the panels below to inspect evidence records, audit review, and JSON/CSV/Markdown export."

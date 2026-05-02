@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import { resolveEvidenceContext } from "../lib/server/source-pipeline.ts";
 import { countryPolicyProfiles } from "../lib/mock-data.ts";
 
+const allowedHosts = new Set(["www.unescap.org", "unescap.org", "dtri.uneca.org"]);
+
 test("source pipeline returns traceable evidence records for requested jurisdictions", async () => {
   const context = await resolveEvidenceContext("China", "Singapore");
 
@@ -12,10 +14,20 @@ test("source pipeline returns traceable evidence records for requested jurisdict
   assert.ok(context.evidenceRecords.every((record) => record.citation.length > 0));
   assert.ok(context.evidenceRecords.every((record) => record.indicatorCode.startsWith("P6_")));
   assert.ok(
+    context.evidenceRecords.every((record) => {
+      const host = new URL(record.sourceUrl).host;
+      return allowedHosts.has(host);
+    })
+  );
+  assert.ok(context.evidenceRecords.every((record) => Boolean(record.sourceLocator)));
+  assert.ok(context.evidenceRecords.every((record) => Boolean(record.sourceStrength)));
+  assert.ok(context.evidenceRecords.every((record) => Boolean(record.traceabilityTier)));
+  assert.ok(
     context.evidenceRecords.some(
       (record) =>
         record.sourceUrl.includes("unescap.org/projects/rcdtra") ||
-        record.sourceUrl.includes("dtri.uneca.org/assets/data/publications/")
+        record.sourceUrl.includes("dtri.uneca.org/assets/data/publications/") ||
+        record.sourceUrl.includes("dtri.uneca.org/v1/uploads/country-profile/")
     )
   );
   assert.ok(context.sourceBasis.some((item) => item.includes("Competition-designated source set")));
@@ -27,12 +39,16 @@ test("source pipeline expands real coverage for Japan and the United States", as
   assert.equal(context.sourceMode, "real");
   assert.ok(context.evidenceRecords.some((record) => record.country === "Japan"));
   assert.ok(context.evidenceRecords.some((record) => record.country === "United States"));
-  assert.ok(
-    context.evidenceRecords.every((record) => !record.sourceUrl.includes("example."))
-  );
+  assert.ok(context.evidenceRecords.every((record) => !record.sourceUrl.includes("example.")));
   assert.ok(
     context.evidenceRecords.some((record) =>
       record.sourceUrl.includes("jpn-country-profile-en.pdf")
+    )
+  );
+  assert.ok(
+    context.evidenceRecords.some(
+      (record) =>
+        record.country === "United States" && record.traceabilityTier === "entrypoint-level"
     )
   );
   assert.ok(context.sourceBasis.some((item) => item.includes("Competition-designated source set")));
@@ -51,6 +67,38 @@ test("source pipeline expands real coverage for the European Union and the Unite
         record.country === "European Union" && record.lawTitle.includes("Regulatory Database")
     )
   );
+  assert.ok(
+    context.evidenceRecords.some(
+      (record) =>
+        record.country === "European Union" && record.sourceStrength === "database-entrypoint"
+    )
+  );
+});
+
+test("all supported jurisdictions stay within the hackathon-designated source set", async () => {
+  const contexts = await Promise.all([
+    resolveEvidenceContext("China"),
+    resolveEvidenceContext("Singapore"),
+    resolveEvidenceContext("Japan"),
+    resolveEvidenceContext("European Union"),
+    resolveEvidenceContext("United States")
+  ]);
+
+  for (const context of contexts) {
+    assert.equal(context.sourceMode, "real");
+    assert.ok(context.evidenceRecords.length > 0);
+    assert.ok(
+      context.evidenceRecords.every((record) => {
+        const host = new URL(record.sourceUrl).host;
+        return allowedHosts.has(host);
+      })
+    );
+    assert.ok(
+      context.evidenceRecords.every(
+        (record) => record.sourceLocator && record.sourceStrength && record.traceabilityTier
+      )
+    );
+  }
 });
 
 test("prototype baseline profiles no longer expose mock wording in user-facing country summaries", () => {

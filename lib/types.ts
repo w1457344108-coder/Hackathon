@@ -299,6 +299,9 @@ export interface AuditCitationItem {
   lawTitle: string;
   citationRef: string;
   sourceUrl: string;
+  sourceLocator?: string;
+  sourceStrength?: "country-profile" | "database-entrypoint" | "methodology-support";
+  traceabilityTier?: "page-level" | "entrypoint-level";
   originalLegalText: string;
   verbatimSnippet: string;
   extractedClaim: string;

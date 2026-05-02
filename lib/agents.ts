@@ -47,9 +47,9 @@ import {
 } from "@/lib/server/uploaded-documents";
 
 const SOURCE_BASIS = [
-  "UN ESCAP RDTII initiative structure",
-  "ESCAP RDTII 2.1 Guide, Pillar 6 scoring logic",
-  "ESCAP coverage of Pillar 6: cross-border data policies"
+  "Competition-designated source set from ai_hackathon.pptx",
+  "UN ESCAP RCDTRA project page / RDTII 2.1 Regulatory Database entry surface",
+  "RDTII 2.1 Guide PDF hosted on dtri.uneca.org"
 ];
 
 const ALL_PILLAR6_INDICATORS: Pillar6IndicatorEnum[] = [
@@ -237,16 +237,30 @@ function getUncertaintyLevel(
   return "Low";
 }
 
-function buildTraceabilityNote(reviewStatus: string, humanReviewNeeded: boolean) {
-  if (humanReviewNeeded) {
-    return "The evidence chain is linked, but a reviewer should confirm the excerpt and citation before export.";
+function buildTraceabilityNote(input: {
+  reviewStatus: string;
+  humanReviewNeeded: boolean;
+  sourceLocator?: string;
+  sourceStrength?: EvidenceRecord["sourceStrength"];
+  traceabilityTier?: EvidenceRecord["traceabilityTier"];
+}) {
+  const details = [
+    input.sourceLocator ? `Locator: ${input.sourceLocator}.` : null,
+    input.sourceStrength ? `Source strength: ${input.sourceStrength}.` : null,
+    input.traceabilityTier ? `Traceability tier: ${input.traceabilityTier}.` : null
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  if (input.humanReviewNeeded) {
+    return `The evidence chain is linked, but a reviewer should confirm the excerpt and citation before export. ${details}`.trim();
   }
 
-  if (reviewStatus !== "Approved") {
-    return "The legal text is linked successfully, but the underlying evidence record still needs reviewer confirmation.";
+  if (input.reviewStatus !== "Approved") {
+    return `The legal text is linked successfully, but the underlying evidence record still needs reviewer confirmation. ${details}`.trim();
   }
 
-  return "The legal claim, source text, and citation are fully linked for reviewer inspection.";
+  return `The legal claim, source text, and citation are fully linked for reviewer inspection. ${details}`.trim();
 }
 
 function summarizeOperationalImpact(
@@ -417,6 +431,8 @@ export async function reportAgent(results: {
   research: ResearchAgentResult;
   policyAnalysis: PolicyAnalysisResult[];
   comparison: ComparisonAgentResult | null;
+  evidenceRecords: EvidenceRecord[];
+  legalFindings: LegalReasonerOutput["legalFindings"];
 }): Promise<ReportAgentResult> {
   await wait(800);
 
@@ -425,14 +441,37 @@ export async function reportAgent(results: {
   const comparisonTable = results.comparison?.rows ?? [];
   const primaryAnalysis = results.policyAnalysis[0];
   const provider = getAnalysisProvider();
+  const findingSummaries = results.legalFindings.slice(0, 3).map((finding) => {
+    const evidenceLabel = finding.evidenceIds
+      .map((evidenceId) => getEvidenceRecord(evidenceId, results.evidenceRecords))
+      .filter(Boolean)
+      .map((record) => `${record?.lawTitle} (${record?.citation})`)
+      .join("; ");
+
+    return {
+      jurisdiction: finding.jurisdiction,
+      conclusion: finding.conclusion,
+      legalEffect: finding.legalEffect,
+      evidence: evidenceLabel
+    };
+  });
+  const clauseLevelEvidenceRetrieved =
+    results.evidenceRecords.length > 0 &&
+    results.evidenceRecords.some(
+      (record) =>
+        !record.lawTitle.includes("Regulatory Database") &&
+        !record.lawTitle.includes("Guide") &&
+        !record.lawTitle.includes("Economy Profile")
+    );
   const fallbackNarrative = results.comparison
-    ? `The multi-agent workflow indicates that ${results.comparison.higherRiskCountry} carries the heavier cross-border compliance load in this scenario, while ${results.comparison.winnerOnOpenness} appears more open for scalable digital operations. ${primaryAnalysis.executiveSummary}`
-    : `The workflow indicates a ${overallRisk.toLowerCase()}-risk posture for ${primaryAnalysis.country}. ${primaryAnalysis.executiveSummary}`;
+    ? `The multi-agent workflow indicates that ${results.comparison.higherRiskCountry} carries the heavier cross-border compliance load in this scenario, while ${results.comparison.winnerOnOpenness} appears more open for scalable digital operations. ${findingSummaries.length ? `Evidence-backed findings include: ${findingSummaries.map((finding) => `${finding.jurisdiction}: ${finding.conclusion}`).join(" ")}` : primaryAnalysis.executiveSummary} ${clauseLevelEvidenceRetrieved ? "At least one retrieved record goes beyond methodology-level material." : "This run still relies on competition-designated portal, profile, or methodology-level sources rather than article-level legal text."}`
+    : `The workflow indicates a ${overallRisk.toLowerCase()}-risk posture for ${primaryAnalysis.country}. ${findingSummaries.length ? `Evidence-backed findings include: ${findingSummaries.map((finding) => `${finding.conclusion}`).join(" ")}` : primaryAnalysis.executiveSummary} ${clauseLevelEvidenceRetrieved ? "At least one retrieved record goes beyond methodology-level material." : "This run still relies on competition-designated portal, profile, or methodology-level sources rather than article-level legal text."}`;
   const fallbackRecommendations = [
     "Design market entry plans around the strictest transfer pathway rather than the average case.",
     "Separate privacy, localization, and approval obligations into different workstreams for faster execution.",
     "Prioritize interoperable markets for pilot launches, then expand into higher-friction jurisdictions with localized controls.",
-    "Keep structured agent outputs so that providers and evidence pipelines can be swapped without breaking the review UI."
+    "Keep structured agent outputs so that providers and evidence pipelines can be swapped without breaking the review UI.",
+    "Escalate any portal-level or methodology-level record to human review before presenting it as clause-specific legal authority."
   ];
 
   const structuredReport = await provider.generateStructuredObject<{
@@ -461,7 +500,9 @@ export async function reportAgent(results: {
       researchSummary: results.research.summary,
       policyAnalysis: results.policyAnalysis,
       comparison: results.comparison,
-      overallRisk
+      overallRisk,
+      legalFindings: findingSummaries,
+      clauseLevelEvidenceRetrieved
     }),
     fallback: {
       title: "Cross-Border Data Policy Multi-Agent Report",
@@ -567,7 +608,9 @@ export function documentReaderAgent(input: {
         evidenceId: record.evidenceId,
         sourceId: source.sourceId,
         lawTitle: record.lawTitle,
-        citationRef: record.citation,
+        citationRef: record.sourceLocator
+          ? `${record.citation} (${record.sourceLocator})`
+          : record.citation,
         sourceUrl: record.sourceUrl,
         text: record.originalLegalText
       }
@@ -598,7 +641,9 @@ export function indicatorMappingAgent(input: {
         evidenceId: record.evidenceId,
         indicatorId: record.indicatorCode,
         mappingReason: record.mappingRationale,
-        citationRef: record.citation
+        citationRef: record.sourceLocator
+          ? `${record.citation} (${record.sourceLocator})`
+          : record.citation
       }
     ];
   });
@@ -635,7 +680,11 @@ export async function legalReasonerAgent(input: {
         lawTitle: record.lawTitle,
         citationRef: record.citation,
         sourceUrl: record.sourceUrl,
+        sourceLocator: record.sourceLocator,
+        sourceStrength: record.sourceStrength,
+        traceabilityTier: record.traceabilityTier,
         excerpt: record.verbatimSnippet,
+        originalLegalText: record.originalLegalText,
         analystNote: record.aiExtraction,
         legalEffectHint: record.riskImplication,
         mappingReason: item.mappingReason,
@@ -686,7 +735,7 @@ export async function legalReasonerAgent(input: {
       }
     },
     instructions:
-      "You are a legal-analysis agent for UN ESCAP RDTII Pillar 6. Produce cautious, evidence-bound conclusions only from the supplied evidence. If evidence is ambiguous, say so in the conclusion or legal effect rather than overstating certainty.",
+      "You are a legal-analysis agent for UN ESCAP RDTII Pillar 6. Produce cautious, evidence-bound conclusions only from the supplied evidence. Prefer the excerpt and original legal text, mention source locators when useful, and explicitly say when the evidence is only page-level or entrypoint-level rather than article-level. If evidence is ambiguous, say so in the conclusion or legal effect rather than overstating certainty.",
     input: JSON.stringify({
       countries: dedupeStrings([input.countryA, input.countryB ?? ""]),
       businessScenario: input.businessScenario,
@@ -937,13 +986,22 @@ export function auditCitationAgent(input: {
         lawTitle: shortlistItem.lawTitle,
         citationRef: shortlistItem.citationRef,
         sourceUrl: shortlistItem.sourceUrl,
+        sourceLocator: record.sourceLocator,
+        sourceStrength: record.sourceStrength,
+        traceabilityTier: record.traceabilityTier,
         originalLegalText: shortlistItem.text,
         verbatimSnippet: record.verbatimSnippet,
         extractedClaim: finding.conclusion,
         legalEffect: finding.legalEffect,
         relevanceReason: shortlistItem.relevanceReason,
         traceabilityStatus,
-        traceabilityNote: buildTraceabilityNote(record.reviewStatus, humanReviewNeeded),
+        traceabilityNote: buildTraceabilityNote({
+          reviewStatus: record.reviewStatus,
+          humanReviewNeeded,
+          sourceLocator: record.sourceLocator,
+          sourceStrength: record.sourceStrength,
+          traceabilityTier: record.traceabilityTier
+        }),
         humanReviewNeeded,
         reviewerNote: record.reviewerNote,
         reviewStatus: record.reviewStatus
@@ -1020,6 +1078,9 @@ export function legalReviewExportAgent(input: {
   const exportCsvRows = input.auditItems.map((item) => ({
     evidenceId: item.evidenceId,
     citationRef: item.citationRef,
+    sourceLocator: item.sourceLocator ?? "",
+    sourceStrength: item.sourceStrength ?? "",
+    traceabilityTier: item.traceabilityTier ?? "",
     indicatorId: item.indicatorId,
     reviewStatus: item.reviewStatus,
     traceabilityStatus: item.traceabilityStatus,
@@ -1045,6 +1106,9 @@ export function legalReviewExportAgent(input: {
     ...input.auditItems.flatMap((item) => [
       `### ${item.lawTitle} (${item.citationRef})`,
       `- Indicator: ${item.indicatorId}`,
+      item.sourceLocator ? `- Source locator: ${item.sourceLocator}` : null,
+      item.sourceStrength ? `- Source strength: ${item.sourceStrength}` : null,
+      item.traceabilityTier ? `- Traceability tier: ${item.traceabilityTier}` : null,
       `- Review status: ${item.reviewStatus}`,
       `- Traceability status: ${item.traceabilityStatus}`,
       `- Source URL: ${item.sourceUrl}`,
@@ -1379,7 +1443,9 @@ export async function runMultiAgentWorkflow(
   const report = await reportAgent({
     research,
     policyAnalysis,
-    comparison
+    comparison,
+    evidenceRecords: resolvedEvidence.evidenceRecords,
+    legalFindings: mainlineAgentResults.legalReasoner.data?.legalFindings ?? []
   });
   const supportingAgentResults = runSupportingAgents({
     evidenceRecords: resolvedEvidence.evidenceRecords,

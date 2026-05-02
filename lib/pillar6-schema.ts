@@ -106,6 +106,9 @@ export interface EvidenceRecord {
   citation: string;
   verbatimSnippet: string;
   sourceUrl: string;
+  sourceLocator?: string;
+  sourceStrength?: "country-profile" | "database-entrypoint" | "methodology-support";
+  traceabilityTier?: "page-level" | "entrypoint-level";
   sourceType: EvidenceSourceType;
   discoveryTags: string[];
   confidence: number;
