@@ -436,12 +436,80 @@ function SearchComposer({
 }) {
   const isHero = surface === "hero";
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const dragDepthRef = useRef(0);
   const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
+  const [isDraggingFile, setIsDraggingFile] = useState(false);
+  const [attachFeedback, setAttachFeedback] = useState(false);
+  const [promptFeedback, setPromptFeedback] = useState(false);
   const [promptPanel, setPromptPanel] = useState<PromptPanelState | null>(null);
 
+  function triggerAttachFeedback() {
+    setAttachFeedback(true);
+    window.setTimeout(() => setAttachFeedback(false), 420);
+  }
+
+  function triggerPromptFeedback() {
+    setPromptFeedback(true);
+    window.setTimeout(() => setPromptFeedback(false), 420);
+  }
+
+  function isSupportedFile(file: File) {
+    const extension = file.name.split(".").pop()?.toLowerCase();
+    return ["pdf", "doc", "docx"].includes(extension ?? "");
+  }
+
+  function handleSelectedFile(file: File | null) {
+    if (!file) {
+      return;
+    }
+
+    if (!isSupportedFile(file)) {
+      setSelectedFileName(null);
+      setFileError("Only PDF and Word files are supported.");
+      return;
+    }
+
+    setSelectedFileName(file.name);
+    setFileError(null);
+  }
+
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0] ?? null;
-    setSelectedFileName(file?.name ?? null);
+    handleSelectedFile(event.target.files?.[0] ?? null);
+    triggerAttachFeedback();
+  }
+
+  function handleAttachClick() {
+    triggerAttachFeedback();
+    fileInputRef.current?.click();
+  }
+
+  function handleDragEnter(event: React.DragEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (event.dataTransfer.types.includes("Files")) {
+      dragDepthRef.current += 1;
+      setIsDraggingFile(true);
+    }
+  }
+
+  function handleDragOver(event: React.DragEvent<HTMLFormElement>) {
+    event.preventDefault();
+  }
+
+  function handleDragLeave(event: React.DragEvent<HTMLFormElement>) {
+    event.preventDefault();
+    dragDepthRef.current = Math.max(0, dragDepthRef.current - 1);
+    if (dragDepthRef.current === 0) {
+      setIsDraggingFile(false);
+    }
+  }
+
+  function handleDrop(event: React.DragEvent<HTMLFormElement>) {
+    event.preventDefault();
+    dragDepthRef.current = 0;
+    setIsDraggingFile(false);
+    handleSelectedFile(event.dataTransfer.files?.[0] ?? null);
+    triggerAttachFeedback();
   }
 
   async function handlePromptClick() {
@@ -451,6 +519,7 @@ function SearchComposer({
       return;
     }
 
+    triggerPromptFeedback();
     setPromptPanel({ status: "loading" });
 
     try {
@@ -470,12 +539,22 @@ function SearchComposer({
   return (
     <form
       onSubmit={onSubmit}
-      className={`min-h-[200px] rounded-[18px] p-3 text-left ${
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={`relative min-h-[200px] rounded-[18px] p-3 text-left ${
         isHero
           ? "bg-black/25 shadow-[0_24px_70px_rgba(0,0,0,0.22)] backdrop-blur-xl"
           : "border border-black/10 bg-white shadow-[0_14px_42px_rgba(0,0,0,0.08)]"
-      }`}
+      } ${isDraggingFile ? "ring-2 ring-black/65 ring-offset-2 ring-offset-white" : ""}`}
     >
+      {isDraggingFile ? (
+        <div className="pointer-events-none absolute inset-3 z-20 flex items-center justify-center rounded-[14px] border border-dashed border-black/40 bg-white/88 font-schibsted text-[14px] font-semibold text-black shadow-[0_18px_50px_rgba(0,0,0,0.16)] backdrop-blur-md">
+          Drop PDF or Word file here
+        </div>
+      ) : null}
+
       <div
         className={`flex items-center justify-end px-1 pb-2 font-schibsted text-[12px] font-medium ${
           isHero ? "text-white" : "text-black"
@@ -524,18 +603,24 @@ function SearchComposer({
             <UtilityButton
               icon={<PaperclipIcon className="h-4 w-4" />}
               label="Attach"
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handleAttachClick}
+              isFeedbackActive={attachFeedback}
             />
-            <UtilityButton icon={<MicrophoneIcon className="h-4 w-4" />} label="Voice" />
             <UtilityButton
               icon={<SearchIcon className="h-4 w-4" />}
               label={promptPanel?.status === "loading" ? "Building..." : "Prompts"}
               onClick={handlePromptClick}
               disabled={!inputValue.trim() || promptPanel?.status === "loading"}
+              isFeedbackActive={promptFeedback || promptPanel?.status === "loading"}
             />
             {selectedFileName ? (
               <span className="truncate rounded-md bg-black/5 px-2 py-1 font-schibsted text-[12px] font-medium text-black/60">
                 {selectedFileName}
+              </span>
+            ) : null}
+            {fileError ? (
+              <span className="truncate rounded-md bg-red-50 px-2 py-1 font-schibsted text-[12px] font-medium text-red-700">
+                {fileError}
               </span>
             ) : null}
           </div>
@@ -653,17 +738,23 @@ function UtilityButton({
   icon,
   label,
   onClick,
-  disabled
+  disabled,
+  isFeedbackActive = false
 }: {
   icon: React.ReactNode;
   label: string;
   onClick?: () => void;
   disabled?: boolean;
+  isFeedbackActive?: boolean;
 }) {
   return (
     <button
       type="button"
-      className="inline-flex items-center gap-1.5 rounded-md bg-[#f8f8f8] px-3 py-2 font-schibsted text-[12px] font-medium text-black disabled:cursor-not-allowed disabled:text-black/35"
+      className={`inline-flex items-center gap-1.5 rounded-md bg-[#f8f8f8] px-3 py-2 font-schibsted text-[12px] font-medium text-black shadow-none transition duration-150 active:scale-95 disabled:cursor-not-allowed disabled:text-black/35 ${
+        isFeedbackActive
+          ? "scale-[0.97] bg-black text-white shadow-[0_0_0_4px_rgba(0,0,0,0.12)]"
+          : "hover:bg-white hover:shadow-[0_0_0_1px_rgba(0,0,0,0.08)]"
+      }`}
       disabled={disabled}
       onClick={onClick}
     >
@@ -971,15 +1062,6 @@ function PaperclipIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" {...props}>
       <path d="M6.1 8.8L9.9 5C10.75 4.15 12.1 4.15 12.95 5C13.8 5.85 13.8 7.2 12.95 8.05L7.7 13.3C6.35 14.65 4.15 14.65 2.8 13.3C1.45 11.95 1.45 9.75 2.8 8.4L8.2 3C9.95 1.25 12.8 1.25 14.55 3" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function MicrophoneIcon(props: SVGProps<SVGSVGElement>) {
-  return (
-    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true" {...props}>
-      <path d="M8 10.25C6.75 10.25 5.75 9.25 5.75 8V4.25C5.75 3 6.75 2 8 2C9.25 2 10.25 3 10.25 4.25V8C10.25 9.25 9.25 10.25 8 10.25Z" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M3.75 7.5V8C3.75 10.35 5.65 12.25 8 12.25M12.25 7.5V8C12.25 10.35 10.35 12.25 8 12.25M8 12.25V14.25" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
   );
 }
