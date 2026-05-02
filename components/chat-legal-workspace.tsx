@@ -1,9 +1,22 @@
 "use client";
 
 import { FormEvent, SVGProps, useMemo, useRef, useState } from "react";
+import {
+  ChatAnalysisPanels,
+  type ChatAnalysisResult
+} from "@/components/chat-analysis-panels";
+import { formatEvidenceSnippetForDisplay } from "@/lib/evidence-display";
+import {
+  detectUnsupportedJurisdictions,
+  supportedCountries
+} from "@/lib/jurisdiction-inference";
 
 type CoreModeId = "regulation" | "case" | "advisory";
 type SupportedCountry = "China" | "Singapore" | "Japan" | "European Union" | "United States";
+type CountrySelection = {
+  countryA: SupportedCountry;
+  countryB: SupportedCountry | null;
+};
 
 interface ChatMessage {
   id: string;
@@ -11,6 +24,7 @@ interface ChatMessage {
   content: string;
   mode?: CoreModeId;
   status?: "loading" | "complete";
+  analysis?: ChatAnalysisResult;
 }
 
 interface ConversationItem {
@@ -30,6 +44,7 @@ const VIDEO_URL =
 
 const MAX_UPLOAD_FILES = 3;
 const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
+const countryOptions = supportedCountries as SupportedCountry[];
 
 const coreModes: Array<{
   id: CoreModeId;
@@ -92,6 +107,8 @@ export function ChatLegalWorkspace() {
   const [messages, setMessages] = useState<ChatMessage[]>(starterMessages);
   const [inputValue, setInputValue] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [countryA, setCountryA] = useState<SupportedCountry>("China");
+  const [countryB, setCountryB] = useState<SupportedCountry | null>("Singapore");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const hasConversation = messages.length > 1;
 
@@ -116,6 +133,10 @@ export function ChatLegalWorkspace() {
 
     const selectedMode = activeModeRef.current;
     const selectedFiles = uploadedFiles;
+    const selectedCountries = {
+      countryA,
+      countryB: countryB && countryB !== countryA ? countryB : null
+    };
     const userMessageId = `user-${Date.now()}`;
     const assistantMessageId = `assistant-${Date.now()}`;
 
@@ -133,6 +154,29 @@ export function ChatLegalWorkspace() {
           role: "assistant",
           mode: selectedMode,
           content: buildOutOfScopeGuidance(selectedMode),
+          status: "complete"
+        }
+      ]);
+      setInputValue("");
+      return;
+    }
+
+    const unsupportedJurisdictions = detectUnsupportedJurisdictions(trimmed);
+
+    if (unsupportedJurisdictions.length > 0) {
+      setMessages((current) => [
+        ...current,
+        {
+          id: userMessageId,
+          role: "user",
+          content: trimmed,
+          mode: selectedMode
+        },
+        {
+          id: assistantMessageId,
+          role: "assistant",
+          mode: selectedMode,
+          content: buildUnsupportedJurisdictionGuidance(unsupportedJurisdictions),
           status: "complete"
         }
       ]);
@@ -161,12 +205,13 @@ export function ChatLegalWorkspace() {
     setIsSubmitting(true);
 
     try {
-      const result = await runBackendAnalysis(trimmed, selectedMode, selectedFiles);
+      const result = await runBackendAnalysis(trimmed, selectedMode, selectedFiles, selectedCountries);
       setMessages((current) =>
         current.map((message) =>
           message.id === assistantMessageId
             ? {
                 ...message,
+                analysis: result,
                 content: formatBackendAnswer(result, selectedMode),
                 status: "complete"
               }
@@ -203,6 +248,8 @@ export function ChatLegalWorkspace() {
           setActiveConversation("current");
           setInputValue("");
           setUploadedFiles([]);
+          setCountryA("China");
+          setCountryB("Singapore");
           handleModeChange("regulation");
         }}
       />
@@ -239,6 +286,15 @@ export function ChatLegalWorkspace() {
                     onInputChange={setInputValue}
                     uploadedFiles={uploadedFiles}
                     onUploadedFilesChange={setUploadedFiles}
+                    countryA={countryA}
+                    countryB={countryB}
+                    onCountryAChange={(nextCountry) => {
+                      setCountryA(nextCountry);
+                      if (countryB === nextCountry) {
+                        setCountryB(null);
+                      }
+                    }}
+                    onCountryBChange={setCountryB}
                     isSubmitting={isSubmitting}
                     onSubmit={handleSubmit}
                   />
@@ -263,6 +319,15 @@ export function ChatLegalWorkspace() {
                   onInputChange={setInputValue}
                   uploadedFiles={uploadedFiles}
                   onUploadedFilesChange={setUploadedFiles}
+                  countryA={countryA}
+                  countryB={countryB}
+                  onCountryAChange={(nextCountry) => {
+                    setCountryA(nextCountry);
+                    if (countryB === nextCountry) {
+                      setCountryB(null);
+                    }
+                  }}
+                  onCountryBChange={setCountryB}
                   isSubmitting={isSubmitting}
                   onSubmit={handleSubmit}
                 />
@@ -461,6 +526,10 @@ function SearchComposer({
   onInputChange,
   uploadedFiles,
   onUploadedFilesChange,
+  countryA,
+  countryB,
+  onCountryAChange,
+  onCountryBChange,
   onSubmit
 }: {
   activeMode: CoreModeId;
@@ -472,6 +541,10 @@ function SearchComposer({
   onInputChange: (value: string) => void;
   uploadedFiles: File[];
   onUploadedFilesChange: (files: File[]) => void;
+  countryA: SupportedCountry;
+  countryB: SupportedCountry | null;
+  onCountryAChange: (country: SupportedCountry) => void;
+  onCountryBChange: (country: SupportedCountry | null) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   const isHero = surface === "hero";
@@ -581,7 +654,10 @@ function SearchComposer({
     setPromptPanel({ status: "loading" });
 
     try {
-      const suggestion = await runQueryBuilderSuggestion(trimmed, activeMode);
+      const suggestion = await runQueryBuilderSuggestion(trimmed, activeMode, {
+        countryA,
+        countryB: countryB && countryB !== countryA ? countryB : null
+      });
       setPromptPanel({ status: "ready", suggestion });
     } catch (error) {
       setPromptPanel({
@@ -622,6 +698,28 @@ function SearchComposer({
           <AISparkleIcon className="h-4 w-4" />
           <span>Powered by DeepSeek</span>
         </div>
+      </div>
+
+      <div className="mb-2 grid gap-2 sm:grid-cols-2">
+        <CountryPicker
+          label="Country A"
+          value={countryA}
+          options={countryOptions}
+          onChange={(nextCountry) => {
+            if (nextCountry) {
+              onCountryAChange(nextCountry);
+            }
+          }}
+          isHero={isHero}
+        />
+        <CountryPicker
+          label="Country B"
+          value={countryB}
+          options={countryOptions.filter((country) => country !== countryA)}
+          onChange={onCountryBChange}
+          isHero={isHero}
+          allowEmpty
+        />
       </div>
 
       <div className="rounded-[12px] bg-white shadow-[0_12px_30px_rgba(0,0,0,0.12)]">
@@ -818,6 +916,51 @@ function PromptOptimizerPanel({
   );
 }
 
+function CountryPicker({
+  label,
+  value,
+  options,
+  onChange,
+  isHero,
+  allowEmpty = false
+}: {
+  label: string;
+  value: SupportedCountry | null;
+  options: SupportedCountry[];
+  onChange: (country: SupportedCountry | null) => void;
+  isHero: boolean;
+  allowEmpty?: boolean;
+}) {
+  return (
+    <label
+      className={`flex items-center justify-between gap-3 rounded-[12px] border px-3 py-2 font-schibsted text-[12px] font-semibold shadow-sm ${
+        isHero
+          ? "border-white/20 bg-white/12 text-white backdrop-blur-md"
+          : "border-black/10 bg-[#f8f8f8] text-black"
+      }`}
+    >
+      <span className={isHero ? "text-white/72" : "text-black/50"}>{label}</span>
+      <select
+        value={value ?? ""}
+        onChange={(event) =>
+          onChange(event.target.value ? (event.target.value as SupportedCountry) : null)
+        }
+        className={`min-w-0 flex-1 appearance-none bg-transparent text-right outline-none ${
+          isHero ? "text-white" : "text-black"
+        }`}
+        aria-label={label}
+      >
+        {allowEmpty ? <option value="">No second country</option> : null}
+        {options.map((country) => (
+          <option key={`${label}-${country}`} value={country} className="text-black">
+            {country}
+          </option>
+        ))}
+      </select>
+    </label>
+  );
+}
+
 function UtilityButton({
   icon,
   label,
@@ -860,7 +1003,7 @@ function ConversationMessages({ messages }: { messages: ChatMessage[] }) {
           return (
             <article key={message.id} className="flex justify-end">
               <div className="max-w-[78%] rounded-[18px] bg-[#f2f2f2] px-5 py-3 text-[15px] leading-7 text-black">
-                {message.content}
+                <FormattedMessageContent content={message.content} />
               </div>
             </article>
           );
@@ -878,11 +1021,35 @@ function ConversationMessages({ messages }: { messages: ChatMessage[] }) {
               </p>
             ) : null}
             <div className="rounded-[18px] border border-black/10 bg-white px-5 py-4 text-[15px] leading-7 text-black shadow-[0_12px_34px_rgba(0,0,0,0.05)]">
-              {message.content}
+              <FormattedMessageContent content={message.content} />
             </div>
+            {message.analysis ? (
+              <ChatAnalysisPanels result={message.analysis} modeLabel={modeLabel} />
+            ) : null}
           </article>
         );
       })}
+    </div>
+  );
+}
+
+function FormattedMessageContent({ content }: { content: string }) {
+  const paragraphs = content
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length <= 1) {
+    return <div className="whitespace-pre-wrap">{content}</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {paragraphs.map((paragraph, index) => (
+        <p key={`${index}-${paragraph.slice(0, 24)}`} className="whitespace-pre-wrap">
+          {paragraph}
+        </p>
+      ))}
     </div>
   );
 }
@@ -904,7 +1071,7 @@ function AnalysisLoadingMessage({ modeLabel }: { modeLabel: string | null | unde
           <div className="min-w-0 flex-1">
             <p className="font-semibold tracking-[-0.2px]">Multi-agent legal workflow is running</p>
             <p className="text-[13px] leading-5 text-black/55">
-              DeepSeek is preparing evidence retrieval, legal reasoning, and compliance synthesis.
+              The backend is preparing evidence retrieval, legal reasoning, and compliance synthesis.
             </p>
           </div>
           <div className="flex items-center gap-1" aria-hidden="true">
@@ -921,39 +1088,36 @@ function AnalysisLoadingMessage({ modeLabel }: { modeLabel: string | null | unde
   );
 }
 
-interface BackendWorkflowResult {
-  analysisRunId?: string | null;
-  providerId?: string;
-  providerModel?: string | null;
-  evidenceSourceMode?: "real" | "mock" | "hybrid";
-  input?: {
-    uploadedDocuments?: Array<{
-      fileName: string;
-      sizeBytes: number;
-      characterCount: number;
-    }>;
-  };
+interface BackendWorkflowResult extends ChatAnalysisResult {
   report?: {
     finalNarrative?: string;
     overallRisk?: string;
   };
-  evidenceRecords?: Array<{
-    citation?: string;
-    lawTitle?: string;
-    sourceUrl?: string;
-  }>;
-  supportingAgentResults?: {
+  mainlineAgentResults?: {
+    legalReasoner?: {
+      data?: {
+        legalFindings?: Array<{
+          conclusion?: string;
+          legalEffect?: string;
+          evidenceIds?: string[];
+          jurisdiction?: string;
+        }>;
+      } | null;
+    };
+  };
+  supportingAgentResults?: ChatAnalysisResult["supportingAgentResults"] & {
     queryBuilder?: {
       data?: QueryBuilderData | null;
     };
     legalReviewExport?: {
       data?: {
         exportReadiness?: string;
+        exportJson?: Record<string, unknown>;
+        exportCsvRows?: Array<Record<string, string | number>>;
+        exportMarkdown?: string;
+        judgeSummary?: string;
       } | null;
     };
-  };
-  research?: {
-    sourceBasis?: string[];
   };
 }
 
@@ -978,14 +1142,6 @@ interface QueryBuilderData {
     sourceType?: string;
   }>;
 }
-
-const supportedCountries: SupportedCountry[] = [
-  "China",
-  "Singapore",
-  "Japan",
-  "European Union",
-  "United States"
-];
 
 const legalScopeKeywords = [
   "law",
@@ -1027,21 +1183,6 @@ const legalScopeKeywords = [
   "\u54a8\u8be2"
 ];
 
-function inferCountries(question: string): {
-  countryA: SupportedCountry;
-  countryB: SupportedCountry | null;
-} {
-  const lowerQuestion = question.toLowerCase();
-  const matchedCountries = supportedCountries.filter((country) =>
-    lowerQuestion.includes(country.toLowerCase())
-  );
-
-  return {
-    countryA: matchedCountries[0] ?? "China",
-    countryB: matchedCountries[1] ?? null
-  };
-}
-
 function getScenarioLabel(mode: CoreModeId) {
   if (mode === "regulation") {
     return "regulation interpretation";
@@ -1079,9 +1220,20 @@ function buildOutOfScopeGuidance(mode: CoreModeId) {
   ].join("\n\n");
 }
 
-async function runBackendAnalysis(question: string, mode: CoreModeId, files: File[] = []) {
-  const countries = inferCountries(question);
+function buildUnsupportedJurisdictionGuidance(jurisdictions: string[]) {
+  return [
+    `This prototype cannot yet analyze ${jurisdictions.join(", ")} with real competition-designated evidence.`,
+    `Current supported jurisdictions are ${supportedCountries.join(", ")}.`,
+    "Please ask about one of the supported jurisdictions, or expand the source registry and row-level legal pipeline before using this workspace for additional countries."
+  ].join("\n\n");
+}
 
+async function runBackendAnalysis(
+  question: string,
+  mode: CoreModeId,
+  files: File[] = [],
+  countries: CountrySelection = { countryA: "China", countryB: "Singapore" }
+) {
   const requestInit: RequestInit = files.length
     ? {
         method: "POST",
@@ -1133,8 +1285,12 @@ async function runBackendAnalysis(question: string, mode: CoreModeId, files: Fil
   return JSON.parse(doneMatch[1]) as BackendWorkflowResult;
 }
 
-async function runQueryBuilderSuggestion(question: string, mode: CoreModeId) {
-  const result = await runBackendAnalysis(question, mode);
+async function runQueryBuilderSuggestion(
+  question: string,
+  mode: CoreModeId,
+  countries: CountrySelection = { countryA: "China", countryB: "Singapore" }
+) {
+  const result = await runBackendAnalysis(question, mode, [], countries);
   return formatQueryBuilderSuggestion(result, question, mode);
 }
 
@@ -1212,22 +1368,125 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
     .map((record) => record.citation || record.lawTitle || record.sourceUrl)
     .filter(Boolean);
   const sourceBasis = result.research?.sourceBasis?.slice(0, 2) ?? [];
+  const legalFindings = result.mainlineAgentResults?.legalReasoner?.data?.legalFindings ?? [];
+  const findingHighlights = legalFindings.slice(0, 2).map((finding, index) => {
+    return [
+      `- Finding ${index + 1}: ${finding.conclusion ?? "No conclusion returned."}`,
+      finding.legalEffect ? `  Effect: ${finding.legalEffect}` : null
+    ]
+      .filter(Boolean)
+      .join("\n");
+  });
+  const evidenceHighlights = (result.evidenceRecords ?? []).slice(0, 2).map((record, index) => {
+    return [
+      `- Evidence ${index + 1}: ${record.lawTitle}`,
+      record.sourceLocator ? `  Locator: ${record.sourceLocator}` : null,
+      record.verbatimSnippet
+        ? `  Excerpt:\n${formatEvidenceSnippetForDisplay(record)
+            .split("\n")
+            .map((line) => `    ${line}`)
+            .join("\n")}`
+        : null,
+      record.sourceUrl ? `  Source: ${record.sourceUrl}` : null
+    ]
+      .filter(Boolean)
+      .join("\n");
+  });
+  const lacksClauseLevelEvidence =
+    (result.evidenceRecords ?? []).length > 0 &&
+    (result.evidenceRecords ?? []).every((record) =>
+      ["Regulatory Database", "Guide", "Economy Profile"].some((label) =>
+        record.lawTitle.includes(label)
+      )
+    );
+  const coverageDetail = Array.from(
+    new Map(
+      (result.evidenceRecords ?? []).map((record) => [
+        record.country,
+        {
+          country: record.country,
+          strengths: new Set<string>(),
+          locators: new Set<string>()
+        }
+      ])
+    ).values()
+  )
+    .map((entry) => {
+      (result.evidenceRecords ?? [])
+        .filter((record) => record.country === entry.country)
+        .forEach((record) => {
+          if (record.sourceStrength) {
+            entry.strengths.add(record.sourceStrength);
+          }
 
-  return [
-    `${coreModes.find((item) => item.id === mode)?.english ?? "Legal analysis"} result:`,
+          if (record.sourceLocator) {
+            entry.locators.add(record.sourceLocator);
+          }
+        });
+
+      return [
+        `- ${entry.country}: ${[...entry.strengths].join(", ") || "unspecified"}`,
+        entry.locators.size
+          ? `  Locators: ${[...entry.locators].slice(0, 2).join(" | ")}`
+          : null
+      ]
+        .filter(Boolean)
+        .join("\n");
+    })
+    .join("\n");
+  const traceabilityLimitation = lacksClauseLevelEvidence
+    ? "Current retrieval did not yet pinpoint row-level statutes or article-level clauses; this run is grounded in competition-designated database, profile, and methodology files and still needs human drill-down."
+    : null;
+
+  const summaryBlock = [
+    `${coreModes.find((item) => item.id === mode)?.english ?? "Legal analysis"} result`,
     narrative,
     risk,
     provider,
     evidenceMode,
-    uploadedDocuments.length
-      ? `Uploaded documents used: ${uploadedDocuments
-          .map((file) => `${file.fileName} (${file.characterCount.toLocaleString()} chars)`)
-          .join(" | ")}`
-      : null,
     exportReadiness ? `Export readiness: ${exportReadiness}.` : null,
-    citations.length ? `Key citations: ${citations.join(" | ")}` : null,
-    sourceBasis.length ? `Source basis: ${sourceBasis.join(" | ")}` : null,
     result.analysisRunId ? `Review run ID: ${result.analysisRunId}` : null
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const citationBlock = citations.length
+    ? ["Key citations", ...citations.map((citation) => `- ${citation}`)].join("\n")
+    : null;
+
+  const findingsBlock = findingHighlights.length
+    ? ["Legal findings", ...findingHighlights].join("\n")
+    : null;
+
+  const evidenceBlock = evidenceHighlights.length
+    ? ["Evidence highlights", ...evidenceHighlights].join("\n")
+    : null;
+
+  const coverageBlock = coverageDetail ? ["Coverage detail", coverageDetail].join("\n") : null;
+
+  const sourceBasisBlock = sourceBasis.length
+    ? ["Source basis", ...sourceBasis.map((item) => `- ${item}`)].join("\n")
+    : null;
+
+  const uploadsBlock = uploadedDocuments.length
+    ? [
+        "Uploaded documents used",
+        ...uploadedDocuments.map(
+          (file) => `- ${file.fileName} (${file.characterCount.toLocaleString()} chars)`
+        )
+      ].join("\n")
+    : null;
+
+  return [
+    summaryBlock,
+    citationBlock,
+    findingsBlock,
+    evidenceBlock,
+    coverageBlock,
+    traceabilityLimitation,
+    sourceBasisBlock,
+    uploadsBlock,
+    "Open the panels below to inspect evidence records, audit review, and JSON/CSV/Markdown export."
   ]
     .filter(Boolean)
     .join("\n\n");

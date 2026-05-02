@@ -106,6 +106,13 @@ export interface EvidenceRecord {
   citation: string;
   verbatimSnippet: string;
   sourceUrl: string;
+  sourceLocator?: string;
+  sourceStrength?:
+    | "row-level-law"
+    | "country-profile"
+    | "database-entrypoint"
+    | "methodology-support";
+  traceabilityTier?: "page-level" | "entrypoint-level" | "law-url-level";
   sourceType: EvidenceSourceType;
   discoveryTags: string[];
   confidence: number;
