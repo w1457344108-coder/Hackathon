@@ -18,6 +18,12 @@ interface ConversationItem {
   meta: string;
 }
 
+interface PromptPanelState {
+  status: "loading" | "ready" | "error";
+  suggestion?: string;
+  error?: string;
+}
+
 const VIDEO_URL =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260329_050842_be71947f-f16e-4a14-810c-06e83d23ddb5.mp4";
 
@@ -398,26 +404,11 @@ function VideoBackground() {
 }
 
 function Navigation() {
-  const menuItems = ["Platform", "Features", "Projects", "Community", "Contact"];
-
   return (
     <nav className="flex items-center justify-between py-4 font-schibsted">
       <a href="#" className="text-[24px] font-semibold tracking-[-1.44px] text-black">
         Cross-Border Data Policy Assistant
       </a>
-
-      <div className="hidden items-center gap-8 xl:flex">
-        {menuItems.map((item) => (
-          <a
-            key={item}
-            href="#"
-            className="flex items-center gap-1.5 text-[16px] font-medium tracking-[-0.2px] text-black"
-          >
-            {item}
-            {item === "Features" ? <ChevronDownIcon className="h-4 w-4" /> : null}
-          </a>
-        ))}
-      </div>
 
       <div aria-hidden="true" className="h-11 w-[101px]" />
     </nav>
@@ -444,6 +435,37 @@ function SearchComposer({
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   const isHero = surface === "hero";
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
+  const [promptPanel, setPromptPanel] = useState<PromptPanelState | null>(null);
+
+  function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0] ?? null;
+    setSelectedFileName(file?.name ?? null);
+  }
+
+  async function handlePromptClick() {
+    const trimmed = inputValue.trim();
+
+    if (!trimmed || promptPanel?.status === "loading") {
+      return;
+    }
+
+    setPromptPanel({ status: "loading" });
+
+    try {
+      const suggestion = await runQueryBuilderSuggestion(trimmed, activeMode);
+      setPromptPanel({ status: "ready", suggestion });
+    } catch (error) {
+      setPromptPanel({
+        status: "error",
+        error:
+          error instanceof Error
+            ? error.message
+            : "Query Builder could not optimize this prompt."
+      });
+    }
+  }
 
   return (
     <form
@@ -489,17 +511,47 @@ function SearchComposer({
           </button>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-black/10 px-3 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap gap-2">
-            <UtilityButton icon={<PaperclipIcon className="h-4 w-4" />} label="Attach" />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+
+        <div className="flex flex-col gap-3 border-t border-black/10 px-3 py-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <UtilityButton
+              icon={<PaperclipIcon className="h-4 w-4" />}
+              label="Attach"
+              onClick={() => fileInputRef.current?.click()}
+            />
             <UtilityButton icon={<MicrophoneIcon className="h-4 w-4" />} label="Voice" />
-            <UtilityButton icon={<SearchIcon className="h-4 w-4" />} label="Prompts" />
+            <UtilityButton
+              icon={<SearchIcon className="h-4 w-4" />}
+              label={promptPanel?.status === "loading" ? "Building..." : "Prompts"}
+              onClick={handlePromptClick}
+              disabled={!inputValue.trim() || promptPanel?.status === "loading"}
+            />
+            {selectedFileName ? (
+              <span className="truncate rounded-md bg-black/5 px-2 py-1 font-schibsted text-[12px] font-medium text-black/60">
+                {selectedFileName}
+              </span>
+            ) : null}
           </div>
-          <span className="font-schibsted text-[12px] font-medium text-[#737373]">
-            {inputValue.length.toLocaleString()}/3,000
-          </span>
         </div>
       </div>
+
+      {promptPanel ? (
+        <PromptOptimizerPanel
+          panel={promptPanel}
+          onClose={() => setPromptPanel(null)}
+          onUseSuggestion={(suggestion) => {
+            onInputChange(suggestion);
+            setPromptPanel(null);
+          }}
+        />
+      ) : null}
 
       <div className="mt-3 grid gap-2 md:grid-cols-3">
         {coreModes.map((item) => {
@@ -532,11 +584,88 @@ function SearchComposer({
   );
 }
 
-function UtilityButton({ icon, label }: { icon: React.ReactNode; label: string }) {
+function PromptOptimizerPanel({
+  panel,
+  onClose,
+  onUseSuggestion
+}: {
+  panel: PromptPanelState;
+  onClose: () => void;
+  onUseSuggestion: (suggestion: string) => void;
+}) {
+  return (
+    <aside className="fixed right-5 top-28 z-50 w-[320px] rounded-2xl border border-black/10 bg-white p-4 text-left font-schibsted shadow-[0_24px_70px_rgba(0,0,0,0.18)]">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="text-[13px] font-semibold uppercase tracking-[0.12em] text-black/45">
+            Query Builder
+          </p>
+          <h2 className="mt-1 text-[18px] font-semibold tracking-[-0.3px] text-black">
+            Optimize this input?
+          </h2>
+        </div>
+        <button
+          type="button"
+          className="flex h-8 w-8 items-center justify-center rounded-full bg-black/5 text-[18px] leading-none text-black/60 hover:bg-black/10"
+          aria-label="Close prompt optimizer"
+          onClick={onClose}
+        >
+          x
+        </button>
+      </div>
+
+      <div className="mt-4 max-h-[260px] overflow-y-auto rounded-xl bg-[#f8f8f8] p-3 text-[13px] leading-6 text-black/72">
+        {panel.status === "loading" ? (
+          "Query Builder is refining the prompt..."
+        ) : panel.status === "error" ? (
+          panel.error
+        ) : (
+          <pre className="whitespace-pre-wrap font-schibsted">{panel.suggestion}</pre>
+        )}
+      </div>
+
+      <div className="mt-4 flex justify-end gap-2">
+        <button
+          type="button"
+          className="rounded-full px-4 py-2 text-[13px] font-medium text-black/60 hover:bg-black/5"
+          onClick={onClose}
+        >
+          Keep original
+        </button>
+        <button
+          type="button"
+          className="rounded-full bg-black px-4 py-2 text-[13px] font-semibold text-white disabled:bg-black/25"
+          disabled={panel.status !== "ready" || !panel.suggestion}
+          onClick={() => {
+            if (panel.suggestion) {
+              onUseSuggestion(panel.suggestion);
+            }
+          }}
+        >
+          Use suggestion
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+function UtilityButton({
+  icon,
+  label,
+  onClick,
+  disabled
+}: {
+  icon: React.ReactNode;
+  label: string;
+  onClick?: () => void;
+  disabled?: boolean;
+}) {
   return (
     <button
       type="button"
-      className="inline-flex items-center gap-1.5 rounded-md bg-[#f8f8f8] px-3 py-2 font-schibsted text-[12px] font-medium text-black"
+      className="inline-flex items-center gap-1.5 rounded-md bg-[#f8f8f8] px-3 py-2 font-schibsted text-[12px] font-medium text-black disabled:cursor-not-allowed disabled:text-black/35"
+      disabled={disabled}
+      onClick={onClick}
     >
       {icon}
       {label}
@@ -594,6 +723,9 @@ interface BackendWorkflowResult {
     sourceUrl?: string;
   }>;
   supportingAgentResults?: {
+    queryBuilder?: {
+      data?: QueryBuilderData | null;
+    };
     legalReviewExport?: {
       data?: {
         exportReadiness?: string;
@@ -603,6 +735,23 @@ interface BackendWorkflowResult {
   research?: {
     sourceBasis?: string[];
   };
+}
+
+interface QueryBuilderData {
+  originalQuestion?: string;
+  reformulatedQuestion?: string;
+  optimizedPrompt?: string;
+  lawStudentTerms?: string;
+  aiGeneratedTerms?: string[];
+  targetIndicators?: string[];
+  searchQueries?: string[];
+  queryPlan?: Array<{
+    query?: string;
+    searchQuery?: string;
+    targetIndicator?: string;
+    targetSourceType?: string;
+    sourceType?: string;
+  }>;
 }
 
 const supportedCountries: SupportedCountry[] = [
@@ -672,6 +821,59 @@ async function runBackendAnalysis(question: string, mode: CoreModeId) {
   }
 
   return JSON.parse(doneMatch[1]) as BackendWorkflowResult;
+}
+
+async function runQueryBuilderSuggestion(question: string, mode: CoreModeId) {
+  const result = await runBackendAnalysis(question, mode);
+  return formatQueryBuilderSuggestion(result, question, mode);
+}
+
+function formatQueryBuilderSuggestion(
+  result: BackendWorkflowResult,
+  question: string,
+  mode: CoreModeId
+) {
+  const queryBuilder = result.supportingAgentResults?.queryBuilder?.data;
+  const planLines =
+    queryBuilder?.queryPlan
+      ?.map((item) => {
+        const query = item.query ?? item.searchQuery;
+        const target = item.targetIndicator ?? item.targetSourceType ?? item.sourceType;
+        return [query, target ? `target: ${target}` : null].filter(Boolean).join(" | ");
+      })
+      .filter(Boolean) ?? [];
+
+  const sourceTerms = [
+    queryBuilder?.optimizedPrompt,
+    queryBuilder?.reformulatedQuestion,
+    queryBuilder?.lawStudentTerms,
+    ...(queryBuilder?.aiGeneratedTerms ?? []),
+    ...(queryBuilder?.targetIndicators ?? []),
+    ...(queryBuilder?.searchQueries ?? []),
+    ...planLines
+  ].filter(Boolean);
+
+  if (sourceTerms.length) {
+    return [
+      queryBuilder?.optimizedPrompt ?? queryBuilder?.reformulatedQuestion ?? question,
+      "",
+      "Query Builder focus:",
+      ...sourceTerms
+        .filter((term, index, terms) => terms.indexOf(term) === index)
+        .slice(0, 8)
+        .map((term) => `- ${term}`)
+    ].join("\n");
+  }
+
+  return [
+    `Please handle this as a ${getScenarioLabel(mode)} task under Pillar 6/7:`,
+    question,
+    "",
+    "Query Builder focus:",
+    "- Identify the jurisdiction, data-flow direction, actors, data category, and business purpose.",
+    "- Search for authoritative legal evidence and cite the source basis.",
+    "- Translate the evidence into compliance risks, legal reasoning, and practical next steps."
+  ].join("\n");
 }
 
 function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
