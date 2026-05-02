@@ -27,6 +27,9 @@ interface PromptPanelState {
 const VIDEO_URL =
   "https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260329_050842_be71947f-f16e-4a14-810c-06e83d23ddb5.mp4";
 
+const MAX_UPLOAD_FILES = 3;
+const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
+
 const coreModes: Array<{
   id: CoreModeId;
   english: string;
@@ -87,6 +90,7 @@ export function ChatLegalWorkspace() {
   const [activeConversation, setActiveConversation] = useState("current");
   const [messages, setMessages] = useState<ChatMessage[]>(starterMessages);
   const [inputValue, setInputValue] = useState("");
+  const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const hasConversation = messages.length > 1;
 
@@ -110,6 +114,7 @@ export function ChatLegalWorkspace() {
     }
 
     const selectedMode = activeModeRef.current;
+    const selectedFiles = uploadedFiles;
     const userMessageId = `user-${Date.now()}`;
     const assistantMessageId = `assistant-${Date.now()}`;
 
@@ -129,10 +134,11 @@ export function ChatLegalWorkspace() {
       }
     ]);
     setInputValue("");
+    setUploadedFiles([]);
     setIsSubmitting(true);
 
     try {
-      const result = await runBackendAnalysis(trimmed, selectedMode);
+      const result = await runBackendAnalysis(trimmed, selectedMode, selectedFiles);
       setMessages((current) =>
         current.map((message) =>
           message.id === assistantMessageId
@@ -171,6 +177,7 @@ export function ChatLegalWorkspace() {
           setMessages(starterMessages);
           setActiveConversation("current");
           setInputValue("");
+          setUploadedFiles([]);
           handleModeChange("regulation");
         }}
       />
@@ -205,6 +212,8 @@ export function ChatLegalWorkspace() {
                     surface="chat"
                     onModeChange={handleModeChange}
                     onInputChange={setInputValue}
+                    uploadedFiles={uploadedFiles}
+                    onUploadedFilesChange={setUploadedFiles}
                     isSubmitting={isSubmitting}
                     onSubmit={handleSubmit}
                   />
@@ -227,6 +236,8 @@ export function ChatLegalWorkspace() {
                   surface="hero"
                   onModeChange={handleModeChange}
                   onInputChange={setInputValue}
+                  uploadedFiles={uploadedFiles}
+                  onUploadedFilesChange={setUploadedFiles}
                   isSubmitting={isSubmitting}
                   onSubmit={handleSubmit}
                 />
@@ -423,6 +434,8 @@ function SearchComposer({
   isSubmitting,
   onModeChange,
   onInputChange,
+  uploadedFiles,
+  onUploadedFilesChange,
   onSubmit
 }: {
   activeMode: CoreModeId;
@@ -432,12 +445,13 @@ function SearchComposer({
   isSubmitting: boolean;
   onModeChange: (mode: CoreModeId) => void;
   onInputChange: (value: string) => void;
+  uploadedFiles: File[];
+  onUploadedFilesChange: (files: File[]) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   const isHero = surface === "hero";
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const dragDepthRef = useRef(0);
-  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
   const [fileError, setFileError] = useState<string | null>(null);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
   const [attachFeedback, setAttachFeedback] = useState(false);
@@ -456,26 +470,45 @@ function SearchComposer({
 
   function isSupportedFile(file: File) {
     const extension = file.name.split(".").pop()?.toLowerCase();
-    return ["pdf", "doc", "docx"].includes(extension ?? "");
+    return ["pdf", "docx"].includes(extension ?? "");
   }
 
-  function handleSelectedFile(file: File | null) {
-    if (!file) {
+  function handleSelectedFiles(files: File[]) {
+    if (!files.length) {
       return;
     }
 
-    if (!isSupportedFile(file)) {
-      setSelectedFileName(null);
-      setFileError("Only PDF and Word files are supported.");
+    if (uploadedFiles.length + files.length > MAX_UPLOAD_FILES) {
+      setFileError(`Upload at most ${MAX_UPLOAD_FILES} files at once.`);
       return;
     }
 
-    setSelectedFileName(file.name);
+    const invalidDoc = files.find((file) => file.name.split(".").pop()?.toLowerCase() === "doc");
+    if (invalidDoc) {
+      setFileError(`${invalidDoc.name} is an old Word DOC file. Please upload a DOCX file.`);
+      return;
+    }
+
+    const oversizedFile = files.find((file) => file.size > MAX_UPLOAD_BYTES);
+    if (oversizedFile) {
+      setFileError(`${oversizedFile.name} is larger than the 20MB upload limit.`);
+      return;
+    }
+
+    const unsupportedFile = files.find((file) => !isSupportedFile(file));
+    if (unsupportedFile) {
+      setFileError(`${unsupportedFile.name} is not supported. Upload PDF or DOCX files.`);
+      return;
+    }
+
+    const nextFiles = [...uploadedFiles, ...files].slice(0, MAX_UPLOAD_FILES);
+    onUploadedFilesChange(nextFiles);
     setFileError(null);
   }
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    handleSelectedFile(event.target.files?.[0] ?? null);
+    handleSelectedFiles(Array.from(event.target.files ?? []));
+    event.target.value = "";
     triggerAttachFeedback();
   }
 
@@ -508,7 +541,7 @@ function SearchComposer({
     event.preventDefault();
     dragDepthRef.current = 0;
     setIsDraggingFile(false);
-    handleSelectedFile(event.dataTransfer.files?.[0] ?? null);
+    handleSelectedFiles(Array.from(event.dataTransfer.files ?? []));
     triggerAttachFeedback();
   }
 
@@ -562,7 +595,7 @@ function SearchComposer({
       >
         <div className="flex items-center gap-1.5">
           <AISparkleIcon className="h-4 w-4" />
-          <span>Powered by GPT-4o</span>
+          <span>Powered by DeepSeek</span>
         </div>
       </div>
 
@@ -594,6 +627,7 @@ function SearchComposer({
           ref={fileInputRef}
           type="file"
           accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          multiple
           className="hidden"
           onChange={handleFileChange}
         />
@@ -613,11 +647,26 @@ function SearchComposer({
               disabled={!inputValue.trim() || promptPanel?.status === "loading"}
               isFeedbackActive={promptFeedback || promptPanel?.status === "loading"}
             />
-            {selectedFileName ? (
-              <span className="truncate rounded-md bg-black/5 px-2 py-1 font-schibsted text-[12px] font-medium text-black/60">
-                {selectedFileName}
+            {uploadedFiles.map((file) => (
+              <span
+                key={`${file.name}-${file.size}-${file.lastModified}`}
+                className="inline-flex max-w-[180px] items-center gap-1 truncate rounded-md bg-black/5 px-2 py-1 font-schibsted text-[12px] font-medium text-black/60"
+              >
+                <span className="truncate">{file.name}</span>
+                <button
+                  type="button"
+                  className="text-black/45 hover:text-black"
+                  aria-label={`Remove ${file.name}`}
+                  onClick={() =>
+                    onUploadedFilesChange(
+                      uploadedFiles.filter((item) => item !== file)
+                    )
+                  }
+                >
+                  x
+                </button>
               </span>
-            ) : null}
+            ))}
             {fileError ? (
               <span className="truncate rounded-md bg-red-50 px-2 py-1 font-schibsted text-[12px] font-medium text-red-700">
                 {fileError}
@@ -804,6 +853,13 @@ interface BackendWorkflowResult {
   providerId?: string;
   providerModel?: string | null;
   evidenceSourceMode?: "real" | "mock" | "hybrid";
+  input?: {
+    uploadedDocuments?: Array<{
+      fileName: string;
+      sizeBytes: number;
+      characterCount: number;
+    }>;
+  };
   report?: {
     finalNarrative?: string;
     overallRisk?: string;
@@ -885,19 +941,39 @@ function getScenarioLabel(mode: CoreModeId) {
   return "forward-looking advisory";
 }
 
-async function runBackendAnalysis(question: string, mode: CoreModeId) {
+async function runBackendAnalysis(question: string, mode: CoreModeId, files: File[] = []) {
   const countries = inferCountries(question);
-  const response = await fetch("/api/analyze", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      ...countries,
-      businessScenario: getScenarioLabel(mode),
-      userQuery: question
-    })
-  });
+
+  const requestInit: RequestInit = files.length
+    ? {
+        method: "POST",
+        body: (() => {
+          const formData = new FormData();
+          formData.set("countryA", countries.countryA);
+
+          if (countries.countryB) {
+            formData.set("countryB", countries.countryB);
+          }
+
+          formData.set("businessScenario", getScenarioLabel(mode));
+          formData.set("userQuery", question);
+          files.forEach((file) => formData.append("files", file));
+          return formData;
+        })()
+      }
+    : {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          ...countries,
+          businessScenario: getScenarioLabel(mode),
+          userQuery: question
+        })
+      };
+
+  const response = await fetch("/api/analyze", requestInit);
 
   if (!response.ok) {
     throw new Error(`API returned ${response.status}.`);
@@ -992,6 +1068,7 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
     : null;
   const exportReadiness =
     result.supportingAgentResults?.legalReviewExport?.data?.exportReadiness ?? null;
+  const uploadedDocuments = result.input?.uploadedDocuments ?? [];
   const citations = (result.evidenceRecords ?? [])
     .slice(0, 3)
     .map((record) => record.citation || record.lawTitle || record.sourceUrl)
@@ -1004,6 +1081,11 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
     risk,
     provider,
     evidenceMode,
+    uploadedDocuments.length
+      ? `Uploaded documents used: ${uploadedDocuments
+          .map((file) => `${file.fileName} (${file.characterCount.toLocaleString()} chars)`)
+          .join(" | ")}`
+      : null,
     exportReadiness ? `Export readiness: ${exportReadiness}.` : null,
     citations.length ? `Key citations: ${citations.join(" | ")}` : null,
     sourceBasis.length ? `Source basis: ${sourceBasis.join(" | ")}` : null,

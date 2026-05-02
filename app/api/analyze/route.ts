@@ -1,5 +1,6 @@
 import { runMultiAgentWorkflow } from "@/lib/agents";
 import { createWorkflowRun } from "@/lib/server/run-store";
+import { parseUploadedDocuments, UploadedDocumentContext } from "@/lib/server/uploaded-documents";
 import { SupportedCountry, StreamEventName, WorkflowResult } from "@/lib/types";
 import { NextRequest } from "next/server";
 
@@ -15,6 +16,7 @@ function parseBody(body: unknown): {
   countryB?: SupportedCountry | null;
   businessScenario?: string;
   userQuery?: string;
+  uploadedDocumentContext?: UploadedDocumentContext | null;
 } {
   if (!body || typeof body !== "object") {
     throw new Error("Invalid request body.");
@@ -35,13 +37,48 @@ function parseBody(body: unknown): {
     countryA: input.countryA,
     countryB: input.countryB ?? null,
     businessScenario: input.businessScenario,
-    userQuery: input.userQuery
+    userQuery: input.userQuery,
+    uploadedDocumentContext: null
+  };
+}
+
+function parseCountry(value: FormDataEntryValue | null) {
+  return typeof value === "string" && value.trim() ? (value.trim() as SupportedCountry) : null;
+}
+
+function parseOptionalString(value: FormDataEntryValue | null) {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+async function parseRequestBody(request: NextRequest) {
+  const contentType = request.headers.get("content-type") ?? "";
+
+  if (!contentType.includes("multipart/form-data")) {
+    return parseBody(await request.json());
+  }
+
+  const formData = await request.formData();
+  const countryA = parseCountry(formData.get("countryA"));
+
+  if (!countryA) {
+    throw new Error("countryA is required.");
+  }
+
+  const files = formData
+    .getAll("files")
+    .filter((item): item is File => item instanceof File && item.size > 0);
+
+  return {
+    countryA,
+    countryB: parseCountry(formData.get("countryB")),
+    businessScenario: parseOptionalString(formData.get("businessScenario")),
+    userQuery: parseOptionalString(formData.get("userQuery")),
+    uploadedDocumentContext: files.length ? await parseUploadedDocuments(files) : null
   };
 }
 
 export async function POST(request: NextRequest) {
   const encoder = new TextEncoder();
-  const body = parseBody(await request.json());
 
   const stream = new ReadableStream({
     async start(controller) {
@@ -50,6 +87,8 @@ export async function POST(request: NextRequest) {
       };
 
       try {
+        const body = await parseRequestBody(request);
+
         send("workflow", {
           status: "running",
           message: "Multi-agent workflow initiated."
@@ -57,7 +96,8 @@ export async function POST(request: NextRequest) {
 
         const result = await runMultiAgentWorkflow(body.countryA, body.countryB, {
           businessScenario: body.businessScenario,
-          userQuery: body.userQuery
+          userQuery: body.userQuery,
+          uploadedDocumentContext: body.uploadedDocumentContext
         });
         const persistedRun = await createWorkflowRun(result);
         const persistedResult: WorkflowResult = {

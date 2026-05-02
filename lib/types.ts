@@ -113,6 +113,11 @@ export interface WorkflowInput {
   countryB?: SupportedCountry | null;
   businessScenario: string;
   userQuery: string;
+  uploadedDocuments?: Array<{
+    fileName: string;
+    sizeBytes: number;
+    characterCount: number;
+  }>;
 }
 
 export type TenAgentId =

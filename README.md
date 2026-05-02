@@ -6,6 +6,7 @@ Submission-ready UN AI Hackathon prototype for analyzing **UN ESCAP RDTII Pillar
 - provider adapter architecture
 - competition-designated RDTII-source evidence ingestion
 - structured legal evidence records
+- local PDF / DOCX upload parsing for user-provided context
 - multi-agent analysis outputs
 - audit review persistence
 - JSON / CSV / Markdown export
@@ -17,6 +18,7 @@ The UI contract from the original demo is preserved, and the original mock data 
 - **Model provider adapter:** implemented in [lib/server/provider-adapter.ts](lib/server/provider-adapter.ts:1)
 - **Live provider support:** DeepSeek Chat Completions API via `DEEPSEEK_API_KEY`, or OpenAI Responses API via `OPENAI_API_KEY`
 - **Real source pipeline:** competition-designated UN ESCAP RCDTRA and RDTII 2.1 sources plus live fetch / excerpt extraction in [lib/server/source-pipeline.ts](lib/server/source-pipeline.ts:1)
+- **Uploaded document context:** chat uploads support up to three PDF / DOCX files, 20MB each, parsed through [lib/server/uploaded-documents.ts](lib/server/uploaded-documents.ts:1)
 - **Review persistence:** filesystem-backed run store in [lib/server/run-store.ts](lib/server/run-store.ts:1)
 - **Review APIs:** [app/api/reviews/route.ts](app/api/reviews/route.ts:1) and [app/api/runs/[runId]/route.ts](app/api/runs/[runId]/route.ts:1)
 - **Smoke tests:** `tests/source-pipeline-smoke.test.ts` and `tests/run-store-smoke.test.ts`
@@ -27,7 +29,7 @@ The UI contract from the original demo is preserved, and the original mock data 
 - **Source coverage:** current competition-designated live-source coverage is strongest for China, Singapore, and the European Union
 - **Other jurisdictions:** fall back to existing mock evidence records rather than failing the workflow
 - **Persistence backend:** current implementation uses the local filesystem run store for prototype durability; swap the adapter for a hosted database or object store before production deployment
-- **Additional providers:** the adapter layer is designed for expansion, but only OpenAI is wired today
+- **Additional providers:** DeepSeek and OpenAI are wired; the adapter layer can still expand to other model providers
 
 ## Current implementation boundary
 

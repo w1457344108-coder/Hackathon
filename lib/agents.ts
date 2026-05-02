@@ -41,6 +41,10 @@ import {
 } from "@/lib/types";
 import { getAnalysisProvider } from "@/lib/server/provider-adapter";
 import { resolveEvidenceContext } from "@/lib/server/source-pipeline";
+import {
+  buildUploadedDocumentQuery,
+  UploadedDocumentContext
+} from "@/lib/server/uploaded-documents";
 
 const SOURCE_BASIS = [
   "UN ESCAP RDTII initiative structure",
@@ -1336,12 +1340,15 @@ export async function runMultiAgentWorkflow(
   options?: {
     businessScenario?: string;
     userQuery?: string;
+    uploadedDocumentContext?: UploadedDocumentContext | null;
   }
 ): Promise<WorkflowResult> {
   const businessScenario = options?.businessScenario ?? "fintech";
-  const userQuery =
+  const rawUserQuery =
     options?.userQuery ??
     "Find legal evidence describing how cross-border data transfers are permitted, conditioned, or restricted.";
+  const uploadedDocumentContext = options?.uploadedDocumentContext ?? null;
+  const userQuery = buildUploadedDocumentQuery(rawUserQuery, uploadedDocumentContext);
   const provider = getAnalysisProvider();
   const resolvedEvidence = await resolveEvidenceContext(countryA, countryB);
   const mainlineAgentResults = await runMainlineAgents({
@@ -1394,7 +1401,12 @@ export async function runMultiAgentWorkflow(
       countryA,
       countryB,
       businessScenario,
-      userQuery
+      userQuery: rawUserQuery,
+      uploadedDocuments: uploadedDocumentContext?.files.map((file) => ({
+        fileName: file.fileName,
+        sizeBytes: file.sizeBytes,
+        characterCount: file.characterCount
+      }))
     },
     research,
     policyAnalysis,
