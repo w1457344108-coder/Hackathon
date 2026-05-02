@@ -5,6 +5,7 @@ import {
   EvidenceRecord,
   EvidenceReviewStatus
 } from "@/lib/pillar6-schema";
+import { formatEvidenceSnippetForDisplay } from "@/lib/evidence-display";
 import {
   AuditCitationItem,
   AuditCitationOutput,
@@ -359,7 +360,9 @@ export function ChatAnalysisPanels({
                 {record.sourceLocator ? (
                   <p className="mt-1 text-xs leading-5 text-black/55">{`Locator: ${record.sourceLocator}`}</p>
                 ) : null}
-                <p className="mt-2 text-sm leading-6 text-black/72">{record.verbatimSnippet}</p>
+                <p className="mt-2 whitespace-pre-line text-sm leading-6 text-black/72">
+                  {formatEvidenceSnippetForDisplay(record)}
+                </p>
                 <a
                   href={record.sourceUrl}
                   target="_blank"

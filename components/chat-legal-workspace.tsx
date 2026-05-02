@@ -5,6 +5,7 @@ import {
   ChatAnalysisPanels,
   type ChatAnalysisResult
 } from "@/components/chat-analysis-panels";
+import { formatEvidenceSnippetForDisplay } from "@/lib/evidence-display";
 import {
   detectUnsupportedJurisdictions,
   inferCountries,
@@ -1265,7 +1266,12 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
     return [
       `- Evidence ${index + 1}: ${record.lawTitle}`,
       record.sourceLocator ? `  Locator: ${record.sourceLocator}` : null,
-      record.verbatimSnippet ? `  Excerpt: ${record.verbatimSnippet}` : null,
+      record.verbatimSnippet
+        ? `  Excerpt:\n${formatEvidenceSnippetForDisplay(record)
+            .split("\n")
+            .map((line) => `    ${line}`)
+            .join("\n")}`
+        : null,
       record.sourceUrl ? `  Source: ${record.sourceUrl}` : null
     ]
       .filter(Boolean)
