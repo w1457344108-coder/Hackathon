@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 
-export type AnalysisProviderId = "openai" | "mock";
+export type AnalysisProviderId = "openai" | "deepseek" | "mock";
 
 export interface StructuredGenerationRequest<T> {
   schemaName: string;
@@ -48,6 +48,17 @@ interface OpenAIResponsesApiResponse {
   output?: OpenAIResponseMessage[];
 }
 
+interface DeepSeekChatCompletionResponse {
+  error?: {
+    message?: string;
+  };
+  choices?: Array<{
+    message?: {
+      content?: string | null;
+    };
+  }>;
+}
+
 function getEnv(name: string) {
   const value = process.env[name];
   return value && value.trim() ? value.trim() : null;
@@ -55,6 +66,12 @@ function getEnv(name: string) {
 
 function safeStringify(value: unknown) {
   return JSON.stringify(value, null, 2);
+}
+
+function parseStructuredJson<T>(text: string): T {
+  const trimmed = text.trim();
+  const fencedMatch = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+  return JSON.parse(fencedMatch ? fencedMatch[1] : trimmed) as T;
 }
 
 function createFallbackResult<T>(
@@ -110,6 +127,64 @@ function buildOpenAIRequestBody<T>(request: StructuredGenerationRequest<T>, mode
         schema: request.schema
       }
     }
+  };
+}
+
+function getDeepSeekThinkingConfig() {
+  const thinkingType = getEnv("DEEPSEEK_THINKING") ?? "disabled";
+
+  if (thinkingType !== "enabled" && thinkingType !== "disabled") {
+    return { type: "disabled" };
+  }
+
+  return { type: thinkingType };
+}
+
+function getDeepSeekReasoningEffort() {
+  const reasoningEffort = getEnv("DEEPSEEK_REASONING_EFFORT");
+
+  if (reasoningEffort === "max") {
+    return "max";
+  }
+
+  return "high";
+}
+
+function buildDeepSeekRequestBody<T>(request: StructuredGenerationRequest<T>, model: string) {
+  const jsonInstructions = [
+    request.instructions,
+    "",
+    "Return only valid JSON. Do not include markdown, commentary, or explanatory prose.",
+    "The JSON object must conform to this schema description:",
+    request.schemaDescription,
+    "",
+    "JSON schema:",
+    safeStringify(request.schema),
+    "",
+    "Example JSON output shape:",
+    request.fallback === undefined ? "{}" : safeStringify(request.fallback)
+  ].join("\n");
+
+  return {
+    model,
+    messages: [
+      {
+        role: "system",
+        content: jsonInstructions
+      },
+      {
+        role: "user",
+        content: request.input
+      }
+    ],
+    response_format: {
+      type: "json_object"
+    },
+    max_tokens: request.maxOutputTokens ?? 1400,
+    temperature: request.temperature ?? 0.2,
+    stream: false,
+    thinking: getDeepSeekThinkingConfig(),
+    reasoning_effort: getDeepSeekReasoningEffort()
   };
 }
 
@@ -184,7 +259,7 @@ class OpenAIAnalysisProvider implements AnalysisProvider {
 
       return {
         ok: true,
-        object: JSON.parse(text) as T,
+        object: parseStructuredJson<T>(text),
         providerId: this.id,
         model: this.model,
         usedFallback: false
@@ -200,11 +275,90 @@ class OpenAIAnalysisProvider implements AnalysisProvider {
   }
 }
 
+class DeepSeekAnalysisProvider implements AnalysisProvider {
+  id: AnalysisProviderId = "deepseek";
+  model: string | null;
+  private readonly apiKey: string;
+  private readonly baseUrl: string;
+
+  constructor() {
+    const apiKey = getEnv("DEEPSEEK_API_KEY");
+
+    if (!apiKey) {
+      throw new Error("DEEPSEEK_API_KEY is not configured.");
+    }
+
+    this.apiKey = apiKey;
+    this.baseUrl = getEnv("DEEPSEEK_BASE_URL") ?? "https://api.deepseek.com";
+    this.model = getEnv("DEEPSEEK_MODEL") ?? "deepseek-v4-pro";
+  }
+
+  async generateStructuredObject<T>(
+    request: StructuredGenerationRequest<T>
+  ): Promise<StructuredGenerationResult<T>> {
+    try {
+      const response = await fetch(`${this.baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${this.apiKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(buildDeepSeekRequestBody(request, this.model ?? "deepseek-v4-pro"))
+      });
+
+      const payload = (await response.json()) as DeepSeekChatCompletionResponse;
+
+      if (!response.ok) {
+        return createFallbackResult(
+          request,
+          this.id,
+          this.model,
+          payload.error?.message ?? `DeepSeek Chat Completions API returned ${response.status}.`
+        );
+      }
+
+      const text = payload.choices?.[0]?.message?.content?.trim() ?? "";
+
+      if (!text) {
+        return createFallbackResult(
+          request,
+          this.id,
+          this.model,
+          "DeepSeek Chat Completions API returned no structured message content."
+        );
+      }
+
+      return {
+        ok: true,
+        object: parseStructuredJson<T>(text),
+        providerId: this.id,
+        model: this.model,
+        usedFallback: false
+      };
+    } catch (error) {
+      return createFallbackResult(
+        request,
+        this.id,
+        this.model,
+        error instanceof Error ? error.message : "Unknown DeepSeek provider error."
+      );
+    }
+  }
+}
+
 export function getAnalysisProvider(): AnalysisProvider {
   const configuredProvider = getEnv("ANALYSIS_PROVIDER");
 
   if (configuredProvider === "mock") {
     return new MockAnalysisProvider();
+  }
+
+  if (configuredProvider === "deepseek" || getEnv("DEEPSEEK_API_KEY")) {
+    try {
+      return new DeepSeekAnalysisProvider();
+    } catch {
+      return new MockAnalysisProvider();
+    }
   }
 
   if (configuredProvider === "openai" || getEnv("OPENAI_API_KEY")) {

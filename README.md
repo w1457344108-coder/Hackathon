@@ -15,7 +15,7 @@ The UI contract from the original demo is preserved, and the original mock data 
 ## What Is Real Now
 
 - **Model provider adapter:** implemented in [lib/server/provider-adapter.ts](lib/server/provider-adapter.ts:1)
-- **Live provider support:** OpenAI Responses API via `OPENAI_API_KEY`
+- **Live provider support:** DeepSeek Chat Completions API via `DEEPSEEK_API_KEY`, or OpenAI Responses API via `OPENAI_API_KEY`
 - **Real source pipeline:** competition-designated UN ESCAP RCDTRA and RDTII 2.1 sources plus live fetch / excerpt extraction in [lib/server/source-pipeline.ts](lib/server/source-pipeline.ts:1)
 - **Review persistence:** filesystem-backed run store in [lib/server/run-store.ts](lib/server/run-store.ts:1)
 - **Review APIs:** [app/api/reviews/route.ts](app/api/reviews/route.ts:1) and [app/api/runs/[runId]/route.ts](app/api/runs/[runId]/route.ts:1)
@@ -90,7 +90,17 @@ From `package.json`:
 
 ## Environment Variables
 
-### Optional for live model analysis
+### Optional for live model analysis with DeepSeek
+
+```bash
+DEEPSEEK_API_KEY=...
+DEEPSEEK_MODEL=deepseek-v4-pro
+ANALYSIS_PROVIDER=deepseek
+```
+
+The DeepSeek adapter calls `https://api.deepseek.com/chat/completions` by default and requests structured JSON output from the configured model.
+
+### Optional for live model analysis with OpenAI
 
 ```bash
 OPENAI_API_KEY=...
@@ -101,11 +111,12 @@ ANALYSIS_PROVIDER=openai
 ### Optional overrides
 
 ```bash
+DEEPSEEK_BASE_URL=https://api.deepseek.com
 OPENAI_BASE_URL=https://api.openai.com/v1
 ANALYSIS_PROVIDER=mock
 ```
 
-If `OPENAI_API_KEY` is missing, the workflow still runs with structured mock fallback reasoning instead of pretending a live model is active.
+If no live provider API key is configured, the workflow still runs with structured mock fallback reasoning instead of pretending a live model is active.
 
 ## Run Locally
 
