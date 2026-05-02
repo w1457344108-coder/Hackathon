@@ -73,19 +73,19 @@ function getEvidenceModeLabel(mode: ChatAnalysisResult["evidenceSourceMode"]) {
 }
 
 function getSourceStrengthLabel(record: EvidenceRecord) {
-  if (record.lawTitle.includes("Economy Profile")) {
-    return "Country profile";
+  if (record.sourceType === "Statute") {
+    return "Statute text";
   }
 
-  if (record.lawTitle.includes("Regulatory Database")) {
-    return "Database entrypoint";
+  if (record.sourceType === "Regulator Guidance") {
+    return "Regulator guidance";
   }
 
-  if (record.lawTitle.includes("Guide")) {
-    return "Methodology support";
+  if (record.sourceType === "Policy Notice") {
+    return "Official policy notice";
   }
 
-  return "Supporting source";
+  return "Official source";
 }
 
 function toCoverageSummary(result: ChatAnalysisResult, evidenceRecords: EvidenceRecord[]) {
@@ -122,16 +122,20 @@ function toSourceStrengthSummary(result: ChatAnalysisResult, evidenceRecords: Ev
       (record) => record.country === country && !isLikelyMockSource(record.sourceUrl)
     );
 
-    if (records.some((record) => getSourceStrengthLabel(record) === "Country profile")) {
-      return `${country}: country-profile evidence`;
+    if (records.some((record) => getSourceStrengthLabel(record) === "Statute text")) {
+      return `${country}: statute-level evidence`;
     }
 
-    if (records.some((record) => getSourceStrengthLabel(record) === "Database entrypoint")) {
-      return `${country}: database-entry coverage`;
+    if (records.some((record) => getSourceStrengthLabel(record) === "Regulator guidance")) {
+      return `${country}: regulator-guidance coverage`;
+    }
+
+    if (records.some((record) => getSourceStrengthLabel(record) === "Official policy notice")) {
+      return `${country}: official-policy coverage`;
     }
 
     if (records.length) {
-      return `${country}: methodology support`;
+      return `${country}: official-source coverage`;
     }
 
     return `${country}: fallback only`;
@@ -360,7 +364,10 @@ export function ChatAnalysisPanels({
                 {record.sourceLocator ? (
                   <p className="mt-1 text-xs leading-5 text-black/55">{`Locator: ${record.sourceLocator}`}</p>
                 ) : null}
-                <p className="mt-2 whitespace-pre-line text-sm leading-6 text-black/72">
+                <p className="mt-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-black/45">
+                  Decisive basis
+                </p>
+                <p className="mt-1 whitespace-pre-line text-sm leading-6 text-black/72">
                   {formatEvidenceSnippetForDisplay(record)}
                 </p>
                 <a
@@ -381,7 +388,7 @@ export function ChatAnalysisPanels({
 
         {sourceBasis.length ? (
           <div className="mt-4 rounded-[16px] border border-black/10 bg-[#fcfcfc] px-4 py-4">
-            <p className="text-[13px] font-semibold text-black">Source basis</p>
+            <p className="text-[13px] font-semibold text-black">Source URLs used</p>
             <ul className="mt-2 space-y-1 text-sm leading-6 text-black/68">
               {sourceBasis.map((item) => (
                 <li key={item}>{item}</li>
@@ -403,7 +410,13 @@ export function ChatAnalysisPanels({
               {selectedRecord.sourceLocator ? (
                 <p className="mt-1 text-xs leading-5 text-black/55">{`Locator: ${selectedRecord.sourceLocator}`}</p>
               ) : null}
-              <p className="mt-2 text-sm leading-6 text-black/72">{selectedRecord.aiExtraction}</p>
+              <p className="mt-3 text-[12px] font-semibold uppercase tracking-[0.12em] text-black/45">
+                Decisive basis
+              </p>
+              <p className="mt-1 whitespace-pre-line text-sm leading-6 text-black/72">
+                {formatEvidenceSnippetForDisplay(selectedRecord)}
+              </p>
+              <p className="mt-3 text-sm leading-6 text-black/72">{selectedRecord.aiExtraction}</p>
               <p className="mt-3 text-sm leading-6 text-black/72">{selectedRecord.pillar6Mapping}</p>
               {selectedAuditItem ? (
                 <div className="mt-4 rounded-[14px] border border-black/10 bg-white px-3 py-3 text-sm leading-6 text-black/72">

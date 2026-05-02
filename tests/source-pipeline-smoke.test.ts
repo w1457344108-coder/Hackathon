@@ -3,9 +3,23 @@ import assert from "node:assert/strict";
 import { resolveEvidenceContext } from "../lib/server/source-pipeline.ts";
 import { countryPolicyProfiles } from "../lib/mock-data.ts";
 
-const allowedHosts = new Set(["www.unescap.org", "unescap.org", "dtri.uneca.org"]);
+const allowedHosts = new Set([
+  "www.npc.gov.cn",
+  "npc.gov.cn",
+  "www.cac.gov.cn",
+  "cac.gov.cn",
+  "www.pdpc.gov.sg",
+  "pdpc.gov.sg",
+  "www.ppc.go.jp",
+  "ppc.go.jp",
+  "eur-lex.europa.eu",
+  "www.commerce.gov",
+  "commerce.gov",
+  "www.dataprivacyframework.gov",
+  "dataprivacyframework.gov"
+]);
 
-test("source pipeline returns traceable evidence records for requested jurisdictions", async () => {
+test("source pipeline returns traceable official-source evidence for requested jurisdictions", async () => {
   const context = await resolveEvidenceContext("China", "Singapore");
 
   assert.ok(context.evidenceRecords.length >= 2);
@@ -22,94 +36,17 @@ test("source pipeline returns traceable evidence records for requested jurisdict
   assert.ok(context.evidenceRecords.every((record) => Boolean(record.sourceLocator)));
   assert.ok(context.evidenceRecords.every((record) => Boolean(record.sourceStrength)));
   assert.ok(context.evidenceRecords.every((record) => Boolean(record.traceabilityTier)));
+  assert.ok(context.evidenceRecords.some((record) => record.sourceUrl.includes("npc.gov.cn")));
+  assert.ok(context.evidenceRecords.some((record) => record.sourceUrl.includes("pdpc.gov.sg")));
   assert.ok(
-    context.evidenceRecords.some(
-      (record) =>
-        record.sourceUrl.includes("unescap.org/projects/rcdtra") ||
-        record.sourceUrl.includes("dtri.uneca.org/assets/data/publications/") ||
-        record.sourceUrl.includes("dtri.uneca.org/v1/uploads/country-profile/")
-    )
-  );
-  assert.ok(context.sourceBasis.some((item) => item.includes("Competition-designated source set")));
-});
-
-test("source pipeline expands real coverage for Japan and the United States", async () => {
-  const context = await resolveEvidenceContext("Japan", "United States");
-
-  assert.equal(context.sourceMode, "real");
-  assert.ok(context.evidenceRecords.some((record) => record.country === "Japan"));
-  assert.ok(context.evidenceRecords.some((record) => record.country === "United States"));
-  assert.ok(context.evidenceRecords.every((record) => !record.sourceUrl.includes("example.")));
-  assert.ok(
-    context.evidenceRecords.some((record) =>
-      record.sourceUrl.includes("jpn-country-profile-en.pdf")
-    )
-  );
-  const japanProfile = context.evidenceRecords.find((record) =>
-    record.sourceUrl.includes("jpn-country-profile-en.pdf")
-  );
-  assert.ok(japanProfile);
-  assert.match(
-    japanProfile.sourceLocator ?? "",
-    /(Page \d+, sentence \d+|sentence-level fallback excerpt)/
-  );
-  assert.ok((japanProfile.originalLegalText ?? "").length <= 500);
-  assert.ok(
-    context.evidenceRecords.some(
-      (record) =>
-        record.country === "United States" && record.traceabilityTier === "entrypoint-level"
-    )
-  );
-  assert.ok(context.sourceBasis.some((item) => item.includes("Competition-designated source set")));
-});
-
-test("pdf-based evidence excerpts avoid score-table spillover when highlighting Pillar 6", async () => {
-  const context = await resolveEvidenceContext("Singapore");
-  const singaporeProfile = context.evidenceRecords.find((record) =>
-    record.sourceUrl.includes("sgp-country-profile-en.pdf")
-  );
-
-  assert.ok(singaporeProfile);
-  assert.doesNotMatch(singaporeProfile.verbatimSnippet, /Pillar 1:|Pillar 2:|Pillar 3:|Pillar 5:|Pillar 7:|Pillar 8:/i);
-  assert.doesNotMatch(singaporeProfile.verbatimSnippet, /Table: Singapore'?s RDTII 2025 overall score/i);
-  assert.doesNotMatch(singaporeProfile.verbatimSnippet, /\.{5,}/);
-  assert.match(singaporeProfile.verbatimSnippet, /Pillar 6|cross-border data policies/i);
-});
-
-test("guide evidence excerpts stay focused on Pillar 6 rather than table-of-contents spillover", async () => {
-  const context = await resolveEvidenceContext("China");
-  const guideRecord = context.evidenceRecords.find((record) =>
-    record.sourceUrl.includes("ESCAP-2025-MN-RDTII-2.1-guide-en.pdf")
-  );
-
-  assert.ok(guideRecord);
-  assert.doesNotMatch(guideRecord.verbatimSnippet, /Pillar 5:|Pillar 7:|Pillar 8:/i);
-  assert.doesNotMatch(guideRecord.verbatimSnippet, /\.{5,}/);
-  assert.match(guideRecord.verbatimSnippet, /Pillar 6|cross-border data policies/i);
-});
-
-test("source pipeline expands real coverage for the European Union and the United States", async () => {
-  const context = await resolveEvidenceContext("European Union", "United States");
-
-  assert.equal(context.sourceMode, "real");
-  assert.ok(context.evidenceRecords.some((record) => record.country === "European Union"));
-  assert.ok(context.evidenceRecords.some((record) => record.country === "United States"));
-  assert.ok(context.evidenceRecords.every((record) => !record.sourceUrl.includes("example.")));
-  assert.ok(
-    context.evidenceRecords.some(
-      (record) =>
-        record.country === "European Union" && record.lawTitle.includes("Regulatory Database")
-    )
-  );
-  assert.ok(
-    context.evidenceRecords.some(
-      (record) =>
-        record.country === "European Union" && record.sourceStrength === "database-entrypoint"
+    context.sourceBasis.every(
+      (item) =>
+        !/competition-designated|ai_hackathon|hackathon|RDTII 2\.1 Guide|RCDTRA/i.test(item)
     )
   );
 });
 
-test("all supported jurisdictions stay within the hackathon-designated source set", async () => {
+test("supported jurisdictions stay inside the selected official-source allowlist", async () => {
   const contexts = await Promise.all([
     resolveEvidenceContext("China"),
     resolveEvidenceContext("Singapore"),
@@ -132,6 +69,110 @@ test("all supported jurisdictions stay within the hackathon-designated source se
         (record) => record.sourceLocator && record.sourceStrength && record.traceabilityTier
       )
     );
+  }
+});
+
+test("China evidence focuses on statute and implementing rule sources", async () => {
+  const context = await resolveEvidenceContext("China");
+  const combinedText = context.evidenceRecords
+    .map((record) => `${record.verbatimSnippet} ${record.originalLegalText}`)
+    .join(" ");
+
+  assert.ok(
+    context.evidenceRecords.some((record) =>
+      record.lawTitle.includes("Personal Information Protection Law")
+    )
+  );
+  assert.ok(
+    context.evidenceRecords.some((record) =>
+      record.lawTitle.includes("Provisions on Promoting and Regulating Cross-border Data Flows")
+    )
+  );
+  assert.ok(
+    /provide personal information outside the territory|跨境流动|安全评估|标准合同|认证|consent/i.test(
+      combinedText
+    )
+  );
+});
+
+test("Singapore evidence focuses on the Transfer Limitation Obligation", async () => {
+  const context = await resolveEvidenceContext("Singapore");
+
+  assert.ok(
+    context.evidenceRecords.some((record) =>
+      /Transfer Limitation Obligation/i.test(record.lawTitle + record.citation + record.verbatimSnippet)
+    )
+  );
+  assert.ok(
+    context.evidenceRecords.some((record) =>
+      /comparable to the protection under the PDPA/i.test(
+        `${record.verbatimSnippet} ${record.originalLegalText}`
+      )
+    )
+  );
+  assert.doesNotMatch(
+    context.evidenceRecords.map((record) => record.verbatimSnippet).join(" "),
+    /Pillar 1:|Pillar 2:|Pillar 3:|Pillar 5:|Pillar 7:|Pillar 8:/i
+  );
+});
+
+test("EU evidence surfaces GDPR Chapter V transfer conditions", async () => {
+  const context = await resolveEvidenceContext("European Union");
+
+  assert.ok(
+    context.evidenceRecords.some((record) => /Article 44/i.test(record.citation))
+  );
+  assert.ok(
+    context.evidenceRecords.some((record) => /Article 46/i.test(record.citation))
+  );
+  assert.ok(
+    context.evidenceRecords.some((record) =>
+      /third country|international organisation|appropriate safeguards/i.test(
+        `${record.verbatimSnippet} ${record.originalLegalText}`
+      )
+    )
+  );
+});
+
+test("United States evidence stays on official federal framework sources", async () => {
+  const context = await resolveEvidenceContext("United States");
+
+  assert.ok(
+    context.evidenceRecords.every((record) =>
+      /commerce\.gov|dataprivacyframework\.gov/i.test(record.sourceUrl)
+    )
+  );
+  assert.ok(
+    context.evidenceRecords.some((record) =>
+      /Data Privacy Framework|cross-border data flows/i.test(
+        `${record.lawTitle} ${record.verbatimSnippet}`
+      )
+    )
+  );
+});
+
+test("user-facing evidence text no longer exposes hackathon wording", async () => {
+  const contexts = await Promise.all([
+    resolveEvidenceContext("China"),
+    resolveEvidenceContext("Singapore"),
+    resolveEvidenceContext("Japan"),
+    resolveEvidenceContext("European Union"),
+    resolveEvidenceContext("United States")
+  ]);
+
+  for (const context of contexts) {
+    for (const record of context.evidenceRecords) {
+      const combined = [
+        record.reviewerNote,
+        record.originalLegalText,
+        record.aiExtraction,
+        record.pillar6Mapping,
+        record.mappingRationale,
+        record.riskImplication
+      ].join(" ");
+
+      assert.doesNotMatch(combined, /competition-designated|ai_hackathon|hackathon/i);
+    }
   }
 });
 

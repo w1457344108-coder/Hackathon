@@ -18,6 +18,7 @@ type ParsedSourceText = {
   text: string;
   pages: string[];
   resolvedUrl: string;
+  isPdf: boolean;
 };
 
 type ExcerptContext = {
@@ -31,7 +32,22 @@ type ExcerptContext = {
 const require = createRequire(import.meta.url);
 const pdfParse = require("pdf-parse/lib/pdf-parse.js") as PdfParseFn;
 
-const ALLOWED_SOURCE_HOSTS = new Set(["www.unescap.org", "unescap.org", "dtri.uneca.org"]);
+const ALLOWED_SOURCE_HOSTS = new Set([
+  "www.npc.gov.cn",
+  "npc.gov.cn",
+  "www.cac.gov.cn",
+  "cac.gov.cn",
+  "www.pdpc.gov.sg",
+  "pdpc.gov.sg",
+  "sso.agc.gov.sg",
+  "www.ppc.go.jp",
+  "ppc.go.jp",
+  "eur-lex.europa.eu",
+  "www.commerce.gov",
+  "commerce.gov",
+  "www.dataprivacyframework.gov",
+  "dataprivacyframework.gov"
+]);
 
 export type EvidenceSourceMode = "real" | "mock" | "hybrid";
 
@@ -61,15 +77,15 @@ function stripHtml(value: string) {
 }
 
 function toSourceBasisLabel(source: CuratedSourceRecord) {
-  return `${source.country}: ${source.title} (${new URL(source.sourceUrl).host})`;
+  return `${source.country}: ${source.title} — ${source.sourceUrl}`;
 }
 
 function getSourceStrength(entry: CuratedSourceRecord): SourceStrength {
-  if (entry.title.includes("Economy Profile")) {
+  if (entry.sourceType === "Statute") {
     return "country-profile";
   }
 
-  if (entry.title.includes("Regulatory Database")) {
+  if (entry.sourceType === "Policy Notice" || entry.sourceType === "Official Portal") {
     return "database-entrypoint";
   }
 
@@ -89,13 +105,17 @@ function getTraceabilityTier(entry: CuratedSourceRecord, pageNumber: number | nu
 }
 
 function getSourceStrengthLabel(entry: CuratedSourceRecord) {
-  switch (getSourceStrength(entry)) {
-    case "country-profile":
-      return "country profile";
-    case "database-entrypoint":
-      return "database entrypoint";
-    case "methodology-support":
-      return "methodology support";
+  switch (entry.sourceType) {
+    case "Statute":
+      return "statute text";
+    case "Regulator Guidance":
+      return "regulator guidance";
+    case "Policy Notice":
+      return "official policy notice";
+    case "Official Portal":
+      return "official portal";
+    case "International Agreement":
+      return "international agreement";
   }
 }
 
@@ -117,31 +137,36 @@ function mapIndicatorLabel(indicatorCode: Pillar6IndicatorCode) {
 function formatSourceLocator(
   entry: CuratedSourceRecord,
   pageNumber: number | null,
-  sentenceNumber: number | null
+  sentenceNumber: number | null,
+  isPdf: boolean
 ) {
   if (pageNumber !== null) {
+    if (isPdf) {
+      return sentenceNumber !== null
+        ? `PDF page ${pageNumber}, sentence ${sentenceNumber}`
+        : `PDF page ${pageNumber}`;
+    }
+
     return sentenceNumber !== null
-      ? `Page ${pageNumber}, sentence ${sentenceNumber}`
-      : `Page ${pageNumber}`;
+      ? `Web source sentence ${sentenceNumber}`
+      : "Web source paragraph";
   }
 
-  if (entry.title.includes("Regulatory Database")) {
-    return `Pillar 6 economy entry for ${entry.country}`;
-  }
-
-  if (entry.title.includes("Economy Profile")) {
-    return "Pillar 6 section in economy profile (sentence-level fallback excerpt)";
-  }
-
-  return "Pillar 6 methodology section (sentence-level fallback excerpt)";
+  return "Sentence-level fallback excerpt";
 }
 
 function getReviewNote(
   entry: CuratedSourceRecord,
   foundLiveExcerpt: boolean,
-  pageNumber: number | null
+  pageNumber: number | null,
+  isPdf: boolean
 ) {
-  const locatorNote = pageNumber !== null ? ` Locator: page ${pageNumber}.` : "";
+  const locatorNote =
+    pageNumber !== null
+      ? isPdf
+        ? ` Locator: PDF page ${pageNumber}.`
+        : " Locator: live source sentence or paragraph extracted from the web page."
+      : "";
 
   if (foundLiveExcerpt) {
     return `${entry.reviewerNote} Source strength: ${getSourceStrengthLabel(entry)}.${locatorNote} Live retrieval succeeded.`;
@@ -154,7 +179,7 @@ function ensureAllowedSourceUrl(sourceUrl: string) {
   const host = new URL(sourceUrl).host;
 
   if (!ALLOWED_SOURCE_HOSTS.has(host)) {
-    throw new Error(`Source host ${host} is outside the competition-designated source set.`);
+    throw new Error(`Source host ${host} is outside the official-source allowlist.`);
   }
 }
 
@@ -198,7 +223,8 @@ async function parsePdfText(response: Response, resolvedUrl: string): Promise<Pa
   return {
     text: collapseWhitespace(rawText),
     pages,
-    resolvedUrl
+    resolvedUrl,
+    isPdf: true
   };
 }
 
@@ -218,7 +244,8 @@ async function fetchSourceText(sourceUrl: string): Promise<ParsedSourceText> {
   return {
     text,
     pages: text ? [text] : [],
-    resolvedUrl
+    resolvedUrl,
+    isPdf: false
   };
 }
 
@@ -499,7 +526,8 @@ async function resolveCuratedEvidenceRecord(entry: CuratedSourceRecord): Promise
       sourceLocator: formatSourceLocator(
         entry,
         excerptContext.pageNumber,
-        excerptContext.sentenceNumber
+        excerptContext.sentenceNumber,
+        liveSource.isPdf
       ),
       sourceStrength: getSourceStrength(entry),
       traceabilityTier: getTraceabilityTier(entry, excerptContext.pageNumber),
@@ -507,7 +535,7 @@ async function resolveCuratedEvidenceRecord(entry: CuratedSourceRecord): Promise
       discoveryTags: entry.discoveryTags,
       confidence: entry.confidence,
       reviewStatus: entry.reviewStatus,
-      reviewerNote: getReviewNote(entry, true, excerptContext.pageNumber),
+      reviewerNote: getReviewNote(entry, true, excerptContext.pageNumber, liveSource.isPdf),
       originalLegalText,
       aiExtraction: entry.aiExtractionFallback,
       pillar6Mapping: entry.pillar6Mapping,
@@ -525,14 +553,19 @@ async function resolveCuratedEvidenceRecord(entry: CuratedSourceRecord): Promise
       citation: entry.citation,
       verbatimSnippet: entry.excerptFallback,
       sourceUrl: entry.sourceUrl,
-      sourceLocator: formatSourceLocator(entry, null, null),
+      sourceLocator: formatSourceLocator(entry, null, null, entry.sourceUrl.toLowerCase().endsWith(".pdf")),
       sourceStrength: getSourceStrength(entry),
       traceabilityTier: getTraceabilityTier(entry, null),
       sourceType: entry.sourceType,
       discoveryTags: entry.discoveryTags,
       confidence: entry.confidence,
       reviewStatus: entry.reviewStatus,
-      reviewerNote: getReviewNote(entry, false, null),
+      reviewerNote: getReviewNote(
+        entry,
+        false,
+        null,
+        entry.sourceUrl.toLowerCase().endsWith(".pdf")
+      ),
       originalLegalText: entry.originalTextFallback,
       aiExtraction: entry.aiExtractionFallback,
       pillar6Mapping: entry.pillar6Mapping,
@@ -575,7 +608,6 @@ export async function resolveEvidenceContext(
     evidenceRecords,
     sourceMode: fallbackEvidenceRecords.length > 0 ? "hybrid" : "real",
     sourceBasis: [
-      "Competition-designated source set from ai_hackathon.pptx: ESCAP RCDTRA portal, RDTII 2.1 guide, and official RDTII files hosted under dtri.uneca.org",
       ...curatedSources.map((source) => toSourceBasisLabel(source))
     ],
     realEvidenceCount: realEvidenceRecords.length,

@@ -6,11 +6,7 @@ import {
   type ChatAnalysisResult
 } from "@/components/chat-analysis-panels";
 import { formatEvidenceSnippetForDisplay } from "@/lib/evidence-display";
-import {
-  detectUnsupportedJurisdictions,
-  inferCountries,
-  supportedCountries
-} from "@/lib/jurisdiction-inference";
+import { supportedCountries } from "@/lib/jurisdiction-inference";
 
 type CoreModeId = "regulation" | "case" | "advisory";
 type LegalTaskType =
@@ -107,6 +103,8 @@ export function ChatLegalWorkspace() {
   const [messages, setMessages] = useState<ChatMessage[]>(starterMessages);
   const [inputValue, setInputValue] = useState("");
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
+  const [selectedCountryA, setSelectedCountryA] = useState<SupportedCountry>("China");
+  const [selectedCountryB, setSelectedCountryB] = useState<SupportedCountry>("Singapore");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const hasConversation = messages.length > 1;
 
@@ -118,6 +116,12 @@ export function ChatLegalWorkspace() {
   function handleModeChange(nextMode: CoreModeId) {
     activeModeRef.current = nextMode;
     setActiveMode(nextMode);
+
+    if (nextMode === "case" && selectedCountryA === selectedCountryB) {
+      const fallbackCountry =
+        supportedCountries.find((country) => country !== selectedCountryA) ?? "Singapore";
+      setSelectedCountryB(fallbackCountry);
+    }
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -155,29 +159,6 @@ export function ChatLegalWorkspace() {
       return;
     }
 
-    const unsupportedJurisdictions = detectUnsupportedJurisdictions(trimmed);
-
-    if (unsupportedJurisdictions.length > 0) {
-      setMessages((current) => [
-        ...current,
-        {
-          id: userMessageId,
-          role: "user",
-          content: trimmed,
-          mode: selectedMode
-        },
-        {
-          id: assistantMessageId,
-          role: "assistant",
-          mode: selectedMode,
-          content: buildUnsupportedJurisdictionGuidance(unsupportedJurisdictions),
-          status: "complete"
-        }
-      ]);
-      setInputValue("");
-      return;
-    }
-
     setMessages((current) => [
       ...current,
       {
@@ -199,7 +180,13 @@ export function ChatLegalWorkspace() {
     setIsSubmitting(true);
 
     try {
-      const result = await runBackendAnalysis(trimmed, selectedMode, selectedFiles);
+      const result = await runBackendAnalysis(
+        trimmed,
+        selectedMode,
+        selectedCountryA,
+        selectedCountryB,
+        selectedFiles
+      );
       setMessages((current) =>
         current.map((message) =>
           message.id === assistantMessageId
@@ -242,6 +229,8 @@ export function ChatLegalWorkspace() {
           setActiveConversation("current");
           setInputValue("");
           setUploadedFiles([]);
+          setSelectedCountryA("China");
+          setSelectedCountryB("Singapore");
           handleModeChange("regulation");
         }}
       />
@@ -278,6 +267,10 @@ export function ChatLegalWorkspace() {
                     onInputChange={setInputValue}
                     uploadedFiles={uploadedFiles}
                     onUploadedFilesChange={setUploadedFiles}
+                    selectedCountryA={selectedCountryA}
+                    selectedCountryB={selectedCountryB}
+                    onSelectedCountryAChange={setSelectedCountryA}
+                    onSelectedCountryBChange={setSelectedCountryB}
                     isSubmitting={isSubmitting}
                     onSubmit={handleSubmit}
                   />
@@ -302,6 +295,10 @@ export function ChatLegalWorkspace() {
                   onInputChange={setInputValue}
                   uploadedFiles={uploadedFiles}
                   onUploadedFilesChange={setUploadedFiles}
+                  selectedCountryA={selectedCountryA}
+                  selectedCountryB={selectedCountryB}
+                  onSelectedCountryAChange={setSelectedCountryA}
+                  onSelectedCountryBChange={setSelectedCountryB}
                   isSubmitting={isSubmitting}
                   onSubmit={handleSubmit}
                 />
@@ -495,22 +492,30 @@ function SearchComposer({
   inputValue,
   modePrompt,
   surface,
+  selectedCountryA,
+  selectedCountryB,
   isSubmitting,
   onModeChange,
   onInputChange,
   uploadedFiles,
   onUploadedFilesChange,
+  onSelectedCountryAChange,
+  onSelectedCountryBChange,
   onSubmit
 }: {
   activeMode: CoreModeId;
   inputValue: string;
   modePrompt: string;
   surface: "hero" | "chat";
+  selectedCountryA: SupportedCountry;
+  selectedCountryB: SupportedCountry;
   isSubmitting: boolean;
   onModeChange: (mode: CoreModeId) => void;
   onInputChange: (value: string) => void;
   uploadedFiles: File[];
   onUploadedFilesChange: (files: File[]) => void;
+  onSelectedCountryAChange: (country: SupportedCountry) => void;
+  onSelectedCountryBChange: (country: SupportedCountry) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   const isHero = surface === "hero";
@@ -521,6 +526,7 @@ function SearchComposer({
   const [attachFeedback, setAttachFeedback] = useState(false);
   const [promptFeedback, setPromptFeedback] = useState(false);
   const [promptPanel, setPromptPanel] = useState<PromptPanelState | null>(null);
+  const countrySelectionMode = activeMode === "case" ? "dual" : "single";
 
   function triggerAttachFeedback() {
     setAttachFeedback(true);
@@ -620,7 +626,12 @@ function SearchComposer({
     setPromptPanel({ status: "loading" });
 
     try {
-      const suggestion = await runQueryBuilderSuggestion(trimmed, activeMode);
+      const suggestion = await runQueryBuilderSuggestion(
+        trimmed,
+        activeMode,
+        selectedCountryA,
+        selectedCountryB
+      );
       setPromptPanel({ status: "ready", suggestion });
     } catch (error) {
       setPromptPanel({
@@ -664,6 +675,32 @@ function SearchComposer({
       </div>
 
       <div className="rounded-[12px] bg-white shadow-[0_12px_30px_rgba(0,0,0,0.12)]">
+        <div className="border-b border-black/10 px-4 py-4">
+          <CountrySelectionBlock
+            label={countrySelectionMode === "dual" ? "Primary jurisdiction" : "Jurisdiction"}
+            value={selectedCountryA}
+            onChange={(country) => {
+              onSelectedCountryAChange(country);
+
+              if (activeMode === "case" && selectedCountryB === country) {
+                const fallbackCountry =
+                  supportedCountries.find((item) => item !== country) ?? "Singapore";
+                onSelectedCountryBChange(fallbackCountry);
+              }
+            }}
+          />
+          {countrySelectionMode === "dual" ? (
+            <div className="mt-3">
+              <CountrySelectionBlock
+                label="Counterparty jurisdiction"
+                value={selectedCountryB}
+                onChange={onSelectedCountryBChange}
+                disabledCountries={[selectedCountryA]}
+              />
+            </div>
+          ) : null}
+        </div>
+
         <label htmlFor="legal-chat-input" className="sr-only">
           Type question
         </label>
@@ -786,9 +823,53 @@ function SearchComposer({
           isHero ? "text-white/85" : "text-black/55"
         }`}
       >
-        {modePrompt}
+        {countrySelectionMode === "dual"
+          ? `${modePrompt} Retrieval will stay within official legal sources for ${selectedCountryA} and ${selectedCountryB}.`
+          : `${modePrompt} Retrieval will stay within official legal sources for ${selectedCountryA}.`}
       </p>
     </form>
+  );
+}
+
+function CountrySelectionBlock({
+  label,
+  value,
+  onChange,
+  disabledCountries = []
+}: {
+  label: string;
+  value: SupportedCountry;
+  onChange: (country: SupportedCountry) => void;
+  disabledCountries?: SupportedCountry[];
+}) {
+  return (
+    <div>
+      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-black/45">
+        {label}
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {supportedCountries.map((country) => {
+          const isActive = country === value;
+          const isDisabled = disabledCountries.includes(country);
+
+          return (
+            <button
+              key={`${label}-${country}`}
+              type="button"
+              onClick={() => onChange(country)}
+              disabled={isDisabled}
+              className={`rounded-full px-3 py-2 text-[12px] font-medium transition ${
+                isActive
+                  ? "bg-black text-white"
+                  : "bg-[#f5f5f5] text-black hover:bg-black hover:text-white"
+              } ${isDisabled ? "cursor-not-allowed opacity-30 hover:bg-[#f5f5f5] hover:text-black" : ""}`}
+            >
+              {country}
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -1128,16 +1209,32 @@ function buildOutOfScopeGuidance(mode: CoreModeId) {
   ].join("\n\n");
 }
 
-function buildUnsupportedJurisdictionGuidance(jurisdictions: string[]) {
-  return [
-    `This prototype cannot yet analyze ${jurisdictions.join(", ")} with real competition-designated evidence.`,
-    `Current supported jurisdictions are ${supportedCountries.join(", ")}.`,
-    "Please ask about one of the supported jurisdictions, or expand the source registry and row-level legal pipeline before using this workspace for additional countries."
-  ].join("\n\n");
+function resolveRequestedCountries(
+  mode: CoreModeId,
+  countryA: SupportedCountry,
+  countryB: SupportedCountry
+) {
+  if (mode === "case") {
+    return {
+      countryA,
+      countryB
+    };
+  }
+
+  return {
+    countryA,
+    countryB: null
+  };
 }
 
-async function runBackendAnalysis(question: string, mode: CoreModeId, files: File[] = []) {
-  const countries = inferCountries(question);
+async function runBackendAnalysis(
+  question: string,
+  mode: CoreModeId,
+  selectedCountryA: SupportedCountry,
+  selectedCountryB: SupportedCountry,
+  files: File[] = []
+) {
+  const countries = resolveRequestedCountries(mode, selectedCountryA, selectedCountryB);
 
   const requestInit: RequestInit = files.length
     ? {
@@ -1192,8 +1289,18 @@ async function runBackendAnalysis(question: string, mode: CoreModeId, files: Fil
   return JSON.parse(doneMatch[1]) as BackendWorkflowResult;
 }
 
-async function runQueryBuilderSuggestion(question: string, mode: CoreModeId) {
-  const result = await runBackendAnalysis(question, mode);
+async function runQueryBuilderSuggestion(
+  question: string,
+  mode: CoreModeId,
+  selectedCountryA: SupportedCountry,
+  selectedCountryB: SupportedCountry
+) {
+  const result = await runBackendAnalysis(
+    question,
+    mode,
+    selectedCountryA,
+    selectedCountryB
+  );
   return formatQueryBuilderSuggestion(result, question, mode);
 }
 
@@ -1270,7 +1377,10 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
     .slice(0, 3)
     .map((record) => record.citation || record.lawTitle || record.sourceUrl)
     .filter(Boolean);
-  const sourceBasis = result.research?.sourceBasis?.slice(0, 2) ?? [];
+  const sourceUrls = [...new Set((result.evidenceRecords ?? []).map((record) => record.sourceUrl))].slice(
+    0,
+    4
+  );
   const legalFindings = result.mainlineAgentResults?.legalReasoner?.data?.legalFindings ?? [];
   const findingHighlights = legalFindings.slice(0, 2).map((finding, index) => {
     return [
@@ -1284,24 +1394,21 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
     return [
       `- Evidence ${index + 1}: ${record.lawTitle}`,
       record.sourceLocator ? `  Locator: ${record.sourceLocator}` : null,
+      record.verbatimSnippet ? "  Decisive basis:" : null,
       record.verbatimSnippet
-        ? `  Excerpt:\n${formatEvidenceSnippetForDisplay(record)
+        ? `${formatEvidenceSnippetForDisplay(record)
             .split("\n")
             .map((line) => `    ${line}`)
             .join("\n")}`
         : null,
-      record.sourceUrl ? `  Source: ${record.sourceUrl}` : null
+      record.sourceUrl ? `  Source URL: ${record.sourceUrl}` : null
     ]
       .filter(Boolean)
       .join("\n");
   });
   const lacksClauseLevelEvidence =
     (result.evidenceRecords ?? []).length > 0 &&
-    (result.evidenceRecords ?? []).every((record) =>
-      ["Regulatory Database", "Guide", "Economy Profile"].some((label) =>
-        record.lawTitle.includes(label)
-      )
-    );
+    (result.evidenceRecords ?? []).every((record) => record.sourceType !== "Statute");
   const coverageDetail = Array.from(
     new Map(
       (result.evidenceRecords ?? []).map((record) => [
@@ -1318,9 +1425,15 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
       (result.evidenceRecords ?? [])
         .filter((record) => record.country === entry.country)
         .forEach((record) => {
-          if (record.sourceStrength) {
-            entry.strengths.add(record.sourceStrength);
-          }
+          entry.strengths.add(
+            record.sourceType === "Statute"
+              ? "statute text"
+              : record.sourceType === "Regulator Guidance"
+                ? "regulator guidance"
+                : record.sourceType === "Policy Notice"
+                  ? "official policy notice"
+                  : "official source"
+          );
 
           if (record.sourceLocator) {
             entry.locators.add(record.sourceLocator);
@@ -1338,7 +1451,7 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
     })
     .join("\n");
   const traceabilityLimitation = lacksClauseLevelEvidence
-    ? "Current retrieval did not yet pinpoint row-level statutes or article-level clauses; this run is grounded in competition-designated database, profile, and methodology files and still needs human drill-down."
+    ? "Current retrieval did not yet pinpoint row-level statutes or article-level clauses; the present evidence remains page-level, guidance-level, or summary-level and still needs human legal drill-down."
     : null;
 
   const summaryBlock = [
@@ -1367,8 +1480,8 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
 
   const coverageBlock = coverageDetail ? ["Coverage detail", coverageDetail].join("\n") : null;
 
-  const sourceBasisBlock = sourceBasis.length
-    ? ["Source basis", ...sourceBasis.map((item) => `- ${item}`)].join("\n")
+  const sourceBasisBlock = sourceUrls.length
+    ? ["Source URLs used", ...sourceUrls.map((item) => `- ${item}`)].join("\n")
     : null;
 
   const uploadsBlock = uploadedDocuments.length

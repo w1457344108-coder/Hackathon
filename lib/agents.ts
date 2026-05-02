@@ -45,11 +45,7 @@ import { resolveEvidenceContext } from "@/lib/server/source-pipeline";
 import { buildUploadedDocumentQuery } from "@/lib/server/uploaded-documents";
 import type { UploadedDocumentContext } from "@/lib/server/uploaded-documents";
 
-const SOURCE_BASIS = [
-  "Competition-designated source set from ai_hackathon.pptx",
-  "UN ESCAP RCDTRA project page / RDTII 2.1 Regulatory Database entry surface",
-  "RDTII 2.1 Guide PDF hosted on dtri.uneca.org"
-];
+const SOURCE_BASIS = ["Official legal and regulatory source URLs selected for the requested jurisdiction(s)"];
 
 const ALL_PILLAR6_INDICATORS: Pillar6IndicatorEnum[] = [
   "P6_1_BAN_LOCAL_PROCESSING",
@@ -138,17 +134,17 @@ function getTaskSearchTerms(taskType: LegalTaskType) {
 
 export function getLegalReasonerInstructions(taskType: LegalTaskType) {
   const commonRules = [
-    "Use only the supplied evidence, retrieved legal text, RDTII row-level source URLs, and uploaded documents.",
+    "Use only the supplied evidence, retrieved legal text, source URLs, and uploaded documents.",
     "Do not invent statutes, article numbers, legal obligations, regulator names, URLs, or citations.",
     "Prefer original legal text and official sources over summaries, methodology pages, or database descriptions.",
-    "Distinguish exact legal text, RDTII database entries, policy indicator summaries, and inferred legal effect.",
+    "Distinguish exact legal text, regulator or statute text, policy summaries, and inferred legal effect.",
     "Never rely on or mention other pillars unless the source itself is being rejected as out of scope.",
     "If exact clause-level legal text is unavailable, state that limitation explicitly inside the conclusion or legalEffect field and stop short of claiming a specific statutory rule."
   ].join(" ");
 
   if (taskType === "case-analysis") {
     return [
-      "You are a legal case analysis agent for cross-border data law under UN ESCAP RDTII Pillar 6.",
+      "You are a legal case analysis agent for cross-border data law under Pillar 6.",
       "Task type: Case Analysis.",
       commonRules,
       "Treat the user scenario as an existing or current business operation.",
@@ -161,7 +157,7 @@ export function getLegalReasonerInstructions(taskType: LegalTaskType) {
 
   if (taskType === "forward-looking-advisory") {
     return [
-      "You are a forward-looking legal advisory agent for cross-border data law under UN ESCAP RDTII Pillar 6.",
+      "You are a forward-looking legal advisory agent for cross-border data law under Pillar 6.",
       "Task type: Forward-looking Advisory.",
       commonRules,
       "Treat the user scenario as a planned or future activity, not an existing case.",
@@ -173,7 +169,7 @@ export function getLegalReasonerInstructions(taskType: LegalTaskType) {
   }
 
   return [
-    "You are a legal interpretation agent for cross-border data law under UN ESCAP RDTII Pillar 6.",
+    "You are a legal interpretation agent for cross-border data law under Pillar 6.",
     "Task type: Regulation Interpretation.",
     commonRules,
     "Treat the user question as a request to explain a specific law, regulation, clause, policy indicator, or legal requirement.",
@@ -249,9 +245,11 @@ function getSearchStrategy(taskType: LegalTaskType): string {
 
 export function getSourceDiscoveryInstructions(taskType: LegalTaskType): string {
   const commonRules = [
-    "You are a Source Discovery Agent for cross-border data policy under UN ESCAP RDTII Pillar 6.",
+    "You are a Source Discovery Agent for cross-border data policy under Pillar 6.",
     "Your task is to identify official or authoritative source locations where Pillar 6 evidence is likely to be found.",
-    "Route each query to the most relevant authority channel first: legislation portals, regulator guidance, ministry websites, treaty databases, or RDTII references.",
+    "Use only the source URLs already supplied in the evidence set for the selected jurisdiction or jurisdictions.",
+    "Do not invent, expand, or substitute domains, portals, mirrors, or unofficial summaries.",
+    "Route each query to the most relevant authority channel first: legislation portals, regulator guidance, ministry websites, treaty databases, or official framework resources already supplied in the evidence set.",
     "Rank sources by: (a) official status first, (b) Pillar 6 relevance second.",
     "Discard clearly off-topic privacy-only or domestic compliance material before the reading stage."
   ].join("\n");
@@ -287,7 +285,7 @@ export function getSourceDiscoveryInstructions(taskType: LegalTaskType): string 
 
 export function getDocumentReaderInstructions(): string {
   return [
-    "You are a Document Reader Agent for cross-border data policy under UN ESCAP RDTII Pillar 6.",
+    "You are a Document Reader Agent for cross-border data policy under Pillar 6.",
     "Your task is to convert raw legal material (statutes, regulations, guidance documents) into structured, citation-ready passages.",
     "",
     "For each source provided:",
@@ -317,8 +315,8 @@ export function getDocumentReaderInstructions(): string {
 
 export function getIndicatorMappingInstructions(): string {
   return [
-    "You are an Indicator Mapping Agent for cross-border data policy under UN ESCAP RDTII Pillar 6.",
-    "Your task is to align each structured legal passage to one of the five canonical RDTII Pillar 6 indicators.",
+    "You are an Indicator Mapping Agent for cross-border data policy under Pillar 6.",
+    "Your task is to align each structured legal passage to one of the five canonical Pillar 6 indicators.",
     "",
     "The five canonical indicators are:",
     "- P6_1_BAN_LOCAL_PROCESSING: prohibits cross-border processing or mandates local processing",
@@ -352,7 +350,7 @@ export function getIndicatorMappingInstructions(): string {
 
 export function getRelevanceFilterInstructions(): string {
   return [
-    "You are a Relevance Filter Agent for cross-border data policy under UN ESCAP RDTII Pillar 6.",
+    "You are a Relevance Filter Agent for cross-border data policy under Pillar 6.",
     "Your task is to read completed mainline passages and keep only the evidence that is genuinely useful for Pillar 6 audit and export.",
     "You are a quality gate — remove noise, protect against scope creep, and flag borderline material for human review.",
     "",
@@ -385,7 +383,7 @@ export function getRelevanceFilterInstructions(): string {
 
 export function getRiskCostInstructions(taskType: LegalTaskType): string {
   const commonRules = [
-    "You are a Risk & Cost Quantifier Agent for cross-border data policy under UN ESCAP RDTII Pillar 6.",
+    "You are a Risk & Cost Quantifier Agent for cross-border data policy under Pillar 6.",
     "Your task is to convert completed mainline legal findings into business-facing risk and cost signals.",
     "Translate legal complexity into actionable business intelligence.",
     "",
@@ -445,7 +443,7 @@ export function getRiskCostInstructions(taskType: LegalTaskType): string {
 
 export function getAuditCitationInstructions(): string {
   return [
-    "You are an Audit View & Citation Agent for cross-border data policy under UN ESCAP RDTII Pillar 6.",
+    "You are an Audit View & Citation Agent for cross-border data policy under Pillar 6.",
     "Your task is to link mainline legal findings back to shortlisted evidence, verbatim source text, and reviewer context.",
     "You are the system's main defense against hallucination — every AI claim must remain visibly anchored in legal text.",
     "",
@@ -881,12 +879,7 @@ export async function reportAgent(results: {
   });
   const clauseLevelEvidenceRetrieved =
     results.evidenceRecords.length > 0 &&
-    results.evidenceRecords.some(
-      (record) =>
-        !record.lawTitle.includes("Regulatory Database") &&
-        !record.lawTitle.includes("Guide") &&
-        !record.lawTitle.includes("Economy Profile")
-    );
+    results.evidenceRecords.some((record) => record.sourceType === "Statute");
   const evidenceSummary = findingSummaries.length
     ? findingSummaries
         .map((finding) => `${finding.jurisdiction}: ${finding.conclusion} ${finding.legalEffect}`)
@@ -894,7 +887,7 @@ export async function reportAgent(results: {
     : primaryAnalysis.executiveSummary;
   const sourceLimit = clauseLevelEvidenceRetrieved
     ? "At least one retrieved source is row-level or legal-text-level evidence."
-    : "The available sources are still mainly portal, profile, methodology, or database-level evidence and need human review before being treated as exact clause authority.";
+    : "The available sources are still mainly guidance, policy, or summary-level evidence and need human review before being treated as exact clause authority.";
   const fallbackNarrative =
     taskType === "case-analysis"
       ? [
@@ -922,7 +915,7 @@ export async function reportAgent(results: {
         : [
             clauseLevelEvidenceRetrieved
               ? `Direct Answer: The requested Pillar 6 rule should be interpreted from the cited country source rather than from a generic risk score.`
-              : `Direct Answer: The current competition-designated evidence chain does not yet provide an article-level or clause-level Pillar 6 legal text for this jurisdiction.`,
+              : "Direct Answer: The current evidence chain does not yet provide article-level or clause-level Pillar 6 legal text for this jurisdiction.",
             `Legal Source Located: ${findingSummaries.map((finding) => finding.evidence).filter(Boolean).join("; ") || "No citation-ready finding was returned."}`,
             clauseLevelEvidenceRetrieved
               ? `Rule Explanation: ${evidenceSummary}`
@@ -1057,6 +1050,8 @@ export async function sourceDiscoveryAgent(input: {
 }): Promise<AgentResult<{ candidateSources: CandidateSource[] }>> {
   const taskType = input.taskType ?? classifyLegalTaskType(input.businessScenario);
   const provider = getAnalysisProvider();
+  const allowedEvidenceIds = new Set(input.evidenceRecords.map((record) => record.evidenceId));
+  const allowedSourceUrls = new Set(input.evidenceRecords.map((record) => record.sourceUrl));
 
   const fallbackSources = filterEvidenceByCountries(
     input.evidenceRecords,
@@ -1128,9 +1123,18 @@ export async function sourceDiscoveryAgent(input: {
     fallback: { candidateSources: fallbackSources }
   });
 
+  const constrainedSources = structuredResult.object.candidateSources.filter(
+    (source) =>
+      allowedEvidenceIds.has(source.evidenceId) &&
+      allowedSourceUrls.has(source.sourceUrl) &&
+      [input.countryA, input.countryB].filter(Boolean).includes(source.jurisdiction as SupportedCountry)
+  );
+
   return success(
     "source-discovery",
-    { candidateSources: structuredResult.object.candidateSources },
+    {
+      candidateSources: constrainedSources.length ? constrainedSources : fallbackSources
+    },
     "Candidate legal sources identified from the current Pillar 6 evidence set.",
     "document-reader"
   );
@@ -2276,7 +2280,7 @@ function buildDemoNarrative(input: {
     title: `${input.businessScenario} cross-border data transfer review`,
     scenario: `A ${input.businessScenario} team wants to understand whether data can move from ${input.countryA}${
       input.countryB ? ` to ${input.countryB}` : ""
-    } while staying inside UN ESCAP RDTII Pillar 6 scope.`,
+    } while staying inside Pillar 6 scope.`,
     primaryJurisdiction: input.countryA,
     comparisonJurisdiction: input.countryB ?? null,
     walkthrough: [
