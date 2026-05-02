@@ -3,8 +3,22 @@
 @tailwind utilities;
 
 :root {
-  --background: #f7f7f8;
-  --foreground: #171717;
+  --bg: #f6f8fc;
+  --surface: #ffffff;
+  --surface-subtle: #f1f4fa;
+  --border: #e2e8f0;
+  --border-focus: #94a3b8;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+  --accent: #1e40af;
+  --accent-soft: #e8edf5;
+  --accent-ring: rgba(30, 64, 175, 0.1);
+  --success: #065f46;
+  --warning: #92400e;
+  --danger: #991b1b;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.06);
 }
 
 * {
@@ -18,19 +32,105 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--bg);
+  color: var(--text-primary);
   font-family: var(--font-inter), var(--font-noto), "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection {
-  background: rgba(0, 0, 0, 0.12);
+  background: rgba(30, 64, 175, 0.12);
 }
 
+/* ── Navigation ── */
+
+.nav-header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(16px) saturate(1.4);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: var(--text-primary);
+}
+
+.nav-logo {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.nav-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+}
+
+.nav-subtitle {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-link {
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+  background: var(--surface-subtle);
+}
+
+.nav-link.active {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ── Main Content ── */
+
+.main-content {
+  padding-top: 32px;
+  padding-bottom: 64px;
+}
+
+/* ── Glass Panel ── */
+
 .glass-panel {
-  background: rgba(255, 255, 255, 0.78);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.08);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
 }
 
 .font-schibsted {
@@ -49,56 +149,66 @@ body {
   font-family: var(--font-fustat), var(--font-inter), sans-serif;
 }
 
+/* ── Section Title ── */
+
 .section-title {
-  letter-spacing: 0.08em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  font-weight: 600;
 }
 
-.agent-running {
-  animation: pulse-ring 1.8s ease-in-out infinite;
-}
+/* ── Animations ── */
 
 .stagger-in {
-  animation: rise-in 0.5s ease-out both;
-}
-
-.glow-dot {
-  box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.35);
-  animation: glow 2s ease-in-out infinite;
+  animation: rise-in 0.45s ease-out both;
 }
 
 @keyframes rise-in {
   from {
     opacity: 0;
-    transform: translateY(14px);
+    transform: translateY(12px);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-@keyframes pulse-ring {
-  0%,
-  100% {
-    transform: scale(1);
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.18);
-  }
+.agent-running {
+  animation: pulse-ring 1.8s ease-in-out infinite;
+}
 
+@keyframes pulse-ring {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(30, 64, 175, 0.12);
+  }
   50% {
     transform: scale(1.015);
-    box-shadow: 0 0 0 12px rgba(37, 99, 235, 0);
+    box-shadow: 0 0 0 12px rgba(30, 64, 175, 0);
   }
 }
 
-@keyframes glow {
-  0%,
-  100% {
-    box-shadow: 0 0 0 0 rgba(37, 99, 235, 0.18);
-  }
+.glow-dot {
+  box-shadow: 0 0 0 0 rgba(30, 64, 175, 0.2);
+  animation: glow 2s ease-in-out infinite;
+}
 
-  50% {
-    box-shadow: 0 0 18px 4px rgba(37, 99, 235, 0.22);
+@keyframes glow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(30, 64, 175, 0.12);
   }
+  50% {
+    box-shadow: 0 0 18px 4px rgba(30, 64, 175, 0.14);
+  }
+}
+
+/* ── Tailwind-compatible extras ── */
+
+.rounded-\[2rem\] {
+  border-radius: 2rem;
+}
+
+.rounded-\[1\.5rem\] {
+  border-radius: 1.5rem;
 }

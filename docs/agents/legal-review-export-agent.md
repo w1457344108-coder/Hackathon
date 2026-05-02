@@ -1,7 +1,7 @@
 # Legal Review & Export Agent
 
 ## 1. Purpose
-The Legal Review & Export Agent packages the reviewed Pillar 6 findings into structured outputs suitable for judges, teammates, and future API integration.
+The Legal Review & Export Agent packages the fully reviewed Pillar 6 sidecar results into judge-facing summaries and export-ready artifacts.
 
 ## 2. Position in Workflow
 `Review & Delivery Layer`
@@ -9,16 +9,12 @@ The Legal Review & Export Agent packages the reviewed Pillar 6 findings into str
 ## 3. Input Schema
 ```ts
 interface LegalReviewExportInput {
-  auditItems: Array<{
-    citation: string;
-    extractedText: string;
-    indicatorMapping: string;
-  }>;
-  riskSummary: {
-    riskLevel: "Low" | "Moderate" | "High";
-    businessImpactSummary: string;
-  };
-  comparisonView?: Record<string, string>;
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  businessScenario: string;
+  auditItems: AuditCitationOutput["auditItems"];
+  riskSummary: RiskCostQuantifierOutput["riskSummary"];
+  comparison: ComparisonAgentResult | null;
 }
 ```
 
@@ -26,6 +22,14 @@ interface LegalReviewExportInput {
 ```ts
 interface LegalReviewExportOutput {
   finalReport: string;
+  judgeSummary: string;
+  exportReadiness: "Ready for Judge Review" | "Needs Human Review";
+  reviewSummary: {
+    approvedCount: number;
+    needsRevisionCount: number;
+    rejectedCount: number;
+    humanReviewCount: number;
+  };
   exportJson: Record<string, unknown>;
   exportCsvRows: Array<Record<string, string | number>>;
   exportMarkdown: string;
@@ -33,14 +37,14 @@ interface LegalReviewExportOutput {
 ```
 
 ## 5. Core Logic
-1. Collect reviewed audit items and quantified risk signals.
-2. Compile them into a final policy-analysis narrative.
-3. Generate structured exports for JSON, CSV, and Markdown.
-4. Preserve citation integrity and review status.
-5. Return a presentation-ready output package.
+1. Read the completed sidecar audit items and risk summary.
+2. Count reviewer outcomes and determine whether the package is presentation-ready.
+3. Build a concise judge-facing summary.
+4. Generate JSON, CSV, and Markdown artifacts from the same reviewed source set.
+5. Preserve review status and traceability throughout the export package.
 
 ## 6. Pillar 6 Relevance
-This agent does not invent new legal findings. It consolidates all five Pillar 6 indicator outcomes into a final judge-facing deliverable.
+This agent does not create new legal findings. It consolidates reviewed Pillar 6 evidence into a final, auditable delivery package.
 
 ## 7. Failure Handling
 ```ts
@@ -53,38 +57,31 @@ interface LegalReviewExportFailure {
 ```
 
 ## 8. Example
-Mock input:
-```json
-{
-  "auditItems": [
-    {
-      "citation": "Art. 12",
-      "extractedText": "Transfer is legally conditioned on prior review.",
-      "indicatorMapping": "conditional-flow"
-    }
-  ],
-  "riskSummary": {
-    "riskLevel": "High",
-    "businessImpactSummary": "Pre-transfer approval creates meaningful compliance friction."
-  }
-}
-```
-
 Mock output:
 ```json
 {
-  "finalReport": "The jurisdiction applies a conditional transfer regime under Pillar 6 and imposes meaningful outbound compliance friction.",
+  "finalReport": "fintech scenario review for China indicates moderate risk with 1 mapped Pillar 6 indicator areas.",
+  "judgeSummary": "fintech scenario review for China indicates moderate risk with 1 mapped Pillar 6 indicator areas. 1 evidence item is approved for presentation, while 0 items still need human legal review.",
+  "exportReadiness": "Ready for Judge Review",
+  "reviewSummary": {
+    "approvedCount": 1,
+    "needsRevisionCount": 0,
+    "rejectedCount": 0,
+    "humanReviewCount": 0
+  },
   "exportJson": {
-    "overallRisk": "High",
-    "mappedIndicators": ["conditional-flow"]
+    "scope": "Pillar 6"
   },
   "exportCsvRows": [
     {
-      "citation": "Art. 12",
-      "indicator": "conditional-flow",
-      "risk": "High"
+      "evidenceId": "EV-CHN-001",
+      "citationRef": "Art. 12",
+      "indicatorId": "P6_4_CONDITIONAL_FLOW",
+      "reviewStatus": "Approved",
+      "traceabilityStatus": "Complete",
+      "riskLevel": "Moderate"
     }
   ],
-  "exportMarkdown": "# Pillar 6 Report\n\n- Conditional flow regime identified.\n- Overall risk: High."
+  "exportMarkdown": "# Pillar 6 Review Package"
 }
 ```

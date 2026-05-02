@@ -10,6 +10,8 @@ import {
 } from "@/lib/mock-evidence";
 import {
   AgentResult,
+  AuditCitationItem,
+  AuditCitationOutput,
   CandidateSource,
   ComparisonAgentResult,
   ComparisonRow,
@@ -19,15 +21,20 @@ import {
   IndicatorMappingOutput,
   IntentArbiterOutput,
   LegalReasonerOutput,
+  LegalReviewExportOutput,
   MainlineAgentResults,
   MappedEvidenceItem,
   Pillar6IndicatorEnum,
   PolicyAnalysisResult,
   QueryBuilderOutput,
   QueryPlanItem,
+  ReasoningUncertaintyLevel,
+  RelevanceFilterOutput,
+  RiskCostQuantifierOutput,
   ReportAgentResult,
   ResearchAgentResult,
   RiskLevel,
+  RiskSummary,
   SupportingAgentResults,
   SupportedCountry,
   TenAgentId,
@@ -77,6 +84,141 @@ const agentNames: Record<TenAgentId, string> = {
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function getEvidenceRecord(evidenceId: string) {
+  return mockEvidenceRecords.find((record) => record.evidenceId === evidenceId);
+}
+
+function buildRelevanceReason(indicatorId: Pillar6IndicatorEnum) {
+  switch (indicatorId) {
+    case "P6_1_BAN_LOCAL_PROCESSING":
+      return "Directly addresses local processing or offshore processing restrictions.";
+    case "P6_2_LOCAL_STORAGE":
+      return "Directly addresses domestic storage or localization obligations.";
+    case "P6_3_INFRASTRUCTURE":
+      return "Directly affects infrastructure design, hosting, or regulator-access architecture.";
+    case "P6_4_CONDITIONAL_FLOW":
+      return "Directly describes transfer conditions, approvals, or safeguard gates.";
+    case "P6_5_BINDING_COMMITMENT":
+      return "Directly describes treaty or agreement-based support for cross-border data flows.";
+  }
+}
+
+function getRelevanceBand(record: (typeof mockEvidenceRecords)[number]) {
+  if (
+    record.indicatorCode === "P6_3_INFRASTRUCTURE" ||
+    record.reviewStatus === "Pending Review" ||
+    record.confidence < 0.75
+  ) {
+    return "Borderline" as const;
+  }
+
+  return "Direct Match" as const;
+}
+
+function buildRelevanceReviewerPrompt(record: (typeof mockEvidenceRecords)[number]) {
+  if (record.indicatorCode === "P6_3_INFRASTRUCTURE") {
+    return "Confirm this passage really affects cross-border infrastructure design, not only domestic supervision.";
+  }
+
+  if (record.reviewStatus !== "Approved") {
+    return "Spot-check whether this passage should stay in scope before using it in audit or export.";
+  }
+
+  return "This passage is a strong Pillar 6 fit and can move into audit packaging.";
+}
+
+function getCostDrivers(findings: LegalReasonerOutput["legalFindings"]) {
+  const drivers = new Set<string>();
+
+  findings.forEach((finding) => {
+    switch (finding.indicatorId) {
+      case "P6_1_BAN_LOCAL_PROCESSING":
+        drivers.add("local processing architecture");
+        drivers.add("duplicated operating model");
+        break;
+      case "P6_2_LOCAL_STORAGE":
+        drivers.add("domestic storage infrastructure");
+        drivers.add("data residency controls");
+        break;
+      case "P6_3_INFRASTRUCTURE":
+        drivers.add("cloud and hosting redesign");
+        drivers.add("regulator-access engineering");
+        break;
+      case "P6_4_CONDITIONAL_FLOW":
+        drivers.add("approval preparation burden");
+        drivers.add("transfer assessment lead time");
+        break;
+      case "P6_5_BINDING_COMMITMENT":
+        drivers.add("treaty exception analysis");
+        drivers.add("cross-border governance documentation");
+        break;
+    }
+
+    if (
+      finding.evidenceIds.some((evidenceId) => getEvidenceRecord(evidenceId)?.reviewStatus !== "Approved")
+    ) {
+      drivers.add("additional legal review time");
+    }
+  });
+
+  return [...drivers];
+}
+
+function needsHumanReview(findings: LegalReasonerOutput["legalFindings"]) {
+  return findings.some((finding) =>
+    finding.evidenceIds.some((evidenceId) => getEvidenceRecord(evidenceId)?.reviewStatus !== "Approved")
+  );
+}
+
+function getUncertaintyLevel(
+  findings: LegalReasonerOutput["legalFindings"]
+): ReasoningUncertaintyLevel {
+  if (needsHumanReview(findings)) {
+    return "High";
+  }
+
+  if (
+    findings.some(
+      (finding) =>
+        finding.indicatorId === "P6_3_INFRASTRUCTURE" ||
+        finding.indicatorId === "P6_4_CONDITIONAL_FLOW"
+    )
+  ) {
+    return "Moderate";
+  }
+
+  return "Low";
+}
+
+function buildTraceabilityNote(reviewStatus: string, humanReviewNeeded: boolean) {
+  if (humanReviewNeeded) {
+    return "The evidence chain is linked, but a reviewer should confirm the excerpt and citation before export.";
+  }
+
+  if (reviewStatus !== "Approved") {
+    return "The legal text is linked successfully, but the underlying evidence record still needs reviewer confirmation.";
+  }
+
+  return "The legal claim, source text, and citation are fully linked for demo review.";
+}
+
+function summarizeOperationalImpact(
+  findings: LegalReasonerOutput["legalFindings"],
+  riskLevel: RiskLevel,
+  uncertaintyLevel: ReasoningUncertaintyLevel
+) {
+  const dominantIndicators = [...new Set(findings.map((finding) => finding.indicatorId))];
+  const summary = `The current legal findings indicate a ${riskLevel.toLowerCase()} operational risk posture across ${dominantIndicators.length} Pillar 6 indicator area${dominantIndicators.length === 1 ? "" : "s"}.`;
+  const qualifier =
+    uncertaintyLevel === "High"
+      ? " Several conclusions still need human confirmation before business teams should rely on them."
+      : uncertaintyLevel === "Moderate"
+        ? " Business planning can proceed, but teams should validate exceptions and trigger conditions."
+        : " The resulting risk picture is relatively stable for demo planning and cost discussion.";
+
+  return `${summary}${qualifier}`;
 }
 
 function success<T>(
@@ -507,8 +649,376 @@ export function runMainlineAgents(input: {
       legalReasoner
     },
     supportingAgentResults: {
-      queryBuilder
+      queryBuilder,
+      relevanceFilter: success(
+        "relevance-filter",
+        {
+          shortlistedPassages: [],
+          filteredOutEvidenceIds: [],
+          reviewSummary: {
+            shortlistedCount: 0,
+            filteredOutCount: 0,
+            humanReviewCount: 0
+          },
+          reviewerChecklist: []
+        },
+        "Supporting relevance filter pending post-mainline packaging.",
+        "indicator-mapping"
+      ),
+      riskCostQuantifier: success(
+        "risk-cost-quantifier",
+        {
+          riskSummary: {
+            riskLevel: "Low",
+            businessCostDrivers: [],
+            operationalImpact: "Supporting risk packaging will run after the mainline legal findings are complete.",
+            uncertaintyLevel: "Low",
+            humanReviewNeeded: false
+          }
+        },
+        "Supporting risk quantification pending post-mainline packaging.",
+        "audit-citation"
+      ),
+      auditCitation: success(
+        "audit-citation",
+        {
+          auditItems: [],
+          coverageSummary: {
+            totalFindings: 0,
+            linkedFindings: 0,
+            needsReviewCount: 0
+          }
+        },
+        "Supporting audit citation packaging pending post-mainline execution.",
+        "legal-review-export"
+      ),
+      legalReviewExport: success(
+        "legal-review-export",
+        {
+          finalReport: "Supporting export package will be built after the mainline workflow completes.",
+          judgeSummary: "No supporting export package has been generated yet.",
+          exportReadiness: "Needs Human Review",
+          reviewSummary: {
+            approvedCount: 0,
+            needsRevisionCount: 0,
+            rejectedCount: 0,
+            humanReviewCount: 0
+          },
+          exportJson: {},
+          exportCsvRows: [],
+          exportMarkdown: "# Pending supporting export package"
+        },
+        "Supporting export package pending post-mainline packaging."
+      )
     }
+  };
+}
+
+export function relevanceFilterAgent(input: {
+  focusIndicators: Pillar6IndicatorEnum[];
+  passages: DocumentReaderOutput["passages"];
+}): AgentResult<RelevanceFilterOutput> {
+  const filteredOutEvidenceIds: string[] = [];
+  const shortlistedPassages = input.passages.flatMap((passage) => {
+    const record = getEvidenceRecord(passage.evidenceId);
+
+    if (!record || !input.focusIndicators.includes(record.indicatorCode)) {
+      filteredOutEvidenceIds.push(passage.evidenceId);
+      return [];
+    }
+
+    const relevanceBand = getRelevanceBand(record);
+    const humanReviewNeeded = relevanceBand === "Borderline" || record.reviewStatus !== "Approved";
+
+    return [
+      {
+        evidenceId: passage.evidenceId,
+        sourceId: passage.sourceId,
+        jurisdiction: record.country,
+        indicatorId: record.indicatorCode,
+        lawTitle: passage.lawTitle,
+        citationRef: passage.citationRef,
+        sourceUrl: passage.sourceUrl,
+        sourceType: record.sourceType,
+        text: passage.text,
+        relevanceReason: buildRelevanceReason(record.indicatorCode),
+        relevanceBand,
+        humanReviewNeeded,
+        reviewerPrompt: buildRelevanceReviewerPrompt(record)
+      }
+    ];
+  });
+
+  return success(
+    "relevance-filter",
+    {
+      shortlistedPassages,
+      filteredOutEvidenceIds,
+      reviewSummary: {
+        shortlistedCount: shortlistedPassages.length,
+        filteredOutCount: filteredOutEvidenceIds.length,
+        humanReviewCount: shortlistedPassages.filter((item) => item.humanReviewNeeded).length
+      },
+      reviewerChecklist: [
+        "Confirm every shortlisted passage still belongs to Pillar 6 rather than general privacy compliance.",
+        "Escalate borderline infrastructure or supervision passages to human review before export.",
+        "Only pass fully understood passages into the final audit and export package."
+      ]
+    },
+    "Mainline passages filtered down to transfer-relevant Pillar 6 evidence.",
+    "indicator-mapping"
+  );
+}
+
+export function riskCostQuantifierAgent(input: {
+  jurisdiction: SupportedCountry;
+  legalFindings: LegalReasonerOutput["legalFindings"];
+}): AgentResult<RiskCostQuantifierOutput> {
+  const highestRiskFinding = input.legalFindings.reduce<number>((current, finding) => {
+    const score =
+      finding.indicatorId === "P6_1_BAN_LOCAL_PROCESSING" ||
+      finding.indicatorId === "P6_2_LOCAL_STORAGE"
+        ? 3
+        : finding.indicatorId === "P6_3_INFRASTRUCTURE" ||
+            finding.indicatorId === "P6_4_CONDITIONAL_FLOW"
+          ? 2
+          : 1;
+    const reviewPenalty = finding.evidenceIds.some(
+      (evidenceId) => getEvidenceRecord(evidenceId)?.reviewStatus !== "Approved"
+    )
+      ? 1
+      : 0;
+
+    return Math.max(current, score + reviewPenalty);
+  }, 0);
+
+  const riskLevel: RiskLevel =
+    highestRiskFinding >= 4 ? "High" : highestRiskFinding >= 2 ? "Moderate" : "Low";
+  const uncertaintyLevel = getUncertaintyLevel(input.legalFindings);
+  const riskSummary: RiskSummary = {
+    riskLevel,
+    businessCostDrivers: getCostDrivers(input.legalFindings),
+    operationalImpact: summarizeOperationalImpact(
+      input.legalFindings,
+      riskLevel,
+      uncertaintyLevel
+    ),
+    uncertaintyLevel,
+    humanReviewNeeded: needsHumanReview(input.legalFindings)
+  };
+
+  return success(
+    "risk-cost-quantifier",
+    { riskSummary },
+    "Mainline legal findings translated into business-facing risk and cost signals.",
+    "audit-citation"
+  );
+}
+
+export function auditCitationAgent(input: {
+  shortlistedPassages: RelevanceFilterOutput["shortlistedPassages"];
+  legalFindings: LegalReasonerOutput["legalFindings"];
+}): AgentResult<AuditCitationOutput> {
+  const auditItems: AuditCitationItem[] = input.legalFindings.flatMap((finding) => {
+    const evidenceId = finding.evidenceIds[0];
+    const shortlistItem = input.shortlistedPassages.find((item) => item.evidenceId === evidenceId);
+    const record = evidenceId ? getEvidenceRecord(evidenceId) : null;
+
+    if (!shortlistItem || !record) {
+      return [];
+    }
+
+    const humanReviewNeeded =
+      shortlistItem.humanReviewNeeded || record.reviewStatus !== "Approved";
+    const traceabilityStatus = humanReviewNeeded ? "Needs Human Review" : "Complete";
+
+    return [
+      {
+        evidenceId,
+        sourceId: shortlistItem.sourceId,
+        conclusionId: finding.conclusionId,
+        jurisdiction: record.country,
+        indicatorId: finding.indicatorId,
+        lawTitle: shortlistItem.lawTitle,
+        citationRef: shortlistItem.citationRef,
+        sourceUrl: shortlistItem.sourceUrl,
+        originalLegalText: shortlistItem.text,
+        verbatimSnippet: record.verbatimSnippet,
+        extractedClaim: finding.conclusion,
+        legalEffect: finding.legalEffect,
+        relevanceReason: shortlistItem.relevanceReason,
+        traceabilityStatus,
+        traceabilityNote: buildTraceabilityNote(record.reviewStatus, humanReviewNeeded),
+        humanReviewNeeded,
+        reviewerNote: record.reviewerNote,
+        reviewStatus: record.reviewStatus
+      }
+    ];
+  });
+
+  return success(
+    "audit-citation",
+    {
+      auditItems,
+      coverageSummary: {
+        totalFindings: input.legalFindings.length,
+        linkedFindings: auditItems.length,
+        needsReviewCount: auditItems.filter((item) => item.humanReviewNeeded).length
+      }
+    },
+    "Mainline findings stitched back to legal text, citations, and reviewer context.",
+    "legal-review-export"
+  );
+}
+
+export function legalReviewExportAgent(input: {
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  businessScenario: string;
+  auditItems: AuditCitationItem[];
+  riskSummary: RiskSummary;
+  comparison: ComparisonAgentResult | null;
+}): AgentResult<LegalReviewExportOutput> {
+  const mappedIndicators = [...new Set(input.auditItems.map((item) => item.indicatorId))];
+  const approvedCount = input.auditItems.filter((item) => item.reviewStatus === "Approved").length;
+  const needsRevisionCount = input.auditItems.filter(
+    (item) => item.reviewStatus === "Needs Revision"
+  ).length;
+  const rejectedCount = input.auditItems.filter((item) => item.reviewStatus === "Rejected").length;
+  const humanReviewCount = input.auditItems.filter((item) => item.humanReviewNeeded).length;
+  const exportReadiness =
+    humanReviewCount > 0 || needsRevisionCount > 0 || rejectedCount > 0
+      ? "Needs Human Review"
+      : "Ready for Judge Review";
+  const finalReport = input.comparison
+    ? `${input.businessScenario} scenario review across ${input.countryA} and ${input.countryB} indicates ${input.riskSummary.riskLevel.toLowerCase()} risk with ${mappedIndicators.length} mapped Pillar 6 indicator areas.`
+    : `${input.businessScenario} scenario review for ${input.countryA} indicates ${input.riskSummary.riskLevel.toLowerCase()} risk with ${mappedIndicators.length} mapped Pillar 6 indicator areas.`;
+  const judgeSummary = `${finalReport} ${approvedCount} evidence item(s) are approved for presentation, while ${humanReviewCount} item(s) still need human legal review.`;
+  const reviewSummary = {
+    approvedCount,
+    needsRevisionCount,
+    rejectedCount,
+    humanReviewCount
+  };
+  const exportJson = {
+    scope: "Pillar 6",
+    jurisdictions: [input.countryA, input.countryB].filter(Boolean),
+    mappedIndicators,
+    exportReadiness,
+    reviewSummary,
+    riskSummary: input.riskSummary,
+    auditItems: input.auditItems
+  };
+  const exportCsvRows = input.auditItems.map((item) => ({
+    evidenceId: item.evidenceId,
+    citationRef: item.citationRef,
+    indicatorId: item.indicatorId,
+    reviewStatus: item.reviewStatus,
+    traceabilityStatus: item.traceabilityStatus,
+    riskLevel: input.riskSummary.riskLevel
+  }));
+  const exportMarkdown = [
+    "# Pillar 6 Review Package",
+    "",
+    `- Scenario: ${input.businessScenario}`,
+    `- Primary jurisdiction: ${input.countryA}`,
+    input.countryB ? `- Comparison jurisdiction: ${input.countryB}` : null,
+    `- Risk level: ${input.riskSummary.riskLevel}`,
+    `- Uncertainty: ${input.riskSummary.uncertaintyLevel}`,
+    `- Export readiness: ${exportReadiness}`,
+    "",
+    "## Review Summary",
+    `- Approved: ${approvedCount}`,
+    `- Needs revision: ${needsRevisionCount}`,
+    `- Rejected: ${rejectedCount}`,
+    `- Human review needed: ${humanReviewCount}`,
+    "",
+    "## Audit Items",
+    ...input.auditItems.flatMap((item) => [
+      `### ${item.lawTitle} (${item.citationRef})`,
+      `- Indicator: ${item.indicatorId}`,
+      `- Review status: ${item.reviewStatus}`,
+      `- Traceability status: ${item.traceabilityStatus}`,
+      `- Source URL: ${item.sourceUrl}`,
+      "",
+      item.verbatimSnippet,
+      "",
+      `AI claim: ${item.extractedClaim}`,
+      `Legal effect: ${item.legalEffect}`,
+      `Traceability note: ${item.traceabilityNote}`,
+      `Reviewer note: ${item.reviewerNote}`,
+      ""
+    ])
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  return success(
+    "legal-review-export",
+    {
+      finalReport,
+      judgeSummary,
+      exportReadiness,
+      reviewSummary,
+      exportJson,
+      exportCsvRows,
+      exportMarkdown
+    },
+    "Audit chain and reviewer context packaged into export-ready deliverables."
+  );
+}
+
+export function runSupportingAgents(input: {
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  businessScenario: string;
+  userQuery: string;
+  mainlineAgentResults: MainlineAgentResults;
+  queryBuilder: AgentResult<QueryBuilderOutput>;
+  comparison: ComparisonAgentResult | null;
+}): SupportingAgentResults {
+  const intent =
+    input.mainlineAgentResults.intentArbiter.data ?? {
+      normalizedIntent: input.userQuery,
+      workflowMode: input.countryB ? "cross-jurisdiction" : "single-jurisdiction",
+      pillar6ScopeConfirmed: true,
+      focusIndicators: ALL_PILLAR6_INDICATORS
+    };
+
+  const relevanceFilter = relevanceFilterAgent({
+    focusIndicators: intent.focusIndicators,
+    passages: input.mainlineAgentResults.documentReader.data?.passages ?? []
+  });
+  const riskCostQuantifier = riskCostQuantifierAgent({
+    jurisdiction: input.countryA,
+    legalFindings: input.mainlineAgentResults.legalReasoner.data?.legalFindings ?? []
+  });
+  const auditCitation = auditCitationAgent({
+    shortlistedPassages: relevanceFilter.data?.shortlistedPassages ?? [],
+    legalFindings: input.mainlineAgentResults.legalReasoner.data?.legalFindings ?? []
+  });
+  const legalReviewExport = legalReviewExportAgent({
+    countryA: input.countryA,
+    countryB: input.countryB,
+    businessScenario: input.businessScenario,
+    auditItems: auditCitation.data?.auditItems ?? [],
+    riskSummary:
+      riskCostQuantifier.data?.riskSummary ?? {
+        riskLevel: "Low",
+        businessCostDrivers: [],
+        operationalImpact: "No downstream legal findings were available for business-risk packaging.",
+        uncertaintyLevel: "Low",
+        humanReviewNeeded: false
+      },
+    comparison: input.comparison
+  });
+
+  return {
+    queryBuilder: input.queryBuilder,
+    relevanceFilter,
+    riskCostQuantifier,
+    auditCitation,
+    legalReviewExport
   };
 }
 
@@ -524,6 +1034,7 @@ function buildTenAgentTrace(input: {
   businessScenario: string;
   userQuery: string;
   policyAnalysis: PolicyAnalysisResult[];
+  riskSummary?: RiskSummary | null;
 }): WorkflowAgentTrace[] {
   const countries = [input.countryA, input.countryB].filter(Boolean).join(" and ");
   const evidenceIds = filterEvidenceByCountries(
@@ -637,10 +1148,13 @@ function buildTenAgentTrace(input: {
     {
       agentId: "risk-cost-quantifier",
       name: agentNames["risk-cost-quantifier"],
-      inputSummary: "Legal conclusions with transfer gates, localization signals, and commitments.",
-      outputSummary: `Summarizes risk as ${input.policyAnalysis
-        .map((item) => `${item.country}: ${item.riskLevel}`)
-        .join(", ")}.`,
+      inputSummary:
+        "Legal conclusions with transfer gates, localization signals, uncertainty levels, and review flags.",
+      outputSummary: input.riskSummary
+        ? `Summarizes risk as ${input.riskSummary.riskLevel} with ${input.riskSummary.businessCostDrivers.length} main cost driver(s).`
+        : `Summarizes risk as ${input.policyAnalysis
+            .map((item) => `${item.country}: ${item.riskLevel}`)
+            .join(", ")}.`,
       evidenceIds,
       humanReviewGate: {
         required: true,
@@ -716,7 +1230,8 @@ export async function runMultiAgentWorkflow(
   const userQuery =
     options?.userQuery ??
     "Find legal evidence describing how cross-border data transfers are permitted, conditioned, or restricted.";
-  const { mainlineAgentResults, supportingAgentResults } = runMainlineAgents({
+  const { mainlineAgentResults, supportingAgentResults: mainlineSupportingAgentResults } =
+    runMainlineAgents({
     countryA,
     countryB,
     businessScenario,
@@ -745,6 +1260,15 @@ export async function runMultiAgentWorkflow(
     policyAnalysis,
     comparison
   });
+  const supportingAgentResults = runSupportingAgents({
+    countryA,
+    countryB,
+    businessScenario,
+    userQuery,
+    mainlineAgentResults,
+    queryBuilder: mainlineSupportingAgentResults.queryBuilder,
+    comparison
+  });
 
   return {
     input: {
@@ -764,7 +1288,8 @@ export async function runMultiAgentWorkflow(
       countryB,
       businessScenario,
       userQuery,
-      policyAnalysis
+      policyAnalysis,
+      riskSummary: supportingAgentResults.riskCostQuantifier.data?.riskSummary ?? null
     }),
     demoNarrative: buildDemoNarrative({
       countryA,
