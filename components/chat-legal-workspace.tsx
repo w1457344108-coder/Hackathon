@@ -739,16 +739,21 @@ interface BackendWorkflowResult {
 
 interface QueryBuilderData {
   originalQuestion?: string;
+  normalizedIntent?: string;
   reformulatedQuestion?: string;
   optimizedPrompt?: string;
   lawStudentTerms?: string;
   aiGeneratedTerms?: string[];
   targetIndicators?: string[];
+  sourcePriorityOrder?: string[];
   searchQueries?: string[];
   queryPlan?: Array<{
     query?: string;
+    queryText?: string;
     searchQuery?: string;
+    indicatorLabel?: string;
     targetIndicator?: string;
+    indicatorCode?: string;
     targetSourceType?: string;
     sourceType?: string;
   }>;
@@ -837,18 +842,25 @@ function formatQueryBuilderSuggestion(
   const planLines =
     queryBuilder?.queryPlan
       ?.map((item) => {
-        const query = item.query ?? item.searchQuery;
-        const target = item.targetIndicator ?? item.targetSourceType ?? item.sourceType;
+        const query = item.query ?? item.queryText ?? item.searchQuery;
+        const target =
+          item.indicatorLabel ??
+          item.targetIndicator ??
+          item.indicatorCode ??
+          item.targetSourceType ??
+          item.sourceType;
         return [query, target ? `target: ${target}` : null].filter(Boolean).join(" | ");
       })
       .filter(Boolean) ?? [];
 
   const sourceTerms = [
     queryBuilder?.optimizedPrompt,
+    queryBuilder?.normalizedIntent,
     queryBuilder?.reformulatedQuestion,
     queryBuilder?.lawStudentTerms,
     ...(queryBuilder?.aiGeneratedTerms ?? []),
     ...(queryBuilder?.targetIndicators ?? []),
+    ...(queryBuilder?.sourcePriorityOrder ?? []),
     ...(queryBuilder?.searchQueries ?? []),
     ...planLines
   ].filter(Boolean);
