@@ -13,6 +13,10 @@ import {
 } from "@/lib/jurisdiction-inference";
 
 type CoreModeId = "regulation" | "case" | "advisory";
+type LegalTaskType =
+  | "regulation-interpretation"
+  | "case-analysis"
+  | "forward-looking-advisory";
 type SupportedCountry = "China" | "Singapore" | "Japan" | "European Union" | "United States";
 
 interface ChatMessage {
@@ -1087,6 +1091,18 @@ function getScenarioLabel(mode: CoreModeId) {
   return "forward-looking advisory";
 }
 
+function getTaskType(mode: CoreModeId): LegalTaskType {
+  if (mode === "regulation") {
+    return "regulation-interpretation";
+  }
+
+  if (mode === "case") {
+    return "case-analysis";
+  }
+
+  return "forward-looking-advisory";
+}
+
 function isLegalScopedQuestion(question: string, files: File[]) {
   if (files.length) {
     return true;
@@ -1135,6 +1151,7 @@ async function runBackendAnalysis(question: string, mode: CoreModeId, files: Fil
           }
 
           formData.set("businessScenario", getScenarioLabel(mode));
+          formData.set("taskType", getTaskType(mode));
           formData.set("userQuery", question);
           files.forEach((file) => formData.append("files", file));
           return formData;
@@ -1148,6 +1165,7 @@ async function runBackendAnalysis(question: string, mode: CoreModeId, files: Fil
         body: JSON.stringify({
           ...countries,
           businessScenario: getScenarioLabel(mode),
+          taskType: getTaskType(mode),
           userQuery: question
         })
       };

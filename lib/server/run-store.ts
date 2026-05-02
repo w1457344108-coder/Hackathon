@@ -107,10 +107,10 @@ export async function saveWorkflowRun(workflowResult: WorkflowResult) {
 
 export async function updateWorkflowRun(
   runId: string,
-  updater: (workflowResult: WorkflowResult) => WorkflowResult
+  updater: (workflowResult: WorkflowResult) => WorkflowResult | Promise<WorkflowResult>
 ) {
   const storedRun = await getWorkflowRun(runId);
-  const updatedWorkflowResult = updater(storedRun.workflowResult);
+  const updatedWorkflowResult = await updater(storedRun.workflowResult);
   const nextRun: StoredWorkflowRun = {
     ...storedRun,
     updatedAt: new Date().toISOString(),

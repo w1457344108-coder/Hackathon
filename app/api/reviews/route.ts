@@ -59,8 +59,8 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const updatedWorkflowResult = await updateWorkflowRun(body.runId, (workflowResult) =>
-      applyReviewUpdateToWorkflowResult(workflowResult, {
+    const updatedWorkflowResult = await updateWorkflowRun(body.runId, async (workflowResult) =>
+      await applyReviewUpdateToWorkflowResult(workflowResult, {
         evidenceId: body.evidenceId as string,
         reviewStatus: body.reviewStatus as EvidenceReviewStatus,
         reviewerNote: body.reviewerNote ?? ""
