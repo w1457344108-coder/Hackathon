@@ -7,8 +7,8 @@ import {
   preferredSourceOptions,
   toQueryBuilderOutput
 } from "@/lib/mock-evidence";
-import { EvidenceRecord } from "@/lib/pillar6-schema";
-import {
+import type { EvidenceRecord } from "@/lib/pillar6-schema";
+import type {
   AgentResult,
   AuditCitationItem,
   AuditCitationOutput,
@@ -21,6 +21,7 @@ import {
   IndicatorMappingOutput,
   IntentArbiterOutput,
   LegalReasonerOutput,
+  LegalTaskType,
   MainlineAgentResults,
   MappedEvidenceItem,
   Pillar6IndicatorEnum,
@@ -41,10 +42,8 @@ import {
 } from "@/lib/types";
 import { getAnalysisProvider } from "@/lib/server/provider-adapter";
 import { resolveEvidenceContext } from "@/lib/server/source-pipeline";
-import {
-  buildUploadedDocumentQuery,
-  UploadedDocumentContext
-} from "@/lib/server/uploaded-documents";
+import { buildUploadedDocumentQuery } from "@/lib/server/uploaded-documents";
+import type { UploadedDocumentContext } from "@/lib/server/uploaded-documents";
 
 const SOURCE_BASIS = [
   "Competition-designated source set from ai_hackathon.pptx",
@@ -59,6 +58,425 @@ const ALL_PILLAR6_INDICATORS: Pillar6IndicatorEnum[] = [
   "P6_4_CONDITIONAL_FLOW",
   "P6_5_BINDING_COMMITMENT"
 ];
+
+const TASK_LABELS: Record<LegalTaskType, string> = {
+  "regulation-interpretation": "Regulation Interpretation",
+  "case-analysis": "Case Analysis",
+  "forward-looking-advisory": "Forward-looking Advisory"
+};
+
+export function classifyLegalTaskType(value?: string | null): LegalTaskType {
+  const normalized = (value ?? "").toLowerCase();
+
+  if (normalized.includes("case")) {
+    return "case-analysis";
+  }
+
+  if (
+    normalized.includes("forward") ||
+    normalized.includes("advisory") ||
+    normalized.includes("consult") ||
+    normalized.includes("planned") ||
+    normalized.includes("future")
+  ) {
+    return "forward-looking-advisory";
+  }
+
+  return "regulation-interpretation";
+}
+
+function getTaskIntent(input: {
+  taskType: LegalTaskType;
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  userQuery: string;
+}) {
+  const countries = input.countryB
+    ? `${input.countryA} and ${input.countryB}`
+    : input.countryA;
+
+  if (input.taskType === "case-analysis") {
+    return `Analyze this existing case by extracting facts, identifying the data flow, and matching the facts to Pillar 6/7 legal evidence for ${countries}. User question: ${input.userQuery}`;
+  }
+
+  if (input.taskType === "forward-looking-advisory") {
+    return `Assess this planned or future market-entry activity by forecasting cross-border data barriers, readiness risks, and compliance steps under Pillar 6/7 for ${countries}. User question: ${input.userQuery}`;
+  }
+
+  return `Explain the relevant Pillar 6/7 regulation, legal rule, or policy indicator for ${countries}, including source location, legal elements, plain-language meaning, and evidence limits. User question: ${input.userQuery}`;
+}
+
+function getTaskSearchTerms(taskType: LegalTaskType) {
+  if (taskType === "case-analysis") {
+    return [
+      "existing business facts",
+      "data flow",
+      "data category",
+      "compliance assessment",
+      "legal issues"
+    ];
+  }
+
+  if (taskType === "forward-looking-advisory") {
+    return [
+      "planned market entry",
+      "legal barriers",
+      "risk forecast",
+      "operational readiness",
+      "pre-launch compliance"
+    ];
+  }
+
+  return [
+    "legal text",
+    "regulation meaning",
+    "rule elements",
+    "official source",
+    "plain language explanation"
+  ];
+}
+
+export function getLegalReasonerInstructions(taskType: LegalTaskType) {
+  const commonRules = [
+    "Use only the supplied evidence, retrieved legal text, RDTII row-level source URLs, and uploaded documents.",
+    "Do not invent statutes, article numbers, legal obligations, regulator names, URLs, or citations.",
+    "Prefer original legal text and official sources over summaries, methodology pages, or database descriptions.",
+    "Distinguish exact legal text, RDTII database entries, policy indicator summaries, and inferred legal effect.",
+    "If evidence is ambiguous or incomplete, state the limitation inside the conclusion or legalEffect field."
+  ].join(" ");
+
+  if (taskType === "case-analysis") {
+    return [
+      "You are a legal case analysis agent for cross-border data law under UN ESCAP RDTII Pillar 6/7.",
+      "Task type: Case Analysis.",
+      commonRules,
+      "Treat the user scenario as an existing or current business operation.",
+      "First extract Case Facts Identified, then identify assumptions and missing facts.",
+      "Map the facts to Relevant Pillar 6/7 Issues, including transfer restrictions, localization, conditional flow, infrastructure, binding commitments, approvals, exceptions, and restrictions.",
+      "For each legal finding, make the conclusion case-specific and explain the Compliance Risk Assessment in legalEffect.",
+      "Required analytical coverage: Case Facts Identified, Assumptions and Missing Facts, Relevant Pillar 6/7 Issues, Country-by-Country Analysis, Compliance Risk Assessment, Evidence Match, Practical Next Steps, Limits."
+    ].join("\n");
+  }
+
+  if (taskType === "forward-looking-advisory") {
+    return [
+      "You are a forward-looking legal advisory agent for cross-border data law under UN ESCAP RDTII Pillar 6/7.",
+      "Task type: Forward-looking Advisory.",
+      commonRules,
+      "Treat the user scenario as a planned or future activity, not an existing case.",
+      "Do not present uncertain future risks as confirmed legal violations.",
+      "Focus on Potential Legal Barriers, Forward-Looking Risk Forecast, market-entry readiness, transfer mechanisms, approvals, localization, and operational prerequisites.",
+      "For each legal finding, make the conclusion planning-oriented and explain launch impact, caution signals, or human-review needs in legalEffect.",
+      "Required analytical coverage: Planned Activity Under Review, Key Planning Assumptions, Potential Legal Barriers, Forward-Looking Risk Forecast, Country-by-Country Readiness Review, Compliance Roadmap, Go / Caution / Stop Signals, Evidence and Citations, Limits."
+    ].join("\n");
+  }
+
+  return [
+    "You are a legal interpretation agent for cross-border data law under UN ESCAP RDTII Pillar 6/7.",
+    "Task type: Regulation Interpretation.",
+    commonRules,
+    "Treat the user question as a request to explain a specific law, regulation, clause, policy indicator, or legal requirement.",
+    "Locate the Legal Source Located, then explain the Rule Explanation, Legal Elements, legal exceptions, and application limits.",
+    "For each legal finding, make the conclusion rule-focused and explain what the rule means in legalEffect.",
+    "Required analytical coverage: Direct Answer, Legal Source Located, Rule Explanation, Legal Elements, Application to the User's Question, Confidence and Limits, Citations."
+  ].join("\n");
+}
+
+export function getReportAgentInstructions(taskType: LegalTaskType) {
+  const commonRules = [
+    "Produce a concise, evidence-aware final answer for a Pillar 6/7 cross-border data policy workflow.",
+    "Do not invent jurisdictions, evidence, source claims, legal citations, or business facts.",
+    "Use supplied legal findings and source records as the authority base.",
+    "If the evidence is only row-level database, page-level, or incomplete, say so clearly.",
+    "Write in user-facing prose with clear section labels."
+  ].join(" ");
+
+  if (taskType === "case-analysis") {
+    return [
+      commonRules,
+      "This is Case Analysis. The finalNarrative must be tailored to the user's existing facts and must not read like a generic country-risk memo.",
+      "Required sections inside finalNarrative: Case Facts Identified; Assumptions and Missing Facts; Relevant Pillar 6/7 Issues; Country-by-Country Analysis; Compliance Risk Assessment; Evidence Match; Practical Next Steps; Limits.",
+      "Policy recommendations must be case-specific compliance actions."
+    ].join("\n");
+  }
+
+  if (taskType === "forward-looking-advisory") {
+    return [
+      commonRules,
+      "This is Forward-looking Advisory. The finalNarrative must focus on future planning, potential barriers, readiness, and launch risk.",
+      "Required sections inside finalNarrative: Planned Activity Under Review; Key Planning Assumptions; Potential Legal Barriers; Forward-Looking Risk Forecast; Country-by-Country Readiness Review; Compliance Roadmap; Go / Caution / Stop Signals; Evidence and Citations; Limits.",
+      "Policy recommendations must be staged pre-launch actions."
+    ].join("\n");
+  }
+
+  return [
+    commonRules,
+    "This is Regulation Interpretation. The finalNarrative must explain the rule itself before discussing business impact.",
+    "Required sections inside finalNarrative: Direct Answer; Legal Source Located; Rule Explanation; Legal Elements; Application to the User's Question; Confidence and Limits; Citations.",
+    "Policy recommendations must focus on how to verify, apply, and document the interpreted rule."
+  ].join("\n");
+}
+
+// ── Source Discovery Agent Instructions ──────────────────────────
+
+function getSearchStrategy(taskType: LegalTaskType): string {
+  if (taskType === "case-analysis") {
+    return [
+      "Search strategy: Case Analysis mode.",
+      "Prioritize sources that describe existing enforcement actions, regulatory decisions,",
+      "or compliance assessments for currently operating businesses.",
+      "Weight regulator guidance and enforcement records higher than general legislative text."
+    ].join("\n");
+  }
+
+  if (taskType === "forward-looking-advisory") {
+    return [
+      "Search strategy: Forward-looking Advisory mode.",
+      "Prioritize sources that describe planned regulatory changes, pending legislation,",
+      "white papers, and market-entry conditions.",
+      "Weight ministry announcements and consultation papers higher than existing case law."
+    ].join("\n");
+  }
+
+  return [
+    "Search strategy: Regulation Interpretation mode.",
+    "Prioritize the official legislative text itself (statutes, regulations, implementing rules).",
+    "Weight primary legislation and official government portals higher than secondary guidance."
+  ].join("\n");
+}
+
+export function getSourceDiscoveryInstructions(taskType: LegalTaskType): string {
+  const commonRules = [
+    "You are a Source Discovery Agent for cross-border data policy under UN ESCAP RDTII Pillar 6/7.",
+    "Your task is to identify official or authoritative source locations where Pillar 6 evidence is likely to be found.",
+    "Route each query to the most relevant authority channel first: legislation portals, regulator guidance, ministry websites, treaty databases, or RDTII references.",
+    "Rank sources by: (a) official status first, (b) Pillar 6 relevance second.",
+    "Discard clearly off-topic privacy-only or domestic compliance material before the reading stage."
+  ].join("\n");
+
+  const indicatorGuidance = [
+    "Only return sources relevant to the five canonical Pillar 6 indicators:",
+    "- P6_1_BAN_LOCAL_PROCESSING: rules requiring local processing or banning cross-border processing",
+    "- P6_2_LOCAL_STORAGE: rules mandating domestic data storage",
+    "- P6_3_INFRASTRUCTURE: rules requiring local infrastructure (servers, cloud, hosting)",
+    "- P6_4_CONDITIONAL_FLOW: rules permitting cross-border transfers subject to conditions",
+    "- P6_5_BINDING_COMMITMENT: treaty or agreement-based commitments facilitating cross-border flows",
+    "Do not include sources about general privacy, consumer data rights, or domestic data protection that do not specifically address cross-border transfer conditions."
+  ].join("\n");
+
+  const searchStrategy = getSearchStrategy(taskType);
+
+  return [
+    commonRules,
+    indicatorGuidance,
+    searchStrategy,
+    "Output a list of CandidateSource objects, each with:",
+    "- sourceId, evidenceId, queryId (traceable to originating query)",
+    "- title, jurisdiction, sourceType, sourceUrl",
+    "- authorityLevel: 'Primary' (official statute/regulation) or 'Supporting' (guidance/secondary)",
+    "- jurisdictionMatch: 'Direct' or 'Regional / Comparative'",
+    "- relevanceNote explaining why this source matters for the indicator",
+    "- retrievalStatus: 'Ready for Reading' or 'Needs Human Check'",
+    "If no authoritative source can be found, return an empty candidateSources array with a clear explanation."
+  ].join("\n");
+}
+
+// ── Document Reader Agent Instructions ──────────────────────────
+
+export function getDocumentReaderInstructions(): string {
+  return [
+    "You are a Document Reader Agent for cross-border data policy under UN ESCAP RDTII Pillar 6/7.",
+    "Your task is to convert raw legal material (statutes, regulations, guidance documents) into structured, citation-ready passages.",
+    "",
+    "For each source provided:",
+    "1. Extract and normalize the legal text into clean plain-text passages.",
+    "2. Split into logical citation-ready units by natural legal boundaries (article, section, clause).",
+    "3. Preserve all citation anchors, section numbers, and article references exactly as written.",
+    "4. Maintain source URL and law title as provenance for every passage.",
+    "",
+    "Output a list of LegalPassage objects:",
+    "- evidenceId: unique identifier for this passage",
+    "- sourceId: reference back to the original source",
+    "- lawTitle: full name of the law/regulation (verbatim)",
+    "- citationRef: specific article/section reference (e.g. 'Art. 12', 'Sec. 5.2')",
+    "- sourceUrl: direct URL to the source",
+    "- text: the extracted legal text passage (verbatim, no summarization)",
+    "",
+    "Important constraints:",
+    "- Do NOT summarize, interpret, or add commentary — extract verbatim text only.",
+    "- Preserve original legal language exactly, including numbering and punctuation.",
+    "- If the original text contains defined terms, keep them as-is.",
+    "- If parsing fails (OCR errors, garbled HTML, unreachable URL), return error type 'PARSE_FAILED'.",
+    "- Each passage must be independently citable on its own."
+  ].join("\n");
+}
+
+// ── Indicator Mapping Agent Instructions ──────────────────────────
+
+export function getIndicatorMappingInstructions(): string {
+  return [
+    "You are an Indicator Mapping Agent for cross-border data policy under UN ESCAP RDTII Pillar 6/7.",
+    "Your task is to align each structured legal passage to one of the five canonical RDTII Pillar 6 indicators.",
+    "",
+    "The five canonical indicators are:",
+    "- P6_1_BAN_LOCAL_PROCESSING: prohibits cross-border processing or mandates local processing",
+    "- P6_2_LOCAL_STORAGE: mandates data storage within domestic territory",
+    "- P6_3_INFRASTRUCTURE: requires computing infrastructure to be locally located",
+    "- P6_4_CONDITIONAL_FLOW: permits cross-border transfers subject to conditions (approvals, safeguards, adequacy)",
+    "- P6_5_BINDING_COMMITMENT: treaty/agreement-based commitments facilitating cross-border flows",
+    "",
+    "For each passage:",
+    "1. Analyze the legal meaning in the context of cross-border data transfers.",
+    "2. Determine which single indicator the passage addresses.",
+    "3. Provide a concise mappingReason (1-2 sentences) explaining the connection.",
+    "4. If the passage genuinely cannot be mapped to any indicator, flag it as unmapped.",
+    "",
+    "Output a list of MappedEvidenceItem objects:",
+    "- evidenceId: references the source passage",
+    "- indicatorId: the matched Pillar 6 indicator code",
+    "- mappingReason: brief justification for the mapping",
+    "- citationRef: the original citation reference",
+    "",
+    "Important constraints:",
+    "- Use ONLY the five canonical indicator codes — no custom labels, no Pillar 7 codes.",
+    "- A conditional transfer rule (P6_4) is NOT the same as a storage mandate (P6_2).",
+    "- Infrastructure requirements (P6_3) must explicitly address cross-border data access, not just domestic supervision.",
+    "- If a passage addresses multiple indicators, choose the PRIMARY one only.",
+    "- Do not map passages about general privacy rights that don't address cross-border transfer conditions."
+  ].join("\n");
+}
+
+// ── Relevance Filter Agent Instructions ──────────────────────────
+
+export function getRelevanceFilterInstructions(): string {
+  return [
+    "You are a Relevance Filter Agent for cross-border data policy under UN ESCAP RDTII Pillar 6/7.",
+    "Your task is to read completed mainline passages and keep only the evidence that is genuinely useful for Pillar 6 audit and export.",
+    "You are a quality gate — remove noise, protect against scope creep, and flag borderline material for human review.",
+    "",
+    "For each passage:",
+    "1. Check if its content still aligns with the scoped Pillar 6 indicators.",
+    "2. Rate it as:",
+    "   - 'Direct Match': strong, on-topic Pillar 6 evidence (high confidence, approved review status)",
+    "   - 'Borderline': ambiguous fit, infrastructure-adjacent, or low-confidence (needs human review)",
+    "3. Generate a specific reviewerPrompt for the law student to verify.",
+    "4. If the passage is clearly off-topic (domestic privacy, general consumer rights, tax, telecom), filter it out.",
+    "",
+    "Output a RelevanceFilterOutput with:",
+    "- shortlistedPassages: array of filtered + rated passages",
+    "  - Each includes: evidenceId, sourceId, jurisdiction, indicatorId, lawTitle, citationRef, sourceUrl,",
+    "    sourceType, text, relevanceReason, relevanceBand ('Direct Match'|'Borderline'),",
+    "    humanReviewNeeded, reviewerPrompt",
+    "- filteredOutEvidenceIds: array of removed evidence IDs",
+    "- reviewSummary: { shortlistedCount, filteredOutCount, humanReviewCount }",
+    "- reviewerChecklist: actionable checklist items for the law student reviewer",
+    "",
+    "Important constraints:",
+    "- Preserve citation integrity — never separate a passage from its source metadata.",
+    "- When in doubt, keep the passage but mark it as 'Borderline' with a clear reviewerPrompt.",
+    "- Infrastructure evidence (P6_3) should generally be 'Borderline' unless it explicitly addresses cross-border data access.",
+    "- The reviewerChecklist should help a law student efficiently verify the shortlist in under 5 minutes."
+  ].join("\n");
+}
+
+// ── Risk & Cost Quantifier Agent Instructions ──────────────────────────
+
+export function getRiskCostInstructions(taskType: LegalTaskType): string {
+  const commonRules = [
+    "You are a Risk & Cost Quantifier Agent for cross-border data policy under UN ESCAP RDTII Pillar 6/7.",
+    "Your task is to convert completed mainline legal findings into business-facing risk and cost signals.",
+    "Translate legal complexity into actionable business intelligence.",
+    "",
+    "For each set of findings, assess risk level by indicator type and review status:",
+    "- P6_1_BAN_LOCAL_PROCESSING and P6_2_LOCAL_STORAGE → higher baseline risk",
+    "- P6_3_INFRASTRUCTURE and P6_4_CONDITIONAL_FLOW → moderate baseline risk",
+    "- P6_5_BINDING_COMMITMENT → lower baseline risk (positive signal for cross-border flow)",
+    "- Unapproved or low-confidence evidence → add one risk level penalty",
+    "",
+    "Identify business cost drivers based on active indicators:",
+    "- P6_1 → local processing architecture, duplicated operating model",
+    "- P6_2 → domestic storage infrastructure, data residency controls",
+    "- P6_3 → cloud/hosting redesign, regulator-access engineering",
+    "- P6_4 → approval preparation burden, transfer assessment lead time",
+    "- P6_5 → treaty exception analysis, cross-border governance documentation",
+    "",
+    "Determine uncertainty level:",
+    "- 'High': any evidence needs human review",
+    "- 'Moderate': infrastructure or conditional flow indicators present",
+    "- 'Low': all evidence is approved and straightforward",
+    "",
+    "Output a RiskSummary with:",
+    "- riskLevel: 'Low' | 'Moderate' | 'High'",
+    "- businessCostDrivers: array of specific, actionable cost driver descriptions",
+    "- operationalImpact: narrative summary of what this means for business operations",
+    "- uncertaintyLevel: 'Low' | 'Moderate' | 'High'",
+    "- humanReviewNeeded: boolean"
+  ].join("\n");
+
+  if (taskType === "case-analysis") {
+    return [
+      commonRules,
+      "Context: This is a Case Analysis — treat the business scenario as an EXISTING operation.",
+      "Risk assessment must reflect current compliance gaps and immediate remediation costs.",
+      "Operational impact should describe what the business needs to fix NOW."
+    ].join("\n");
+  }
+
+  if (taskType === "forward-looking-advisory") {
+    return [
+      commonRules,
+      "Context: This is a Forward-looking Advisory — treat the business scenario as a PLANNED activity.",
+      "Risk assessment should focus on launch readiness and pre-market barriers.",
+      "Operational impact should describe what the business needs to prepare BEFORE entering the market."
+    ].join("\n");
+  }
+
+  return [
+    commonRules,
+    "Context: This is a Regulation Interpretation — focus on the cost of compliance with the interpreted rule.",
+    "Risk assessment reflects the rule's intrinsic restrictiveness, not a specific business case.",
+    "Operational impact should describe the general compliance burden created by the rule itself."
+  ].join("\n");
+}
+
+// ── Audit View & Citation Agent Instructions ──────────────────────────
+
+export function getAuditCitationInstructions(): string {
+  return [
+    "You are an Audit View & Citation Agent for cross-border data policy under UN ESCAP RDTII Pillar 6/7.",
+    "Your task is to link mainline legal findings back to shortlisted evidence, verbatim source text, and reviewer context.",
+    "You are the system's main defense against hallucination — every AI claim must remain visibly anchored in legal text.",
+    "",
+    "For each legal finding:",
+    "1. Match the finding to its corresponding shortlisted passage using evidenceId.",
+    "2. Extract the verbatim source text that supports the AI's claim (exact quote in quotation marks).",
+    "3. Record extractedClaim (what the AI concluded) alongside originalLegalText (what the law actually says).",
+    "4. Determine traceabilityStatus:",
+    "   - 'Complete': all links in the chain (finding → passage → source text → citation) are solid",
+    "   - 'Needs Human Review': any link is weak, missing, or the underlying evidence is not approved",
+    "5. Generate a traceabilityNote explaining the state of the evidence chain.",
+    "6. Preserve reviewer context (reviewerNote, reviewStatus) from the evidence records.",
+    "",
+    "Output an AuditCitationOutput with:",
+    "- auditItems: array of AuditCitationItem objects",
+    "  - Each includes: evidenceId, sourceId, conclusionId, jurisdiction, indicatorId, lawTitle, citationRef,",
+    "    sourceUrl, sourceLocator, sourceStrength, traceabilityTier, originalLegalText, verbatimSnippet,",
+    "    extractedClaim, legalEffect, relevanceReason, traceabilityStatus, traceabilityNote,",
+    "    humanReviewNeeded, reviewerNote, reviewStatus",
+    "- coverageSummary: { totalFindings, linkedFindings, needsReviewCount }",
+    "",
+    "Important constraints:",
+    "- The verbatimSnippet MUST be an exact quote from the source text, clearly enclosed in quotation marks.",
+    "- Never fabricate or approximate citations — if the evidence chain is broken, say so in traceabilityNote.",
+    "- If a finding references evidence that was filtered out, still try to link it but mark as 'Needs Human Review'.",
+    "- Every audit item should be independently reviewable by a law student without cross-referencing other tools.",
+    "",
+    "Traceability note guidelines:",
+    "- If humanReviewNeeded: 'The evidence chain is linked, but a reviewer should confirm the excerpt and citation before export.'",
+    "- If reviewStatus is not 'Approved': 'The legal text is linked successfully, but the underlying evidence record still needs reviewer confirmation.'",
+    "- If complete: 'The legal claim, source text, and citation are fully linked for reviewer inspection.'"
+  ].join("\n");
+}
 
 const TEN_AGENT_ORDER: TenAgentId[] = [
   "intent-arbiter",
@@ -433,9 +851,13 @@ export async function reportAgent(results: {
   comparison: ComparisonAgentResult | null;
   evidenceRecords: EvidenceRecord[];
   legalFindings: LegalReasonerOutput["legalFindings"];
+  businessScenario: string;
+  taskType?: LegalTaskType;
+  userQuery: string;
 }): Promise<ReportAgentResult> {
   await wait(800);
 
+  const taskType = results.taskType ?? classifyLegalTaskType(results.businessScenario);
   const highestRiskScore = Math.max(...results.policyAnalysis.map((item) => item.restrictionScore));
   const overallRisk = toRiskLabel(highestRiskScore);
   const comparisonTable = results.comparison?.rows ?? [];
@@ -463,16 +885,65 @@ export async function reportAgent(results: {
         !record.lawTitle.includes("Guide") &&
         !record.lawTitle.includes("Economy Profile")
     );
-  const fallbackNarrative = results.comparison
-    ? `The multi-agent workflow indicates that ${results.comparison.higherRiskCountry} carries the heavier cross-border compliance load in this scenario, while ${results.comparison.winnerOnOpenness} appears more open for scalable digital operations. ${findingSummaries.length ? `Evidence-backed findings include: ${findingSummaries.map((finding) => `${finding.jurisdiction}: ${finding.conclusion}`).join(" ")}` : primaryAnalysis.executiveSummary} ${clauseLevelEvidenceRetrieved ? "At least one retrieved record goes beyond methodology-level material." : "This run still relies on competition-designated portal, profile, or methodology-level sources rather than article-level legal text."}`
-    : `The workflow indicates a ${overallRisk.toLowerCase()}-risk posture for ${primaryAnalysis.country}. ${findingSummaries.length ? `Evidence-backed findings include: ${findingSummaries.map((finding) => `${finding.conclusion}`).join(" ")}` : primaryAnalysis.executiveSummary} ${clauseLevelEvidenceRetrieved ? "At least one retrieved record goes beyond methodology-level material." : "This run still relies on competition-designated portal, profile, or methodology-level sources rather than article-level legal text."}`;
-  const fallbackRecommendations = [
-    "Design market entry plans around the strictest transfer pathway rather than the average case.",
-    "Separate privacy, localization, and approval obligations into different workstreams for faster execution.",
-    "Prioritize interoperable markets for pilot launches, then expand into higher-friction jurisdictions with localized controls.",
-    "Keep structured agent outputs so that providers and evidence pipelines can be swapped without breaking the review UI.",
-    "Escalate any portal-level or methodology-level record to human review before presenting it as clause-specific legal authority."
-  ];
+  const evidenceSummary = findingSummaries.length
+    ? findingSummaries
+        .map((finding) => `${finding.jurisdiction}: ${finding.conclusion} ${finding.legalEffect}`)
+        .join(" ")
+    : primaryAnalysis.executiveSummary;
+  const sourceLimit = clauseLevelEvidenceRetrieved
+    ? "At least one retrieved source is row-level or legal-text-level evidence."
+    : "The available sources are still mainly portal, profile, methodology, or database-level evidence and need human review before being treated as exact clause authority.";
+  const fallbackNarrative =
+    taskType === "case-analysis"
+      ? [
+          `Case Facts Identified: The user describes an existing cross-border data situation involving ${results.comparison ? `${results.comparison.comparedCountries[0]} and ${results.comparison.comparedCountries[1]}` : primaryAnalysis.country}.`,
+          `Assumptions and Missing Facts: Data category, transfer mechanism, processor/controller roles, and whether consent or approval exists should be confirmed if not supplied.`,
+          `Relevant Pillar 6/7 Issues: The case should be checked against conditional transfer rules, localization or infrastructure requirements, binding commitments, and privacy safeguards.`,
+          `Country-by-Country Analysis: ${evidenceSummary}`,
+          `Compliance Risk Assessment: Overall risk is ${overallRisk}.`,
+          `Evidence Match: ${findingSummaries.map((finding) => finding.evidence).filter(Boolean).join("; ") || "No citation-ready finding was returned."}`,
+          `Practical Next Steps: Map the data flow, confirm legal basis, review transfer contracts, check approval or localization triggers, and keep evidence for human legal review.`,
+          `Limits: ${sourceLimit}`
+        ].join("\n\n")
+      : taskType === "forward-looking-advisory"
+        ? [
+            `Planned Activity Under Review: The user is evaluating a future cross-border data operation for ${results.comparison ? `${results.comparison.comparedCountries[0]} and ${results.comparison.comparedCountries[1]}` : primaryAnalysis.country}.`,
+            `Key Planning Assumptions: Launch plans should confirm data type, hosting location, transfer direction, vendors, and whether sensitive or regulated data is involved.`,
+            `Potential Legal Barriers: Check transfer conditions, localization, infrastructure, approval, binding commitment, and privacy requirements before launch.`,
+            `Forward-Looking Risk Forecast: Overall risk is ${overallRisk}; ${evidenceSummary}`,
+            `Country-by-Country Readiness Review: Prioritize the stricter jurisdiction when the selected countries diverge.`,
+            `Compliance Roadmap: Verify legal sources, map data flows, design transfer safeguards, prepare contracts and notices, test approval needs, and schedule human legal review before rollout.`,
+            `Go / Caution / Stop Signals: Proceed only after evidence gaps and approval/localization triggers are cleared.`,
+            `Evidence and Citations: ${findingSummaries.map((finding) => finding.evidence).filter(Boolean).join("; ") || "No citation-ready finding was returned."}`,
+            `Limits: ${sourceLimit}`
+          ].join("\n\n")
+        : [
+            `Direct Answer: The requested Pillar 6/7 rule should be interpreted from the cited country source rather than from a generic risk score.`,
+            `Legal Source Located: ${findingSummaries.map((finding) => finding.evidence).filter(Boolean).join("; ") || "No citation-ready finding was returned."}`,
+            `Rule Explanation: ${evidenceSummary}`,
+            `Legal Elements: Review whether the rule permits, restricts, conditions, or requires infrastructure/localization for cross-border data movement.`,
+            `Application to the User's Question: Apply the rule to the selected countries and data-transfer direction before making a compliance decision.`,
+            `Confidence and Limits: Overall risk is ${overallRisk}. ${sourceLimit}`,
+            `Citations: ${results.evidenceRecords.slice(0, 3).map((record) => record.sourceUrl).join("; ")}`
+          ].join("\n\n");
+  const fallbackRecommendations =
+    taskType === "case-analysis"
+      ? [
+          "Convert the user facts into a data-flow map with actors, data category, source country, destination country, and processing purpose.",
+          "Check whether the evidence triggers transfer conditions, localization, infrastructure, or approval obligations.",
+          "Document assumptions and send unresolved facts to human legal review."
+        ]
+      : taskType === "forward-looking-advisory"
+        ? [
+            "Run a pre-launch legal source verification step for every selected country.",
+            "Build a staged compliance roadmap before product or market entry decisions.",
+            "Treat approval, localization, and sensitive-data uncertainty as caution signals until reviewed."
+          ]
+        : [
+            "Verify the exact legal source and citation before relying on the rule.",
+            "Separate the rule meaning from its business impact in internal notes.",
+            "Escalate incomplete or page-level evidence before presenting it as exact legal authority."
+          ];
 
   const structuredReport = await provider.generateStructuredObject<{
     title: string;
@@ -480,7 +951,7 @@ export async function reportAgent(results: {
     policyRecommendations: string[];
   }>({
     schemaName: "pillar6_report",
-    schemaDescription: "Judge-facing Pillar 6 report summary for the current analysis run.",
+    schemaDescription: `Judge-facing Pillar 6 report summary for the current ${TASK_LABELS[taskType]} run.`,
     schema: {
       type: "object",
       additionalProperties: false,
@@ -494,9 +965,12 @@ export async function reportAgent(results: {
         }
       }
     },
-    instructions:
-      "Produce a concise, evidence-aware report summary for a Pillar 6 cross-border data policy analysis. Do not invent jurisdictions, evidence, or source claims.",
+    instructions: getReportAgentInstructions(taskType),
     input: JSON.stringify({
+      taskType,
+      taskLabel: TASK_LABELS[taskType],
+      businessScenario: results.businessScenario,
+      userQuery: results.userQuery,
       researchSummary: results.research.summary,
       policyAnalysis: results.policyAnalysis,
       comparison: results.comparison,
@@ -524,11 +998,13 @@ export function intentArbiterAgent(input: {
   countryA: SupportedCountry;
   countryB?: SupportedCountry | null;
   businessScenario: string;
+  taskType?: LegalTaskType;
   userQuery: string;
 }): AgentResult<IntentArbiterOutput> {
+  const taskType = input.taskType ?? classifyLegalTaskType(input.businessScenario);
   const workflowMode = input.countryB ? "cross-jurisdiction" : "single-jurisdiction";
   const focusIndicators = ALL_PILLAR6_INDICATORS.filter((indicator) => {
-    const query = `${input.userQuery} ${input.businessScenario}`.toLowerCase();
+    const query = `${input.userQuery} ${input.businessScenario} ${getTaskSearchTerms(taskType).join(" ")}`.toLowerCase();
 
     if (query.includes("storage") || query.includes("localization")) {
       return indicator === "P6_2_LOCAL_STORAGE" || indicator === "P6_3_INFRASTRUCTURE";
@@ -548,25 +1024,35 @@ export function intentArbiterAgent(input: {
   return success(
     "intent-arbiter",
     {
-      normalizedIntent: `Assess ${input.businessScenario} cross-border data policy constraints for ${input.countryA}${
-        input.countryB ? ` and ${input.countryB}` : ""
-      } under Pillar 6.`,
+      normalizedIntent: getTaskIntent({
+        taskType,
+        countryA: input.countryA,
+        countryB: input.countryB,
+        userQuery: input.userQuery
+      }),
       workflowMode,
+      taskType,
       pillar6ScopeConfirmed: true,
       focusIndicators: focusIndicators.length ? focusIndicators : ALL_PILLAR6_INDICATORS
     },
-    "Intent normalized and constrained to Pillar 6.",
+    `Intent normalized as ${TASK_LABELS[taskType]} and constrained to Pillar 6/7.`,
     "source-discovery"
   );
 }
 
-export function sourceDiscoveryAgent(input: {
+export async function sourceDiscoveryAgent(input: {
   evidenceRecords: EvidenceRecord[];
   countryA: SupportedCountry;
   countryB?: SupportedCountry | null;
+  businessScenario: string;
+  taskType?: LegalTaskType;
+  userQuery: string;
   focusIndicators: Pillar6IndicatorEnum[];
-}): AgentResult<{ candidateSources: CandidateSource[] }> {
-  const candidateSources = filterEvidenceByCountries(
+}): Promise<AgentResult<{ candidateSources: CandidateSource[] }>> {
+  const taskType = input.taskType ?? classifyLegalTaskType(input.businessScenario);
+  const provider = getAnalysisProvider();
+
+  const fallbackSources = filterEvidenceByCountries(
     input.evidenceRecords,
     input.countryA,
     input.countryB ?? ""
@@ -579,24 +1065,78 @@ export function sourceDiscoveryAgent(input: {
       jurisdiction: record.country,
       sourceType: record.sourceType,
       sourceUrl: record.sourceUrl,
-      relevanceNote: `Candidate source for ${record.indicatorCode} based on ${record.discoveryTags.join(
-        ", "
-      )}.`
+      relevanceNote: `Candidate source for ${record.indicatorCode} based on ${record.discoveryTags.join(", ")}.`
     }));
+
+  const structuredResult = await provider.generateStructuredObject<{
+    candidateSources: CandidateSource[];
+  }>({
+    schemaName: "pillar6_candidate_sources",
+    schemaDescription: "Candidate legal sources for Pillar 6 evidence discovery.",
+    schema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["candidateSources"],
+      properties: {
+        candidateSources: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["sourceId", "evidenceId", "title", "jurisdiction", "sourceType", "sourceUrl", "relevanceNote"],
+            properties: {
+              sourceId: { type: "string" },
+              evidenceId: { type: "string" },
+              queryId: { type: "string" },
+              indicatorId: { type: "string" },
+              title: { type: "string" },
+              jurisdiction: { type: "string" },
+              sourceType: { type: "string" },
+              sourceUrl: { type: "string" },
+              authorityLevel: { type: "string", enum: ["Primary", "Supporting"] },
+              jurisdictionMatch: { type: "string", enum: ["Direct", "Regional / Comparative"] },
+              relevanceNote: { type: "string" },
+              retrievalStatus: { type: "string", enum: ["Ready for Reading", "Needs Human Check"] }
+            }
+          }
+        }
+      }
+    },
+    instructions: getSourceDiscoveryInstructions(taskType),
+    input: JSON.stringify({
+      countries: [input.countryA, input.countryB].filter(Boolean).join(" and "),
+      taskType,
+      taskLabel: TASK_LABELS[taskType],
+      focusIndicators: input.focusIndicators,
+      evidenceRecordCount: input.evidenceRecords.length,
+      evidenceSources: input.evidenceRecords.map((r) => ({
+        evidenceId: r.evidenceId,
+        country: r.country,
+        lawTitle: r.lawTitle,
+        indicatorCode: r.indicatorCode,
+        sourceType: r.sourceType,
+        sourceUrl: r.sourceUrl,
+        discoveryTags: r.discoveryTags
+      }))
+    }),
+    fallback: { candidateSources: fallbackSources }
+  });
 
   return success(
     "source-discovery",
-    { candidateSources },
-    "Candidate legal sources selected from the current Pillar 6 evidence set.",
+    { candidateSources: structuredResult.object.candidateSources },
+    "Candidate legal sources identified from the current Pillar 6 evidence set.",
     "document-reader"
   );
 }
 
-export function documentReaderAgent(input: {
+export async function documentReaderAgent(input: {
   evidenceRecords: EvidenceRecord[];
   candidateSources: CandidateSource[];
-}): AgentResult<DocumentReaderOutput> {
-  const passages = input.candidateSources.flatMap((source) => {
+}): Promise<AgentResult<DocumentReaderOutput>> {
+  const provider = getAnalysisProvider();
+
+  const fallbackPassages = input.candidateSources.flatMap((source) => {
     const record = input.evidenceRecords.find((item) => item.evidenceId === source.evidenceId);
 
     if (!record) {
@@ -617,19 +1157,70 @@ export function documentReaderAgent(input: {
     ];
   });
 
+  const structResult = await provider.generateStructuredObject<DocumentReaderOutput>({
+    schemaName: "pillar6_legal_passages",
+    schemaDescription: "Structured legal passages extracted from candidate sources.",
+    schema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["passages"],
+      properties: {
+        passages: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["evidenceId", "sourceId", "lawTitle", "citationRef", "sourceUrl", "text"],
+            properties: {
+              evidenceId: { type: "string" },
+              sourceId: { type: "string" },
+              lawTitle: { type: "string" },
+              citationRef: { type: "string" },
+              sourceUrl: { type: "string" },
+              text: { type: "string" }
+            }
+          }
+        }
+      }
+    },
+    instructions: getDocumentReaderInstructions(),
+    input: JSON.stringify({
+      sourceCount: input.candidateSources.length,
+      sources: input.candidateSources.map((s) => ({
+        sourceId: s.sourceId,
+        evidenceId: s.evidenceId,
+        lawTitle: s.title,
+        jurisdiction: s.jurisdiction,
+        sourceType: s.sourceType,
+        sourceUrl: s.sourceUrl,
+        relevanceNote: s.relevanceNote
+      })),
+      evidenceLookup: input.evidenceRecords.map((r) => ({
+        evidenceId: r.evidenceId,
+        lawTitle: r.lawTitle,
+        citation: r.citation,
+        sourceLocator: r.sourceLocator,
+        originalLegalText: r.originalLegalText
+      }))
+    }),
+    fallback: { passages: fallbackPassages }
+  });
+
   return success(
     "document-reader",
-    { passages },
+    { passages: structResult.object.passages },
     "Candidate sources normalized into citation-ready legal passages.",
     "indicator-mapping"
   );
 }
 
-export function indicatorMappingAgent(input: {
+export async function indicatorMappingAgent(input: {
   evidenceRecords: EvidenceRecord[];
   passages: DocumentReaderOutput["passages"];
-}): AgentResult<IndicatorMappingOutput> {
-  const mappedEvidence: MappedEvidenceItem[] = input.passages.flatMap((passage) => {
+}): Promise<AgentResult<IndicatorMappingOutput>> {
+  const provider = getAnalysisProvider();
+
+  const fallbackMapped: MappedEvidenceItem[] = input.passages.flatMap((passage) => {
     const record = input.evidenceRecords.find((item) => item.evidenceId === passage.evidenceId);
 
     if (!record) {
@@ -648,9 +1239,58 @@ export function indicatorMappingAgent(input: {
     ];
   });
 
+  const structResult = await provider.generateStructuredObject<IndicatorMappingOutput>({
+    schemaName: "pillar6_indicator_mapping",
+    schemaDescription: "Legal passages mapped to canonical Pillar 6 indicator codes.",
+    schema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["mappedEvidence"],
+      properties: {
+        mappedEvidence: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["evidenceId", "indicatorId", "mappingReason", "citationRef"],
+            properties: {
+              evidenceId: { type: "string" },
+              indicatorId: {
+                type: "string",
+                enum: ALL_PILLAR6_INDICATORS
+              },
+              mappingReason: { type: "string" },
+              citationRef: { type: "string" }
+            }
+          }
+        }
+      }
+    },
+    instructions: getIndicatorMappingInstructions(),
+    input: JSON.stringify({
+      passageCount: input.passages.length,
+      passages: input.passages.map((p) => ({
+        evidenceId: p.evidenceId,
+        lawTitle: p.lawTitle,
+        citationRef: p.citationRef,
+        sourceUrl: p.sourceUrl,
+        text: p.text
+      })),
+      evidenceContext: input.evidenceRecords.map((r) => ({
+        evidenceId: r.evidenceId,
+        country: r.country,
+        lawTitle: r.lawTitle,
+        citation: r.citation,
+        indicatorCode: r.indicatorCode,
+        mappingRationale: r.mappingRationale
+      }))
+    }),
+    fallback: { mappedEvidence: fallbackMapped }
+  });
+
   return success(
     "indicator-mapping",
-    { mappedEvidence },
+    { mappedEvidence: structResult.object.mappedEvidence },
     "Legal passages mapped to canonical Pillar 6 indicator codes.",
     "legal-reasoner"
   );
@@ -660,10 +1300,12 @@ export async function legalReasonerAgent(input: {
   countryA: SupportedCountry;
   countryB?: SupportedCountry | null;
   businessScenario: string;
+  taskType?: LegalTaskType;
   userQuery: string;
   evidenceRecords: EvidenceRecord[];
   mappedEvidence: MappedEvidenceItem[];
 }): Promise<AgentResult<LegalReasonerOutput>> {
+  const taskType = input.taskType ?? classifyLegalTaskType(input.businessScenario);
   const provider = getAnalysisProvider();
   const evidencePayload = input.mappedEvidence.flatMap((item) => {
     const record = getEvidenceRecord(item.evidenceId, input.evidenceRecords);
@@ -734,10 +1376,11 @@ export async function legalReasonerAgent(input: {
         }
       }
     },
-    instructions:
-      "You are a legal-analysis agent for UN ESCAP RDTII Pillar 6. Produce cautious, evidence-bound conclusions only from the supplied evidence. Prefer the excerpt and original legal text, mention source locators when useful, and explicitly say when the evidence is only page-level or entrypoint-level rather than article-level. If evidence is ambiguous, say so in the conclusion or legal effect rather than overstating certainty.",
+    instructions: getLegalReasonerInstructions(taskType),
     input: JSON.stringify({
       countries: dedupeStrings([input.countryA, input.countryB ?? ""]),
+      taskType,
+      taskLabel: TASK_LABELS[taskType],
       businessScenario: input.businessScenario,
       userQuery: input.userQuery,
       mappedEvidence: evidencePayload
@@ -783,20 +1426,24 @@ export async function runMainlineAgents(input: {
   countryA: SupportedCountry;
   countryB?: SupportedCountry | null;
   businessScenario: string;
+  taskType?: LegalTaskType;
   userQuery: string;
 }): Promise<MainlineAgentResults> {
   const intentArbiter = intentArbiterAgent(input);
-  const sourceDiscovery = sourceDiscoveryAgent({
+  const sourceDiscovery = await sourceDiscoveryAgent({
     evidenceRecords: input.evidenceRecords,
     countryA: input.countryA,
     countryB: input.countryB,
+    businessScenario: input.businessScenario,
+    taskType: input.taskType ?? intentArbiter.data?.taskType,
+    userQuery: input.userQuery,
     focusIndicators: intentArbiter.data?.focusIndicators ?? ALL_PILLAR6_INDICATORS
   });
-  const documentReader = documentReaderAgent({
+  const documentReader = await documentReaderAgent({
     evidenceRecords: input.evidenceRecords,
     candidateSources: sourceDiscovery.data?.candidateSources ?? []
   });
-  const indicatorMapping = indicatorMappingAgent({
+  const indicatorMapping = await indicatorMappingAgent({
     evidenceRecords: input.evidenceRecords,
     passages: documentReader.data?.passages ?? []
   });
@@ -804,6 +1451,7 @@ export async function runMainlineAgents(input: {
     countryA: input.countryA,
     countryB: input.countryB,
     businessScenario: input.businessScenario,
+    taskType: input.taskType ?? intentArbiter.data?.taskType,
     userQuery: input.userQuery,
     evidenceRecords: input.evidenceRecords,
     mappedEvidence: indicatorMapping.data?.mappedEvidence ?? []
@@ -822,9 +1470,11 @@ export function queryBuilderAgent(input: {
   countryA: SupportedCountry;
   countryB?: SupportedCountry | null;
   businessScenario: string;
+  taskType?: LegalTaskType;
   userQuery: string;
   intent: IntentArbiterOutput;
 }): AgentResult<QueryBuilderOutput> {
+  const taskType = input.taskType ?? input.intent.taskType ?? classifyLegalTaskType(input.businessScenario);
   const preferredSources = preferredSourceOptions.filter((source) => {
     if (input.intent.focusIndicators.includes("P6_5_BINDING_COMMITMENT")) {
       return true;
@@ -837,10 +1487,13 @@ export function queryBuilderAgent(input: {
     jurisdiction: input.countryA,
     businessScenario: input.businessScenario,
     plainLanguageQuery: input.userQuery,
-    aiGeneratedTerms: buildAiSuggestedTerms(input.countryA, input.businessScenario),
+    aiGeneratedTerms: [
+      buildAiSuggestedTerms(input.countryA, input.businessScenario),
+      ...getTaskSearchTerms(taskType)
+    ].join(", "),
     lawStudentTerms: input.countryB
-      ? `${input.countryB} transfer pathway, comparison evidence`
-      : "transfer mechanism, regulator approval",
+      ? `${input.countryB} transfer pathway, comparison evidence, ${TASK_LABELS[taskType]}`
+      : `transfer mechanism, regulator approval, ${TASK_LABELS[taskType]}`,
     exclusionTerms: "tax data, telecom tariffs, customs duty",
     preferredSources,
     focusIndicators: input.intent.focusIndicators,
@@ -855,17 +1508,19 @@ export function queryBuilderAgent(input: {
   );
 }
 
-export function relevanceFilterAgent(input: {
+export async function relevanceFilterAgent(input: {
   evidenceRecords: EvidenceRecord[];
   focusIndicators: Pillar6IndicatorEnum[];
   passages: DocumentReaderOutput["passages"];
-}): AgentResult<RelevanceFilterOutput> {
-  const filteredOutEvidenceIds: string[] = [];
-  const shortlistedPassages = input.passages.flatMap((passage) => {
+}): Promise<AgentResult<RelevanceFilterOutput>> {
+  const provider = getAnalysisProvider();
+
+  const fallbackFilteredOutEvidenceIds: string[] = [];
+  const fallbackShortlistedPassages = input.passages.flatMap((passage) => {
     const record = getEvidenceRecord(passage.evidenceId, input.evidenceRecords);
 
     if (!record || !input.focusIndicators.includes(record.indicatorCode)) {
-      filteredOutEvidenceIds.push(passage.evidenceId);
+      fallbackFilteredOutEvidenceIds.push(passage.evidenceId);
       return [];
     }
 
@@ -891,32 +1546,114 @@ export function relevanceFilterAgent(input: {
     ];
   });
 
-  return success(
-    "relevance-filter",
-    {
-      shortlistedPassages,
-      filteredOutEvidenceIds,
+  const structResult = await provider.generateStructuredObject<RelevanceFilterOutput>({
+    schemaName: "pillar6_relevance_filter",
+    schemaDescription: "Filtered and rated legal passages for Pillar 6 relevance.",
+    schema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["shortlistedPassages", "filteredOutEvidenceIds", "reviewSummary", "reviewerChecklist"],
+      properties: {
+        shortlistedPassages: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: [
+              "evidenceId", "sourceId", "jurisdiction", "indicatorId", "lawTitle",
+              "citationRef", "sourceUrl", "sourceType", "text", "relevanceReason",
+              "relevanceBand", "humanReviewNeeded", "reviewerPrompt"
+            ],
+            properties: {
+              evidenceId: { type: "string" },
+              sourceId: { type: "string" },
+              jurisdiction: { type: "string" },
+              indicatorId: { type: "string", enum: ALL_PILLAR6_INDICATORS },
+              lawTitle: { type: "string" },
+              citationRef: { type: "string" },
+              sourceUrl: { type: "string" },
+              sourceType: { type: "string" },
+              text: { type: "string" },
+              relevanceReason: { type: "string" },
+              relevanceBand: { type: "string", enum: ["Direct Match", "Borderline"] },
+              humanReviewNeeded: { type: "boolean" },
+              reviewerPrompt: { type: "string" }
+            }
+          }
+        },
+        filteredOutEvidenceIds: { type: "array", items: { type: "string" } },
+        reviewSummary: {
+          type: "object",
+          additionalProperties: false,
+          required: ["shortlistedCount", "filteredOutCount", "humanReviewCount"],
+          properties: {
+            shortlistedCount: { type: "number" },
+            filteredOutCount: { type: "number" },
+            humanReviewCount: { type: "number" }
+          }
+        },
+        reviewerChecklist: { type: "array", items: { type: "string" } }
+      }
+    },
+    instructions: getRelevanceFilterInstructions(),
+    input: JSON.stringify({
+      focusIndicators: input.focusIndicators,
+      passageCount: input.passages.length,
+      passages: input.passages.map((p) => ({
+        evidenceId: p.evidenceId,
+        sourceId: p.sourceId,
+        lawTitle: p.lawTitle,
+        citationRef: p.citationRef,
+        sourceUrl: p.sourceUrl,
+        text: p.text,
+        jurisdiction: input.evidenceRecords.find((r) => r.evidenceId === p.evidenceId)?.country ?? ""
+      })),
+      evidenceRecords: input.evidenceRecords.map((r) => ({
+        evidenceId: r.evidenceId,
+        indicatorCode: r.indicatorCode,
+        reviewStatus: r.reviewStatus,
+        confidence: r.confidence
+      }))
+    }),
+    fallback: {
+      shortlistedPassages: fallbackShortlistedPassages,
+      filteredOutEvidenceIds: fallbackFilteredOutEvidenceIds,
       reviewSummary: {
-        shortlistedCount: shortlistedPassages.length,
-        filteredOutCount: filteredOutEvidenceIds.length,
-        humanReviewCount: shortlistedPassages.filter((item) => item.humanReviewNeeded).length
+        shortlistedCount: fallbackShortlistedPassages.length,
+        filteredOutCount: fallbackFilteredOutEvidenceIds.length,
+        humanReviewCount: fallbackShortlistedPassages.filter((item) => item.humanReviewNeeded).length
       },
       reviewerChecklist: [
         "Confirm every shortlisted passage still belongs to Pillar 6 rather than general privacy compliance.",
         "Escalate borderline infrastructure or supervision passages to human review before export.",
         "Only pass fully understood passages into the final audit and export package."
       ]
+    }
+  });
+
+  return success(
+    "relevance-filter",
+    {
+      shortlistedPassages: structResult.object.shortlistedPassages,
+      filteredOutEvidenceIds: structResult.object.filteredOutEvidenceIds,
+      reviewSummary: structResult.object.reviewSummary,
+      reviewerChecklist: structResult.object.reviewerChecklist
     },
     "Mainline passages filtered down to transfer-relevant Pillar 6 evidence.",
     "indicator-mapping"
   );
 }
 
-export function riskCostQuantifierAgent(input: {
+export async function riskCostQuantifierAgent(input: {
   evidenceRecords: EvidenceRecord[];
   jurisdiction: SupportedCountry;
+  taskType?: LegalTaskType;
+  businessScenario: string;
   legalFindings: LegalReasonerOutput["legalFindings"];
-}): AgentResult<RiskCostQuantifierOutput> {
+}): Promise<AgentResult<RiskCostQuantifierOutput>> {
+  const taskType = input.taskType ?? classifyLegalTaskType(input.businessScenario);
+  const provider = getAnalysisProvider();
+
   const highestRiskFinding = input.legalFindings.reduce<number>((current, finding) => {
     const score =
       finding.indicatorId === "P6_1_BAN_LOCAL_PROCESSING" ||
@@ -935,35 +1672,76 @@ export function riskCostQuantifierAgent(input: {
     return Math.max(current, score + reviewPenalty);
   }, 0);
 
-  const riskLevel: RiskLevel =
+  const fallbackRiskLevel: RiskLevel =
     highestRiskFinding >= 4 ? "High" : highestRiskFinding >= 2 ? "Moderate" : "Low";
-  const uncertaintyLevel = getUncertaintyLevel(input.legalFindings, input.evidenceRecords);
-  const riskSummary: RiskSummary = {
-    riskLevel,
+  const fallbackUncertainty = getUncertaintyLevel(input.legalFindings, input.evidenceRecords);
+  const fallbackSummary: RiskSummary = {
+    riskLevel: fallbackRiskLevel,
     businessCostDrivers: getCostDrivers(input.legalFindings, input.evidenceRecords),
     operationalImpact: summarizeOperationalImpact(
       input.legalFindings,
-      riskLevel,
-      uncertaintyLevel
+      fallbackRiskLevel,
+      fallbackUncertainty
     ),
-    uncertaintyLevel,
+    uncertaintyLevel: fallbackUncertainty,
     humanReviewNeeded: needsHumanReview(input.legalFindings, input.evidenceRecords)
   };
 
+  const structResult = await provider.generateStructuredObject<RiskSummary>({
+    schemaName: "pillar6_risk_summary",
+    schemaDescription: "Business-facing risk and cost assessment for Pillar 6 legal findings.",
+    schema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["riskLevel", "businessCostDrivers", "operationalImpact", "uncertaintyLevel", "humanReviewNeeded"],
+      properties: {
+        riskLevel: { type: "string", enum: ["Low", "Moderate", "High"] },
+        businessCostDrivers: { type: "array", items: { type: "string" } },
+        operationalImpact: { type: "string" },
+        uncertaintyLevel: { type: "string", enum: ["Low", "Moderate", "High"] },
+        humanReviewNeeded: { type: "boolean" }
+      }
+    },
+    instructions: getRiskCostInstructions(taskType),
+    input: JSON.stringify({
+      jurisdiction: input.jurisdiction,
+      taskType,
+      taskLabel: TASK_LABELS[taskType],
+      businessScenario: input.businessScenario,
+      legalFindings: input.legalFindings.map((f) => ({
+        conclusionId: f.conclusionId,
+        jurisdiction: f.jurisdiction,
+        indicatorId: f.indicatorId,
+        conclusion: f.conclusion,
+        legalEffect: f.legalEffect,
+        evidenceIds: f.evidenceIds
+      })),
+      evidenceApprovalStatus: input.legalFindings.flatMap((f) =>
+        f.evidenceIds.map((eid) => ({
+          evidenceId: eid,
+          reviewStatus: getEvidenceRecord(eid, input.evidenceRecords)?.reviewStatus ?? "Unknown"
+        }))
+      )
+    }),
+    fallback: fallbackSummary
+  });
+
   return success(
     "risk-cost-quantifier",
-    { riskSummary },
+    { riskSummary: structResult.object },
     "Mainline legal findings translated into business-facing risk and cost signals.",
     "audit-citation"
   );
 }
 
-export function auditCitationAgent(input: {
+export async function auditCitationAgent(input: {
   evidenceRecords: EvidenceRecord[];
   shortlistedPassages: RelevanceFilterOutput["shortlistedPassages"];
   legalFindings: LegalReasonerOutput["legalFindings"];
-}): AgentResult<AuditCitationOutput> {
-  const auditItems: AuditCitationItem[] = input.legalFindings.flatMap((finding) => {
+}): Promise<AgentResult<AuditCitationOutput>> {
+  const provider = getAnalysisProvider();
+
+  const fallbackAuditItems: AuditCitationItem[] = input.legalFindings.flatMap((finding) => {
     const evidenceId = finding.evidenceIds[0];
     const shortlistItem = input.shortlistedPassages.find((item) => item.evidenceId === evidenceId);
     const record = evidenceId ? getEvidenceRecord(evidenceId, input.evidenceRecords) : null;
@@ -1009,15 +1787,115 @@ export function auditCitationAgent(input: {
     ];
   });
 
+  const structResult = await provider.generateStructuredObject<AuditCitationOutput>({
+    schemaName: "pillar6_audit_citation",
+    schemaDescription: "Audit items linking legal findings to source text and citations.",
+    schema: {
+      type: "object",
+      additionalProperties: false,
+      required: ["auditItems", "coverageSummary"],
+      properties: {
+        auditItems: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: [
+              "evidenceId", "sourceId", "conclusionId", "jurisdiction", "indicatorId",
+              "lawTitle", "citationRef", "sourceUrl", "originalLegalText", "verbatimSnippet",
+              "extractedClaim", "legalEffect", "relevanceReason", "traceabilityStatus",
+              "traceabilityNote", "humanReviewNeeded", "reviewerNote", "reviewStatus"
+            ],
+            properties: {
+              evidenceId: { type: "string" },
+              sourceId: { type: "string" },
+              conclusionId: { type: "string" },
+              jurisdiction: { type: "string" },
+              indicatorId: { type: "string", enum: ALL_PILLAR6_INDICATORS },
+              lawTitle: { type: "string" },
+              citationRef: { type: "string" },
+              sourceUrl: { type: "string" },
+              sourceLocator: { type: "string" },
+              sourceStrength: { type: "string" },
+              traceabilityTier: { type: "string" },
+              originalLegalText: { type: "string" },
+              verbatimSnippet: { type: "string" },
+              extractedClaim: { type: "string" },
+              legalEffect: { type: "string" },
+              relevanceReason: { type: "string" },
+              traceabilityStatus: { type: "string", enum: ["Complete", "Needs Human Review"] },
+              traceabilityNote: { type: "string" },
+              humanReviewNeeded: { type: "boolean" },
+              reviewerNote: { type: "string" },
+              reviewStatus: { type: "string" }
+            }
+          }
+        },
+        coverageSummary: {
+          type: "object",
+          additionalProperties: false,
+          required: ["totalFindings", "linkedFindings", "needsReviewCount"],
+          properties: {
+            totalFindings: { type: "number" },
+            linkedFindings: { type: "number" },
+            needsReviewCount: { type: "number" }
+          }
+        }
+      }
+    },
+    instructions: getAuditCitationInstructions(),
+    input: JSON.stringify({
+      totalFindings: input.legalFindings.length,
+      legalFindings: input.legalFindings.map((f) => ({
+        conclusionId: f.conclusionId,
+        jurisdiction: f.jurisdiction,
+        indicatorId: f.indicatorId,
+        conclusion: f.conclusion,
+        legalEffect: f.legalEffect,
+        evidenceIds: f.evidenceIds
+      })),
+      shortlistedPassages: input.shortlistedPassages.map((p) => ({
+        evidenceId: p.evidenceId,
+        sourceId: p.sourceId,
+        lawTitle: p.lawTitle,
+        citationRef: p.citationRef,
+        sourceUrl: p.sourceUrl,
+        text: p.text,
+        relevanceReason: p.relevanceReason,
+        humanReviewNeeded: p.humanReviewNeeded,
+        reviewerPrompt: p.reviewerPrompt
+      })),
+      evidenceContext: input.evidenceRecords.map((r) => ({
+        evidenceId: r.evidenceId,
+        country: r.country,
+        lawTitle: r.lawTitle,
+        citation: r.citation,
+        sourceUrl: r.sourceUrl,
+        sourceLocator: r.sourceLocator,
+        sourceStrength: r.sourceStrength,
+        traceabilityTier: r.traceabilityTier,
+        verbatimSnippet: r.verbatimSnippet,
+        aiExtraction: r.aiExtraction,
+        riskImplication: r.riskImplication,
+        reviewerNote: r.reviewerNote,
+        reviewStatus: r.reviewStatus
+      }))
+    }),
+    fallback: {
+      auditItems: fallbackAuditItems,
+      coverageSummary: {
+        totalFindings: input.legalFindings.length,
+        linkedFindings: fallbackAuditItems.length,
+        needsReviewCount: fallbackAuditItems.filter((item) => item.humanReviewNeeded).length
+      }
+    }
+  });
+
   return success(
     "audit-citation",
     {
-      auditItems,
-      coverageSummary: {
-        totalFindings: input.legalFindings.length,
-        linkedFindings: auditItems.length,
-        needsReviewCount: auditItems.filter((item) => item.humanReviewNeeded).length
-      }
+      auditItems: structResult.object.auditItems,
+      coverageSummary: structResult.object.coverageSummary
     },
     "Mainline findings stitched back to legal text, citations, and reviewer context.",
     "legal-review-export"
@@ -1140,19 +2018,25 @@ export function legalReviewExportAgent(input: {
   );
 }
 
-export function runSupportingAgents(input: {
+export async function runSupportingAgents(input: {
   evidenceRecords: EvidenceRecord[];
   countryA: SupportedCountry;
   countryB?: SupportedCountry | null;
   businessScenario: string;
+  taskType?: LegalTaskType;
   userQuery: string;
   mainlineAgentResults: MainlineAgentResults;
   comparison: ComparisonAgentResult | null;
-}): SupportingAgentResults {
+}): Promise<SupportingAgentResults> {
+  const taskType =
+    input.taskType ??
+    input.mainlineAgentResults.intentArbiter.data?.taskType ??
+    classifyLegalTaskType(input.businessScenario);
   const intent =
     input.mainlineAgentResults.intentArbiter.data ?? {
       normalizedIntent: input.userQuery,
       workflowMode: input.countryB ? "cross-jurisdiction" : "single-jurisdiction",
+      taskType,
       pillar6ScopeConfirmed: true,
       focusIndicators: ALL_PILLAR6_INDICATORS
     };
@@ -1161,20 +2045,23 @@ export function runSupportingAgents(input: {
     countryA: input.countryA,
     countryB: input.countryB,
     businessScenario: input.businessScenario,
+    taskType,
     userQuery: input.userQuery,
     intent
   });
-  const relevanceFilter = relevanceFilterAgent({
+  const relevanceFilter = await relevanceFilterAgent({
     evidenceRecords: input.evidenceRecords,
     focusIndicators: intent.focusIndicators,
     passages: input.mainlineAgentResults.documentReader.data?.passages ?? []
   });
-  const riskCostQuantifier = riskCostQuantifierAgent({
+  const riskCostQuantifier = await riskCostQuantifierAgent({
     evidenceRecords: input.evidenceRecords,
     jurisdiction: input.countryA,
+    taskType,
+    businessScenario: input.businessScenario,
     legalFindings: input.mainlineAgentResults.legalReasoner.data?.legalFindings ?? []
   });
-  const auditCitation = auditCitationAgent({
+  const auditCitation = await auditCitationAgent({
     evidenceRecords: input.evidenceRecords,
     shortlistedPassages: relevanceFilter.data?.shortlistedPassages ?? [],
     legalFindings: input.mainlineAgentResults.legalReasoner.data?.legalFindings ?? []
@@ -1215,10 +2102,12 @@ function buildTenAgentTrace(input: {
   countryA: SupportedCountry;
   countryB?: SupportedCountry | null;
   businessScenario: string;
+  taskType?: LegalTaskType;
   userQuery: string;
   policyAnalysis: PolicyAnalysisResult[];
   riskSummary?: RiskSummary | null;
 }): WorkflowAgentTrace[] {
+  const taskType = input.taskType ?? classifyLegalTaskType(input.businessScenario);
   const countries = [input.countryA, input.countryB].filter(Boolean).join(" and ");
   const evidenceIds = filterEvidenceByCountries(
     input.evidenceRecords,
@@ -1237,8 +2126,8 @@ function buildTenAgentTrace(input: {
     {
       agentId: "intent-arbiter",
       name: agentNames["intent-arbiter"],
-      inputSummary: `${countries} | ${input.businessScenario} | ${input.userQuery}`,
-      outputSummary: "Classifies the request as a Pillar 6 cross-border data policy workflow.",
+      inputSummary: `${countries} | ${TASK_LABELS[taskType]} | ${input.userQuery}`,
+      outputSummary: `Classifies the request as a ${TASK_LABELS[taskType]} Pillar 6/7 workflow.`,
       evidenceIds: [],
       humanReviewGate: {
         required: true,
@@ -1250,8 +2139,8 @@ function buildTenAgentTrace(input: {
     {
       agentId: "query-builder",
       name: agentNames["query-builder"],
-      inputSummary: "Normalized Pillar 6 intent, jurisdiction, scenario, and review terms.",
-      outputSummary: "Builds search queries and lets law students revise specialist legal terms.",
+      inputSummary: "Normalized Pillar 6/7 intent, jurisdiction, task type, scenario, and review terms.",
+      outputSummary: `Builds ${TASK_LABELS[taskType]} search queries and lets law students revise specialist legal terms.`,
       evidenceIds: [],
       humanReviewGate: {
         required: true,
@@ -1403,11 +2292,13 @@ export async function runMultiAgentWorkflow(
   countryB?: SupportedCountry | null,
   options?: {
     businessScenario?: string;
+    taskType?: LegalTaskType;
     userQuery?: string;
     uploadedDocumentContext?: UploadedDocumentContext | null;
   }
 ): Promise<WorkflowResult> {
   const businessScenario = options?.businessScenario ?? "fintech";
+  const taskType = options?.taskType ?? classifyLegalTaskType(businessScenario);
   const rawUserQuery =
     options?.userQuery ??
     "Find legal evidence describing how cross-border data transfers are permitted, conditioned, or restricted.";
@@ -1420,6 +2311,7 @@ export async function runMultiAgentWorkflow(
     countryA,
     countryB,
     businessScenario,
+    taskType,
     userQuery
   });
   const firstProfile = await researchAgent(countryA);
@@ -1445,13 +2337,17 @@ export async function runMultiAgentWorkflow(
     policyAnalysis,
     comparison,
     evidenceRecords: resolvedEvidence.evidenceRecords,
-    legalFindings: mainlineAgentResults.legalReasoner.data?.legalFindings ?? []
+    legalFindings: mainlineAgentResults.legalReasoner.data?.legalFindings ?? [],
+    businessScenario,
+    taskType,
+    userQuery
   });
-  const supportingAgentResults = runSupportingAgents({
+  const supportingAgentResults = await runSupportingAgents({
     evidenceRecords: resolvedEvidence.evidenceRecords,
     countryA,
     countryB,
     businessScenario,
+    taskType,
     userQuery,
     mainlineAgentResults,
     comparison
@@ -1467,6 +2363,7 @@ export async function runMultiAgentWorkflow(
       countryA,
       countryB,
       businessScenario,
+      taskType,
       userQuery: rawUserQuery,
       uploadedDocuments: uploadedDocumentContext?.files.map((file) => ({
         fileName: file.fileName,
@@ -1485,6 +2382,7 @@ export async function runMultiAgentWorkflow(
       countryA,
       countryB,
       businessScenario,
+      taskType,
       userQuery,
       policyAnalysis,
       riskSummary: supportingAgentResults.riskCostQuantifier.data?.riskSummary ?? null
@@ -1498,14 +2396,14 @@ export async function runMultiAgentWorkflow(
   };
 }
 
-export function applyReviewUpdateToWorkflowResult(
+export async function applyReviewUpdateToWorkflowResult(
   workflowResult: WorkflowResult,
   reviewUpdate: {
     evidenceId: string;
     reviewStatus: EvidenceRecord["reviewStatus"];
     reviewerNote: string;
   }
-): WorkflowResult {
+): Promise<WorkflowResult> {
   const nextEvidenceRecords = workflowResult.evidenceRecords.map((record) =>
     record.evidenceId === reviewUpdate.evidenceId
       ? {
@@ -1519,7 +2417,7 @@ export function applyReviewUpdateToWorkflowResult(
   const nextMainlineAgentResults = {
     ...workflowResult.mainlineAgentResults
   };
-  const nextSupportingAgentResults = runSupportingAgents({
+  const nextSupportingAgentResults = await runSupportingAgents({
     evidenceRecords: nextEvidenceRecords,
     countryA: workflowResult.input.countryA,
     countryB: workflowResult.input.countryB,
@@ -1538,6 +2436,7 @@ export function applyReviewUpdateToWorkflowResult(
       countryA: workflowResult.input.countryA,
       countryB: workflowResult.input.countryB,
       businessScenario: workflowResult.input.businessScenario,
+      taskType: workflowResult.input.taskType,
       userQuery: workflowResult.input.userQuery,
       policyAnalysis: workflowResult.policyAnalysis,
       riskSummary: nextSupportingAgentResults.riskCostQuantifier.data?.riskSummary ?? null

@@ -11,6 +11,11 @@ export type RiskLevel = "Low" | "Moderate" | "High";
 
 export type AgentStatus = "idle" | "running" | "completed" | "error";
 
+export type LegalTaskType =
+  | "regulation-interpretation"
+  | "case-analysis"
+  | "forward-looking-advisory";
+
 export type Pillar6IndicatorEnum =
   | "P6_1_BAN_LOCAL_PROCESSING"
   | "P6_2_LOCAL_STORAGE"
@@ -112,6 +117,7 @@ export interface WorkflowInput {
   countryA: SupportedCountry;
   countryB?: SupportedCountry | null;
   businessScenario: string;
+  taskType: LegalTaskType;
   userQuery: string;
   uploadedDocuments?: Array<{
     fileName: string;
@@ -161,6 +167,7 @@ export interface WorkflowAgentTrace {
 export interface IntentArbiterOutput {
   normalizedIntent: string;
   workflowMode: "single-jurisdiction" | "cross-jurisdiction";
+  taskType: LegalTaskType;
   pillar6ScopeConfirmed: true;
   focusIndicators: Pillar6IndicatorEnum[];
 }

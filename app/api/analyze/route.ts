@@ -1,7 +1,8 @@
 import { runMultiAgentWorkflow } from "@/lib/agents";
 import { createWorkflowRun } from "@/lib/server/run-store";
-import { parseUploadedDocuments, UploadedDocumentContext } from "@/lib/server/uploaded-documents";
-import { SupportedCountry, StreamEventName, WorkflowResult } from "@/lib/types";
+import { parseUploadedDocuments } from "@/lib/server/uploaded-documents";
+import type { UploadedDocumentContext } from "@/lib/server/uploaded-documents";
+import type { LegalTaskType, SupportedCountry, StreamEventName, WorkflowResult } from "@/lib/types";
 import { NextRequest } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -15,6 +16,7 @@ function parseBody(body: unknown): {
   countryA: SupportedCountry;
   countryB?: SupportedCountry | null;
   businessScenario?: string;
+  taskType?: LegalTaskType;
   userQuery?: string;
   uploadedDocumentContext?: UploadedDocumentContext | null;
 } {
@@ -26,6 +28,7 @@ function parseBody(body: unknown): {
     countryA?: SupportedCountry;
     countryB?: SupportedCountry | null;
     businessScenario?: string;
+    taskType?: LegalTaskType;
     userQuery?: string;
   };
 
@@ -37,6 +40,7 @@ function parseBody(body: unknown): {
     countryA: input.countryA,
     countryB: input.countryB ?? null,
     businessScenario: input.businessScenario,
+    taskType: input.taskType,
     userQuery: input.userQuery,
     uploadedDocumentContext: null
   };
@@ -72,6 +76,7 @@ async function parseRequestBody(request: NextRequest) {
     countryA,
     countryB: parseCountry(formData.get("countryB")),
     businessScenario: parseOptionalString(formData.get("businessScenario")),
+    taskType: parseOptionalString(formData.get("taskType")) as LegalTaskType | undefined,
     userQuery: parseOptionalString(formData.get("userQuery")),
     uploadedDocumentContext: files.length ? await parseUploadedDocuments(files) : null
   };
@@ -96,6 +101,7 @@ export async function POST(request: NextRequest) {
 
         const result = await runMultiAgentWorkflow(body.countryA, body.countryB, {
           businessScenario: body.businessScenario,
+          taskType: body.taskType,
           userQuery: body.userQuery,
           uploadedDocumentContext: body.uploadedDocumentContext
         });

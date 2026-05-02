@@ -14,6 +14,7 @@ test("filesystem run store persists and reloads an analysis run", async () => {
       countryA: "China",
       countryB: "Singapore",
       businessScenario: "fintech",
+      taskType: "case-analysis",
       userQuery: "Test query"
     },
     research: {
@@ -37,6 +38,7 @@ test("filesystem run store persists and reloads an analysis run", async () => {
         data: {
           normalizedIntent: "Smoke test intent",
           workflowMode: "cross-jurisdiction",
+          taskType: "case-analysis",
           pillar6ScopeConfirmed: true,
           focusIndicators: ["P6_4_CONDITIONAL_FLOW"]
         },
