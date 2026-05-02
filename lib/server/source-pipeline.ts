@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import type {
   EvidenceRecord,
   Pillar6IndicatorCode
@@ -6,6 +7,15 @@ import type { SupportedCountry } from "../types";
 import { filterEvidenceByCountries, mockEvidenceRecords } from "../mock-evidence";
 import { getCuratedSourcesForCountries } from "./source-registry";
 import type { CuratedSourceRecord } from "./source-registry";
+
+type PdfParseResult = {
+  text?: string;
+};
+
+type PdfParseFn = (buffer: Buffer) => Promise<PdfParseResult>;
+
+const require = createRequire(import.meta.url);
+const pdfParse = require("pdf-parse/lib/pdf-parse.js") as PdfParseFn;
 
 export type EvidenceSourceMode = "real" | "mock" | "hybrid";
 
@@ -61,7 +71,7 @@ function getReviewNote(entry: CuratedSourceRecord, foundLiveExcerpt: boolean) {
   return `${entry.reviewerNote} Live retrieval fell back to curated excerpt text.`;
 }
 
-async function fetchSourceText(sourceUrl: string) {
+async function fetchSourceResponse(sourceUrl: string) {
   const response = await fetch(sourceUrl, {
     headers: {
       "User-Agent": "CrossBorderDataPolicyMultiAgentAnalyst/1.0"
@@ -73,10 +83,21 @@ async function fetchSourceText(sourceUrl: string) {
     throw new Error(`Source fetch failed with status ${response.status}.`);
   }
 
+  return response;
+}
+
+async function parsePdfText(response: Response) {
+  const arrayBuffer = await response.arrayBuffer();
+  const parsed = await pdfParse(Buffer.from(arrayBuffer));
+  return collapseWhitespace(parsed.text ?? "");
+}
+
+async function fetchSourceText(sourceUrl: string) {
+  const response = await fetchSourceResponse(sourceUrl);
   const contentType = response.headers.get("content-type") ?? "";
 
   if (contentType.includes("application/pdf") || sourceUrl.toLowerCase().endsWith(".pdf")) {
-    throw new Error("PDF extraction is not wired in the live source pipeline yet.");
+    return parsePdfText(response);
   }
 
   if (contentType.includes("text/html") || contentType.includes("text/plain")) {
@@ -86,7 +107,7 @@ async function fetchSourceText(sourceUrl: string) {
   return collapseWhitespace(await response.text());
 }
 
-function extractExcerptFromText(fullText: string, excerptHints: string[], fallback: string) {
+function extractExcerptContext(fullText: string, excerptHints: string[], fallback: string) {
   const normalizedText = collapseWhitespace(fullText);
 
   for (const hint of excerptHints) {
@@ -98,18 +119,36 @@ function extractExcerptFromText(fullText: string, excerptHints: string[], fallba
 
     const start = Math.max(0, index - 120);
     const end = Math.min(normalizedText.length, index + hint.length + 260);
-    return collapseWhitespace(normalizedText.slice(start, end));
+    return {
+      excerpt: collapseWhitespace(normalizedText.slice(start, end)),
+      anchorIndex: index
+    };
   }
 
-  return fallback;
+  return {
+    excerpt: fallback,
+    anchorIndex: -1
+  };
+}
+
+function extractOriginalTextWindow(fullText: string, anchorIndex: number) {
+  if (anchorIndex < 0) {
+    return fullText.slice(0, Math.min(1800, fullText.length));
+  }
+
+  const start = Math.max(0, anchorIndex - 240);
+  const end = Math.min(fullText.length, anchorIndex + 1560);
+  return collapseWhitespace(fullText.slice(start, end));
 }
 
 async function resolveCuratedEvidenceRecord(entry: CuratedSourceRecord): Promise<EvidenceRecord> {
   try {
     const liveText = await fetchSourceText(entry.sourceUrl);
-    const excerpt = extractExcerptFromText(liveText, entry.excerptHints, entry.excerptFallback);
+    const excerptContext = extractExcerptContext(liveText, entry.excerptHints, entry.excerptFallback);
     const originalLegalText =
-      liveText.length > 200 ? liveText.slice(0, Math.min(1800, liveText.length)) : liveText;
+      liveText.length > 200
+        ? extractOriginalTextWindow(liveText, excerptContext.anchorIndex)
+        : liveText;
 
     return {
       evidenceId: `EV-${entry.id}`,
@@ -119,7 +158,7 @@ async function resolveCuratedEvidenceRecord(entry: CuratedSourceRecord): Promise
       indicatorCode: entry.indicatorCode,
       lawTitle: entry.title,
       citation: entry.citation,
-      verbatimSnippet: excerpt,
+      verbatimSnippet: excerptContext.excerpt,
       sourceUrl: entry.sourceUrl,
       sourceType: entry.sourceType,
       discoveryTags: entry.discoveryTags,

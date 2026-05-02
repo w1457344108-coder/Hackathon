@@ -30,6 +30,10 @@ export interface CuratedSourceRecord {
 const RCDTRA_PROJECT_URL = "https://www.unescap.org/projects/rcdtra";
 const RDTII_GUIDE_URL =
   "https://dtri.uneca.org/assets/data/publications/ESCAP-2025-MN-RDTII-2.1-guide-en.pdf";
+const RDTII_AP_REVIEW_URL =
+  "https://dtri.uneca.org/assets/data/publications/ESCAP-2025-RP-Digital-trade-regulatory-review-AP-en.pdf";
+const RDTII_SGP_PROFILE_URL =
+  "https://dtri.uneca.org/v1/uploads/country-profile/sgp-country-profile-en.pdf";
 
 export const curatedSourceRegistry: CuratedSourceRecord[] = [
   {
@@ -62,6 +66,35 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
     excerptHints: ["RDTII 2.1 Regulatory Database", "currently active digital trade related regulations"]
   },
   {
+    id: "RDTII-CHN-003",
+    country: "China",
+    title: "Digital Trade Regulatory Review for Asia and the Pacific, 2025",
+    citation:
+      "ESCAP-ECA-ECLAC Initiative on Digital Trade Regulatory Integration, 2025 regional review",
+    sourceUrl: RDTII_AP_REVIEW_URL,
+    sourceType: "Official Portal",
+    indicator: "Conditional flow regimes",
+    indicatorCode: "P6_4_CONDITIONAL_FLOW",
+    discoveryTags: ["China", "RDTII review", "Pillar 6", "Asia-Pacific"],
+    confidence: 0.65,
+    reviewStatus: "Pending Review",
+    reviewerNote:
+      "Competition-designated PDF source. Use it as a region-level evidentiary file and extract China-relevant context cautiously, because it is not a jurisdiction-only legal text.",
+    excerptFallback:
+      "The report presents the digital trade policy landscape in Asia and the Pacific using the RDTII 2.1 framework and includes China within the covered Asia-Pacific economies.",
+    originalTextFallback:
+      "Digital Trade Regulatory Review for Asia and the Pacific, 2025. The report states that the RDTII 2.1 framework covers 48 economies in the Asia-Pacific region, including China, and uses Pillar 6 to assess cross-border data policies. This is a competition-designated supporting file rather than a stand-alone China legal text.",
+    aiExtractionFallback:
+      "The ESCAP regional review is a valid competition-designated file that supports China's inclusion in the RDTII Pillar 6 evidence framework, but it should remain secondary to row-level database or legal texts.",
+    pillar6Mapping:
+      "Maps to Conditional flow regimes as a competition-designated supporting file for China-related Pillar 6 interpretation.",
+    mappingRationale:
+      "The regional review is not a statute, but it is part of the designated RDTII file set and can support traceability for how China is analyzed under Pillar 6.",
+    riskImplication:
+      "Useful for judges and methodology traceability, but reviewers should not treat it as conclusive legal proof without deeper source linkage.",
+    excerptHints: ["including China", "Pillar 6", "Cross-border data policies"]
+  },
+  {
     id: "RDTII-CHN-002",
     country: "China",
     title: "RDTII 2.1 Guide - Pillar 6 methodology reference",
@@ -92,31 +125,31 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
   {
     id: "RDTII-SGP-001",
     country: "Singapore",
-    title: "RDTII 2.1 Regulatory Database - Singapore Pillar 6 inventory",
+    title: "Singapore Economy Profile 2025",
     citation:
-      "UN ESCAP RCDTRA portal, RDTII 2.1 Regulatory Database, Pillar 6 economy entry for Singapore",
-    sourceUrl: RCDTRA_PROJECT_URL,
+      "ESCAP-ECA-ECLAC Regional Digital Trade Integration Index economy profile, Singapore",
+    sourceUrl: RDTII_SGP_PROFILE_URL,
     sourceType: "Official Portal",
     indicator: "Conditional flow regimes",
     indicatorCode: "P6_4_CONDITIONAL_FLOW",
-    discoveryTags: ["RDTII", "Singapore", "Pillar 6", "cross-border data policies"],
-    confidence: 0.76,
+    discoveryTags: ["RDTII", "Singapore", "economy profile", "Pillar 6"],
+    confidence: 0.83,
     reviewStatus: "Pending Review",
     reviewerNote:
-      "Competition-designated source entrypoint. The prototype uses the RDTII database surface first and stores a normalized Singapore note until row-level row capture is automated.",
+      "Competition-designated PDF source. This is the strongest public Singapore file in the current RDTII source set and should be preferred over the generic portal entry.",
     excerptFallback:
-      "The database compiles an inventory of currently active digital trade related regulations across economies, structured under the Regional Digital Trade Integration Index (RDTII) framework.",
+      "Based on the RDTII 2025 scores, Singapore has lower regulatory complexity for cross-border digital trade than the Asia-Pacific average, and Pillar 6: Cross-border data policies scores 0.17.",
     originalTextFallback:
-      "RDTII 2.1 Regulatory Database. The database compiles an inventory of currently active digital trade related regulations across economies, structured under the Regional Digital Trade Integration Index framework. For the hackathon prototype, Singapore Pillar 6 evidence is anchored to this competition-designated database surface and should be verified against the specific Singapore row and underlying legal URL during reviewer audit.",
+      "Singapore Economy Profile 2025. Based on the RDTII 2025 scores, Singapore has 24% lower regulatory complexity for cross-border digital trade than the Asia-Pacific average. Pillar 6: Cross-border data policies has a score of 0.17. The profile cites the RCDTRA databases page as the source of the score set and provides Singapore-specific narrative context.",
     aiExtractionFallback:
-      "Within the competition-designated RDTII workflow, Singapore is treated as an open-but-conditional transfer regime whose safeguards should be checked against the database row and linked legal instrument during final review.",
+      "The Singapore country profile is a competition-designated file that provides Singapore-specific Pillar 6 context and should be used as primary RDTII-file evidence in this prototype.",
     pillar6Mapping:
-      "Maps to Conditional flow regimes because the competition-designated RDTII database is the first-stop discovery layer for Singapore transfer safeguards under Pillar 6.",
+      "Maps to Conditional flow regimes because the Singapore RDTII economy profile directly reports the economy's Pillar 6 cross-border data policy complexity and surrounding narrative context.",
     mappingRationale:
-      "This record intentionally prioritizes the RDTII database entrypoint required by the hackathon instead of a national regulator site, while still preserving a conditional-flow interpretation for Singapore.",
+      "This is a country-specific RDTII file rather than a generic portal page, which improves auditability while staying within the competition-designated source set.",
     riskImplication:
-      "Good for hackathon traceability, but reviewers should still inspect the underlying Singapore act or database URL1 before approving export.",
-    excerptHints: ["RDTII 2.1 Regulatory Database", "currently active digital trade related regulations"]
+      "Strong for the prototype's evidence chain, though final legal claims should still be traced into the underlying acts cited in the profile.",
+    excerptHints: ["SINGAPORE", "Pillar 6: Cross-border data policies", "0.17"]
   },
   {
     id: "RDTII-SGP-002",
@@ -145,35 +178,6 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
     riskImplication:
       "Useful for explaining the model to judges, but not sufficient on its own for a final legal conclusion.",
     excerptHints: ["Pillar 6", "Cross-border Data Policies", "binding commitments"]
-  },
-  {
-    id: "RDTII-EU-001",
-    country: "European Union",
-    title: "RDTII 2.1 Regulatory Database - European Union Pillar 6 inventory",
-    citation:
-      "UN ESCAP RCDTRA portal, RDTII 2.1 Regulatory Database, Pillar 6 economy entry for the European Union",
-    sourceUrl: RCDTRA_PROJECT_URL,
-    sourceType: "Official Portal",
-    indicator: "Conditional flow regimes",
-    indicatorCode: "P6_4_CONDITIONAL_FLOW",
-    discoveryTags: ["RDTII", "European Union", "Pillar 6", "cross-border data policies"],
-    confidence: 0.78,
-    reviewStatus: "Pending Review",
-    reviewerNote:
-      "Competition-designated source entrypoint. The prototype now aligns EU evidence to the RDTII database surface before any deeper legal validation.",
-    excerptFallback:
-      "The database compiles an inventory of currently active digital trade related regulations across economies, structured under the Regional Digital Trade Integration Index (RDTII) framework.",
-    originalTextFallback:
-      "RDTII 2.1 Regulatory Database. The database compiles an inventory of currently active digital trade related regulations across economies, structured under the Regional Digital Trade Integration Index framework. For the hackathon prototype, European Union Pillar 6 evidence is anchored to this competition-designated database surface and should be verified against the specific EU row and underlying legal URL during reviewer audit.",
-    aiExtractionFallback:
-      "Within the competition-designated RDTII workflow, the European Union is treated as a conditional-flow jurisdiction whose transfer mechanisms should be confirmed against the database row and linked legal source before final export.",
-    pillar6Mapping:
-      "Maps to Conditional flow regimes because the RDTII database is the required discovery surface for EU Pillar 6 transfer controls in this prototype.",
-    mappingRationale:
-      "The hackathon prototype now prioritizes the competition-specified RDTII portal, while keeping the EU's Pillar 6 categorization in the conditional-flow bucket.",
-    riskImplication:
-      "Strong for competition alignment, but reviewers should still inspect the exact EU database row and linked legal instrument during final QA.",
-    excerptHints: ["RDTII 2.1 Regulatory Database", "currently active digital trade related regulations"]
   },
   {
     id: "RDTII-EU-002",
