@@ -250,7 +250,10 @@ function isTableLikeText(text: string) {
   const pillarMatches = text.match(/Pillar\s+\d+/gi)?.length ?? 0;
   const percentMatches = text.match(/-?\d+%/g)?.length ?? 0;
   const numericChunks = text.match(/\b\d+(?:\.\d+)?\b/g)?.length ?? 0;
-  const hasDenseSeparators = text.includes("Table:") || text.includes("Index score");
+  const hasDenseSeparators =
+    text.includes("Table:") ||
+    text.includes("Index score") ||
+    /\.{5,}/.test(text);
 
   return (
     pillarMatches >= 2 ||
@@ -258,6 +261,57 @@ function isTableLikeText(text: string) {
     numericChunks >= 10 ||
     hasDenseSeparators
   );
+}
+
+function getMentionedPillars(text: string) {
+  return [...text.matchAll(/Pillar\s+(\d+)/gi)]
+    .map((match) => Number.parseInt(match[1] ?? "", 10))
+    .filter((value) => Number.isFinite(value));
+}
+
+function extractPillar6OnlySegment(text: string) {
+  const candidates = [
+    /Pillar\s*6[:.]\s*Cross-border data policies[^.?!]{0,240}(?:[.?!]|$)/i,
+    /Pillar\s*6\s+deals with cross-border data policies[^.?!]{0,240}(?:[.?!]|$)/i,
+    /cross-border data policies[^.?!]{0,240}(?:[.?!]|$)/i
+  ];
+
+  for (const pattern of candidates) {
+    const match = text.match(pattern);
+
+    if (match?.[0]) {
+      return collapseWhitespace(match[0]);
+    }
+  }
+
+  return null;
+}
+
+function sanitizePillar6Excerpt(text: string) {
+  const normalized = collapseWhitespace(text.replace(/[•♦]/g, " "));
+
+  if (!normalized) {
+    return null;
+  }
+
+  if (!/Pillar\s*6|cross-border data policies/i.test(normalized)) {
+    return null;
+  }
+
+  const pillarNumbers = getMentionedPillars(normalized);
+  const mentionsOtherPillars = pillarNumbers.some((value) => value !== 6);
+
+  if (isTableLikeText(normalized) || mentionsOtherPillars) {
+    const pillar6OnlySegment = extractPillar6OnlySegment(normalized);
+
+    if (!pillar6OnlySegment || isTableLikeText(pillar6OnlySegment)) {
+      return null;
+    }
+
+    return pillar6OnlySegment;
+  }
+
+  return normalized;
 }
 
 function extractParagraphContext(pageText: string, hint: string) {
@@ -287,8 +341,14 @@ function extractParagraphContext(pageText: string, hint: string) {
       continue;
     }
 
+    const excerpt = sanitizePillar6Excerpt(excerptLines.join("\n"));
+
+    if (!excerpt) {
+      continue;
+    }
+
     return {
-      excerpt: excerptLines.join("\n"),
+      excerpt,
       sentenceNumber: lineIndex + 1
     };
   }
@@ -305,9 +365,10 @@ function splitIntoSentences(text: string) {
 
 function extractSentenceContext(pageText: string, hint: string) {
   const sentences = splitIntoSentences(collapseWhitespace(pageText));
+  const normalizedHint = hint.toLowerCase();
 
   for (const [sentenceIndex, sentence] of sentences.entries()) {
-    if (!sentence.includes(hint)) {
+    if (!sentence.toLowerCase().includes(normalizedHint)) {
       continue;
     }
 
@@ -316,7 +377,11 @@ function extractSentenceContext(pageText: string, hint: string) {
       sentence,
       sentences[sentenceIndex + 1]
     ].filter(Boolean) as string[];
-    const excerpt = collapseWhitespace(excerptSentences.join(" "));
+    const excerpt = sanitizePillar6Excerpt(excerptSentences.join(" "));
+
+    if (!excerpt) {
+      continue;
+    }
 
     return {
       excerpt,
@@ -364,9 +429,15 @@ function extractExcerptContext(
       const pageMatch = extractExcerptFromPage(pageText, hint);
 
       if (pageMatch) {
+        const excerpt = sanitizePillar6Excerpt(pageMatch.excerpt);
+
+        if (!excerpt) {
+          continue;
+        }
+
         return {
-          excerpt: pageMatch.excerpt,
-          supportingText: pageMatch.excerpt,
+          excerpt,
+          supportingText: excerpt,
           anchorIndex: normalizedText.indexOf(hint),
           pageNumber: pageIndex + 1,
           sentenceNumber: null
@@ -379,10 +450,15 @@ function extractExcerptContext(
     if (index !== -1) {
       const start = Math.max(0, index - 120);
       const end = Math.min(normalizedText.length, index + hint.length + 260);
+      const excerpt = sanitizePillar6Excerpt(normalizedText.slice(start, end));
+
+      if (!excerpt) {
+        continue;
+      }
 
       return {
-        excerpt: collapseWhitespace(normalizedText.slice(start, end)),
-        supportingText: collapseWhitespace(normalizedText.slice(start, end)),
+        excerpt,
+        supportingText: excerpt,
         anchorIndex: index,
         pageNumber: null,
         sentenceNumber: null

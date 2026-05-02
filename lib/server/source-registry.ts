@@ -94,7 +94,7 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
     excerptHints: [
       "Pillar 6: Cross-border Data Policies",
       "cross-border data policies",
-      "binding commitments"
+      "Pillar 6 deals with cross-border data policies"
     ]
   },
   {
@@ -126,8 +126,8 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
       "Strong for the prototype's evidence chain, though final legal claims should still be traced into the underlying acts cited in the profile.",
     excerptHints: [
       "Pillar 6: Cross-border data policies",
-      "Pillar 6",
-      "score of 0.17"
+      "cross-border data policies",
+      "cross-border data policies scores 0.17"
     ]
   },
   {
@@ -159,7 +159,7 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
     excerptHints: [
       "Pillar 6: Cross-border Data Policies",
       "cross-border data policies",
-      "binding commitments"
+      "Pillar 6 deals with cross-border data policies"
     ]
   },
   {
@@ -220,7 +220,6 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
       "Strong for prototype evidence traceability, though final legal submissions should still verify the underlying acts and row-level legal links cited by the RDTII material.",
     excerptHints: [
       "Pillar 6: Cross-border data policies",
-      "Pillar 6",
       "Cross-border data policies"
     ]
   },
@@ -253,7 +252,7 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
     excerptHints: [
       "Pillar 6: Cross-border Data Policies",
       "cross-border data policies",
-      "binding commitments"
+      "Pillar 6 deals with cross-border data policies"
     ]
   },
   {
@@ -343,7 +342,7 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
     excerptHints: [
       "Pillar 6: Cross-border Data Policies",
       "cross-border data policies",
-      "binding commitments"
+      "Pillar 6 deals with cross-border data policies"
     ]
   },
   {
@@ -404,7 +403,7 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
     excerptHints: [
       "Pillar 6: Cross-border Data Policies",
       "cross-border data policies",
-      "binding commitments"
+      "Pillar 6 deals with cross-border data policies"
     ]
   }
 ];

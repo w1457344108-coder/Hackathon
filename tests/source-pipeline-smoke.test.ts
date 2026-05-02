@@ -70,9 +70,22 @@ test("pdf-based evidence excerpts avoid score-table spillover when highlighting 
   );
 
   assert.ok(singaporeProfile);
-  assert.doesNotMatch(singaporeProfile.verbatimSnippet, /Pillar 1:|Pillar 2:|Pillar 3:/i);
+  assert.doesNotMatch(singaporeProfile.verbatimSnippet, /Pillar 1:|Pillar 2:|Pillar 3:|Pillar 5:|Pillar 7:|Pillar 8:/i);
   assert.doesNotMatch(singaporeProfile.verbatimSnippet, /Table: Singapore'?s RDTII 2025 overall score/i);
+  assert.doesNotMatch(singaporeProfile.verbatimSnippet, /\.{5,}/);
   assert.match(singaporeProfile.verbatimSnippet, /Pillar 6|cross-border data policies/i);
+});
+
+test("guide evidence excerpts stay focused on Pillar 6 rather than table-of-contents spillover", async () => {
+  const context = await resolveEvidenceContext("China");
+  const guideRecord = context.evidenceRecords.find((record) =>
+    record.sourceUrl.includes("ESCAP-2025-MN-RDTII-2.1-guide-en.pdf")
+  );
+
+  assert.ok(guideRecord);
+  assert.doesNotMatch(guideRecord.verbatimSnippet, /Pillar 5:|Pillar 7:|Pillar 8:/i);
+  assert.doesNotMatch(guideRecord.verbatimSnippet, /\.{5,}/);
+  assert.match(guideRecord.verbatimSnippet, /Pillar 6|cross-border data policies/i);
 });
 
 test("source pipeline expands real coverage for the European Union and the United States", async () => {

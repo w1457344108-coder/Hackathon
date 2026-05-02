@@ -54,7 +54,7 @@ const coreModes: Array<{
   {
     id: "regulation",
     english: "Regulation Interpretation",
-    prompt: "Locate the relevant Pillar 6/7 legal text and explain what the rule means."
+    prompt: "Locate the relevant Pillar 6 legal text and explain what the rule means."
   },
   {
     id: "case",
@@ -328,7 +328,7 @@ function ConversationSidebar({
       <div className="flex h-16 items-center justify-between border-b border-white/10 px-2 sm:px-4">
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold">Legal</p>
-          <p className="hidden truncate text-xs text-white/55 sm:block">Pillar 6/7 Workspace</p>
+          <p className="hidden truncate text-xs text-white/55 sm:block">Pillar 6 Workspace</p>
         </div>
         <button
           type="button"
@@ -1123,7 +1123,7 @@ function buildOutOfScopeGuidance(mode: CoreModeId) {
   const modeName = coreModes.find((item) => item.id === mode)?.english ?? "legal analysis";
 
   return [
-    `This workspace is focused on ${modeName} for cross-border data law and Pillar 6/7 compliance.`,
+    `This workspace is focused on ${modeName} for cross-border data law and Pillar 6 compliance.`,
     "Please ask a legal or compliance question, such as which rule applies to a data transfer, what risks a business scenario creates, or what barriers a planned market entry may face."
   ].join("\n\n");
 }
@@ -1242,7 +1242,7 @@ function formatQueryBuilderSuggestion(
   }
 
   return [
-    `Please handle this as a ${getScenarioLabel(mode)} task under Pillar 6/7:`,
+    `Please handle this as a ${getScenarioLabel(mode)} task under Pillar 6:`,
     question,
     "",
     "Query Builder focus:",
@@ -1397,7 +1397,7 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
 
 function buildPlaceholderAnswer(mode: CoreModeId) {
   if (mode === "regulation") {
-    return "Regulation Interpretation mode is selected. The next step will locate relevant Pillar 6/7 legal text, extract citations, and explain the rule in plain legal reasoning.";
+    return "Regulation Interpretation mode is selected. The next step will locate relevant Pillar 6 legal text, extract citations, and explain the rule in plain legal reasoning.";
   }
 
   if (mode === "case") {

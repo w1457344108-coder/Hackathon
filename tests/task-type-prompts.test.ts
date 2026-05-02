@@ -46,6 +46,8 @@ test("intent arbiter produces mode-specific normalized intents", () => {
 test("legal reasoner and report prompts are complete for each task type", () => {
   assert.match(getLegalReasonerInstructions("regulation-interpretation"), /Rule Explanation/i);
   assert.match(getReportAgentInstructions("regulation-interpretation"), /Legal Source Located/i);
+  assert.doesNotMatch(getLegalReasonerInstructions("regulation-interpretation"), /Pillar 7/i);
+  assert.doesNotMatch(getReportAgentInstructions("regulation-interpretation"), /Pillar 7/i);
 
   assert.match(getLegalReasonerInstructions("case-analysis"), /Case Facts Identified/i);
   assert.match(getReportAgentInstructions("case-analysis"), /Compliance Risk Assessment/i);

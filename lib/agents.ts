@@ -96,14 +96,14 @@ function getTaskIntent(input: {
     : input.countryA;
 
   if (input.taskType === "case-analysis") {
-    return `Analyze this existing case by extracting facts, identifying the data flow, and matching the facts to Pillar 6/7 legal evidence for ${countries}. User question: ${input.userQuery}`;
+    return `Analyze this existing case by extracting facts, identifying the data flow, and matching the facts to Pillar 6 legal evidence for ${countries}. User question: ${input.userQuery}`;
   }
 
   if (input.taskType === "forward-looking-advisory") {
-    return `Assess this planned or future market-entry activity by forecasting cross-border data barriers, readiness risks, and compliance steps under Pillar 6/7 for ${countries}. User question: ${input.userQuery}`;
+    return `Assess this planned or future market-entry activity by forecasting cross-border data barriers, readiness risks, and compliance steps under Pillar 6 for ${countries}. User question: ${input.userQuery}`;
   }
 
-  return `Explain the relevant Pillar 6/7 regulation, legal rule, or policy indicator for ${countries}, including source location, legal elements, plain-language meaning, and evidence limits. User question: ${input.userQuery}`;
+  return `Explain the relevant Pillar 6 regulation, legal rule, or policy indicator for ${countries}, including source location, legal elements, plain-language meaning, and evidence limits. User question: ${input.userQuery}`;
 }
 
 function getTaskSearchTerms(taskType: LegalTaskType) {
@@ -142,25 +142,26 @@ export function getLegalReasonerInstructions(taskType: LegalTaskType) {
     "Do not invent statutes, article numbers, legal obligations, regulator names, URLs, or citations.",
     "Prefer original legal text and official sources over summaries, methodology pages, or database descriptions.",
     "Distinguish exact legal text, RDTII database entries, policy indicator summaries, and inferred legal effect.",
-    "If evidence is ambiguous or incomplete, state the limitation inside the conclusion or legalEffect field."
+    "Never rely on or mention other pillars unless the source itself is being rejected as out of scope.",
+    "If exact clause-level legal text is unavailable, state that limitation explicitly inside the conclusion or legalEffect field and stop short of claiming a specific statutory rule."
   ].join(" ");
 
   if (taskType === "case-analysis") {
     return [
-      "You are a legal case analysis agent for cross-border data law under UN ESCAP RDTII Pillar 6/7.",
+      "You are a legal case analysis agent for cross-border data law under UN ESCAP RDTII Pillar 6.",
       "Task type: Case Analysis.",
       commonRules,
       "Treat the user scenario as an existing or current business operation.",
       "First extract Case Facts Identified, then identify assumptions and missing facts.",
-      "Map the facts to Relevant Pillar 6/7 Issues, including transfer restrictions, localization, conditional flow, infrastructure, binding commitments, approvals, exceptions, and restrictions.",
+      "Map the facts to Relevant Pillar 6 Issues, including transfer restrictions, localization, conditional flow, infrastructure, binding commitments, approvals, exceptions, and restrictions.",
       "For each legal finding, make the conclusion case-specific and explain the Compliance Risk Assessment in legalEffect.",
-      "Required analytical coverage: Case Facts Identified, Assumptions and Missing Facts, Relevant Pillar 6/7 Issues, Country-by-Country Analysis, Compliance Risk Assessment, Evidence Match, Practical Next Steps, Limits."
+      "Required analytical coverage: Case Facts Identified, Assumptions and Missing Facts, Relevant Pillar 6 Issues, Country-by-Country Analysis, Compliance Risk Assessment, Evidence Match, Practical Next Steps, Limits."
     ].join("\n");
   }
 
   if (taskType === "forward-looking-advisory") {
     return [
-      "You are a forward-looking legal advisory agent for cross-border data law under UN ESCAP RDTII Pillar 6/7.",
+      "You are a forward-looking legal advisory agent for cross-border data law under UN ESCAP RDTII Pillar 6.",
       "Task type: Forward-looking Advisory.",
       commonRules,
       "Treat the user scenario as a planned or future activity, not an existing case.",
@@ -172,7 +173,7 @@ export function getLegalReasonerInstructions(taskType: LegalTaskType) {
   }
 
   return [
-    "You are a legal interpretation agent for cross-border data law under UN ESCAP RDTII Pillar 6/7.",
+    "You are a legal interpretation agent for cross-border data law under UN ESCAP RDTII Pillar 6.",
     "Task type: Regulation Interpretation.",
     commonRules,
     "Treat the user question as a request to explain a specific law, regulation, clause, policy indicator, or legal requirement.",
@@ -184,10 +185,11 @@ export function getLegalReasonerInstructions(taskType: LegalTaskType) {
 
 export function getReportAgentInstructions(taskType: LegalTaskType) {
   const commonRules = [
-    "Produce a concise, evidence-aware final answer for a Pillar 6/7 cross-border data policy workflow.",
+    "Produce a concise, evidence-aware final answer for a Pillar 6 cross-border data policy workflow.",
     "Do not invent jurisdictions, evidence, source claims, legal citations, or business facts.",
     "Use supplied legal findings and source records as the authority base.",
     "If the evidence is only row-level database, page-level, or incomplete, say so clearly.",
+    "Do not mention other pillars unless you are explicitly explaining that the system excluded them as out of scope.",
     "Write in user-facing prose with clear section labels."
   ].join(" ");
 
@@ -195,7 +197,7 @@ export function getReportAgentInstructions(taskType: LegalTaskType) {
     return [
       commonRules,
       "This is Case Analysis. The finalNarrative must be tailored to the user's existing facts and must not read like a generic country-risk memo.",
-      "Required sections inside finalNarrative: Case Facts Identified; Assumptions and Missing Facts; Relevant Pillar 6/7 Issues; Country-by-Country Analysis; Compliance Risk Assessment; Evidence Match; Practical Next Steps; Limits.",
+      "Required sections inside finalNarrative: Case Facts Identified; Assumptions and Missing Facts; Relevant Pillar 6 Issues; Country-by-Country Analysis; Compliance Risk Assessment; Evidence Match; Practical Next Steps; Limits.",
       "Policy recommendations must be case-specific compliance actions."
     ].join("\n");
   }
@@ -247,7 +249,7 @@ function getSearchStrategy(taskType: LegalTaskType): string {
 
 export function getSourceDiscoveryInstructions(taskType: LegalTaskType): string {
   const commonRules = [
-    "You are a Source Discovery Agent for cross-border data policy under UN ESCAP RDTII Pillar 6/7.",
+    "You are a Source Discovery Agent for cross-border data policy under UN ESCAP RDTII Pillar 6.",
     "Your task is to identify official or authoritative source locations where Pillar 6 evidence is likely to be found.",
     "Route each query to the most relevant authority channel first: legislation portals, regulator guidance, ministry websites, treaty databases, or RDTII references.",
     "Rank sources by: (a) official status first, (b) Pillar 6 relevance second.",
@@ -285,7 +287,7 @@ export function getSourceDiscoveryInstructions(taskType: LegalTaskType): string 
 
 export function getDocumentReaderInstructions(): string {
   return [
-    "You are a Document Reader Agent for cross-border data policy under UN ESCAP RDTII Pillar 6/7.",
+    "You are a Document Reader Agent for cross-border data policy under UN ESCAP RDTII Pillar 6.",
     "Your task is to convert raw legal material (statutes, regulations, guidance documents) into structured, citation-ready passages.",
     "",
     "For each source provided:",
@@ -315,7 +317,7 @@ export function getDocumentReaderInstructions(): string {
 
 export function getIndicatorMappingInstructions(): string {
   return [
-    "You are an Indicator Mapping Agent for cross-border data policy under UN ESCAP RDTII Pillar 6/7.",
+    "You are an Indicator Mapping Agent for cross-border data policy under UN ESCAP RDTII Pillar 6.",
     "Your task is to align each structured legal passage to one of the five canonical RDTII Pillar 6 indicators.",
     "",
     "The five canonical indicators are:",
@@ -350,7 +352,7 @@ export function getIndicatorMappingInstructions(): string {
 
 export function getRelevanceFilterInstructions(): string {
   return [
-    "You are a Relevance Filter Agent for cross-border data policy under UN ESCAP RDTII Pillar 6/7.",
+    "You are a Relevance Filter Agent for cross-border data policy under UN ESCAP RDTII Pillar 6.",
     "Your task is to read completed mainline passages and keep only the evidence that is genuinely useful for Pillar 6 audit and export.",
     "You are a quality gate — remove noise, protect against scope creep, and flag borderline material for human review.",
     "",
@@ -383,7 +385,7 @@ export function getRelevanceFilterInstructions(): string {
 
 export function getRiskCostInstructions(taskType: LegalTaskType): string {
   const commonRules = [
-    "You are a Risk & Cost Quantifier Agent for cross-border data policy under UN ESCAP RDTII Pillar 6/7.",
+    "You are a Risk & Cost Quantifier Agent for cross-border data policy under UN ESCAP RDTII Pillar 6.",
     "Your task is to convert completed mainline legal findings into business-facing risk and cost signals.",
     "Translate legal complexity into actionable business intelligence.",
     "",
@@ -443,7 +445,7 @@ export function getRiskCostInstructions(taskType: LegalTaskType): string {
 
 export function getAuditCitationInstructions(): string {
   return [
-    "You are an Audit View & Citation Agent for cross-border data policy under UN ESCAP RDTII Pillar 6/7.",
+    "You are an Audit View & Citation Agent for cross-border data policy under UN ESCAP RDTII Pillar 6.",
     "Your task is to link mainline legal findings back to shortlisted evidence, verbatim source text, and reviewer context.",
     "You are the system's main defense against hallucination — every AI claim must remain visibly anchored in legal text.",
     "",
@@ -898,7 +900,7 @@ export async function reportAgent(results: {
       ? [
           `Case Facts Identified: The user describes an existing cross-border data situation involving ${results.comparison ? `${results.comparison.comparedCountries[0]} and ${results.comparison.comparedCountries[1]}` : primaryAnalysis.country}.`,
           `Assumptions and Missing Facts: Data category, transfer mechanism, processor/controller roles, and whether consent or approval exists should be confirmed if not supplied.`,
-          `Relevant Pillar 6/7 Issues: The case should be checked against conditional transfer rules, localization or infrastructure requirements, binding commitments, and privacy safeguards.`,
+          `Relevant Pillar 6 Issues: The case should be checked against conditional transfer rules, localization requirements, infrastructure requirements, binding commitments, and transfer approvals.`,
           `Country-by-Country Analysis: ${evidenceSummary}`,
           `Compliance Risk Assessment: Overall risk is ${overallRisk}.`,
           `Evidence Match: ${findingSummaries.map((finding) => finding.evidence).filter(Boolean).join("; ") || "No citation-ready finding was returned."}`,
@@ -909,7 +911,7 @@ export async function reportAgent(results: {
         ? [
             `Planned Activity Under Review: The user is evaluating a future cross-border data operation for ${results.comparison ? `${results.comparison.comparedCountries[0]} and ${results.comparison.comparedCountries[1]}` : primaryAnalysis.country}.`,
             `Key Planning Assumptions: Launch plans should confirm data type, hosting location, transfer direction, vendors, and whether sensitive or regulated data is involved.`,
-            `Potential Legal Barriers: Check transfer conditions, localization, infrastructure, approval, binding commitment, and privacy requirements before launch.`,
+            `Potential Legal Barriers: Check transfer conditions, localization, infrastructure, approval, and binding-commitment requirements before launch.`,
             `Forward-Looking Risk Forecast: Overall risk is ${overallRisk}; ${evidenceSummary}`,
             `Country-by-Country Readiness Review: Prioritize the stricter jurisdiction when the selected countries diverge.`,
             `Compliance Roadmap: Verify legal sources, map data flows, design transfer safeguards, prepare contracts and notices, test approval needs, and schedule human legal review before rollout.`,
@@ -918,9 +920,13 @@ export async function reportAgent(results: {
             `Limits: ${sourceLimit}`
           ].join("\n\n")
         : [
-            `Direct Answer: The requested Pillar 6/7 rule should be interpreted from the cited country source rather than from a generic risk score.`,
+            clauseLevelEvidenceRetrieved
+              ? `Direct Answer: The requested Pillar 6 rule should be interpreted from the cited country source rather than from a generic risk score.`
+              : `Direct Answer: The current competition-designated evidence chain does not yet provide an article-level or clause-level Pillar 6 legal text for this jurisdiction.`,
             `Legal Source Located: ${findingSummaries.map((finding) => finding.evidence).filter(Boolean).join("; ") || "No citation-ready finding was returned."}`,
-            `Rule Explanation: ${evidenceSummary}`,
+            clauseLevelEvidenceRetrieved
+              ? `Rule Explanation: ${evidenceSummary}`
+              : `Rule Explanation: The system can explain the Pillar 6 classification and transfer-policy posture, but it cannot yet quote an exact jurisdiction-specific clause from the current source chain.`,
             `Legal Elements: Review whether the rule permits, restricts, conditions, or requires infrastructure/localization for cross-border data movement.`,
             `Application to the User's Question: Apply the rule to the selected countries and data-transfer direction before making a compliance decision.`,
             `Confidence and Limits: Overall risk is ${overallRisk}. ${sourceLimit}`,
@@ -1035,7 +1041,7 @@ export function intentArbiterAgent(input: {
       pillar6ScopeConfirmed: true,
       focusIndicators: focusIndicators.length ? focusIndicators : ALL_PILLAR6_INDICATORS
     },
-    `Intent normalized as ${TASK_LABELS[taskType]} and constrained to Pillar 6/7.`,
+    `Intent normalized as ${TASK_LABELS[taskType]} and constrained to Pillar 6.`,
     "source-discovery"
   );
 }
@@ -2127,7 +2133,7 @@ function buildTenAgentTrace(input: {
       agentId: "intent-arbiter",
       name: agentNames["intent-arbiter"],
       inputSummary: `${countries} | ${TASK_LABELS[taskType]} | ${input.userQuery}`,
-      outputSummary: `Classifies the request as a ${TASK_LABELS[taskType]} Pillar 6/7 workflow.`,
+      outputSummary: `Classifies the request as a ${TASK_LABELS[taskType]} Pillar 6 workflow.`,
       evidenceIds: [],
       humanReviewGate: {
         required: true,
@@ -2139,7 +2145,7 @@ function buildTenAgentTrace(input: {
     {
       agentId: "query-builder",
       name: agentNames["query-builder"],
-      inputSummary: "Normalized Pillar 6/7 intent, jurisdiction, task type, scenario, and review terms.",
+      inputSummary: "Normalized Pillar 6 intent, jurisdiction, task type, scenario, and review terms.",
       outputSummary: `Builds ${TASK_LABELS[taskType]} search queries and lets law students revise specialist legal terms.`,
       evidenceIds: [],
       humanReviewGate: {
