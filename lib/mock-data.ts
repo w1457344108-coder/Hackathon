@@ -1,4 +1,4 @@
-import { CountryPolicyProfile, SupportedCountry } from "@/lib/types";
+import type { CountryPolicyProfile, SupportedCountry } from "@/lib/types";
 
 export const supportedCountries: SupportedCountry[] = [
   "China",
@@ -13,7 +13,7 @@ export const countryPolicyProfiles: Record<SupportedCountry, CountryPolicyProfil
     country: "China",
     region: "Asia-Pacific",
     dataTransferPolicy:
-      "Illustrative mock profile: cross-border transfers often depend on data category, processor role, and national security-sensitive triggers.",
+      "Current prototype baseline: cross-border transfers often depend on data category, processor role, and national security-sensitive triggers.",
     localizationRules:
       "Stronger localization expectations exist for important data and some personal information scenarios, with sectoral and security-linked storage expectations.",
     privacyFramework:
@@ -31,8 +31,8 @@ export const countryPolicyProfiles: Record<SupportedCountry, CountryPolicyProfil
       bindingAgreementGap: 1
     },
     internationalAgreements: [
-      "Digital trade commitments are selective rather than broadly liberalizing in this demo profile.",
-      "Cross-border data commitments are treated as narrower than Singapore or Japan in the mock model."
+      "Digital trade commitments are selective rather than broadly liberalizing in the current prototype baseline.",
+      "Cross-border data commitments are treated as narrower than Singapore or Japan in the current prototype baseline."
     ],
     complianceNotes: [
       "Transfer mapping and data classification are front-loaded compliance tasks.",
@@ -47,15 +47,15 @@ export const countryPolicyProfiles: Record<SupportedCountry, CountryPolicyProfil
     strategicOutlook:
       "Best suited to staged market entry with strong local counsel, clear data inventory, and localization-ready architecture.",
     demoDisclaimer:
-      "Mock data aligned to ESCAP RDTII Pillar 6 dimensions. Not legal advice and not an official country score."
+      "Prototype baseline aligned to ESCAP RDTII Pillar 6 dimensions. Review competition-designated evidence records before treating outputs as final legal support."
   },
   Singapore: {
     country: "Singapore",
     region: "Asia-Pacific",
     dataTransferPolicy:
-      "Illustrative mock profile: cross-border transfers are comparatively open, with accountability obligations centered on safeguarding personal data when exporting it.",
+      "Current prototype baseline: cross-border transfers are comparatively open, with accountability obligations centered on safeguarding personal data when exporting it.",
     localizationRules:
-      "No broad economy-wide localization requirement is assumed in this demo profile.",
+      "No broad economy-wide localization requirement is assumed in the current prototype baseline.",
     privacyFramework:
       "Business-oriented privacy regime emphasizing accountability, consent, and reasonable protection obligations.",
     approvalMechanism:
@@ -72,7 +72,7 @@ export const countryPolicyProfiles: Record<SupportedCountry, CountryPolicyProfil
     },
     internationalAgreements: [
       "Strong orientation toward digital trade cooperation and interoperability.",
-      "Mock profile assumes participation in binding digital trade commitments."
+      "The current prototype baseline assumes participation in binding digital trade commitments."
     ],
     complianceNotes: [
       "Supplier due diligence remains important for outbound personal data transfers.",
@@ -87,13 +87,13 @@ export const countryPolicyProfiles: Record<SupportedCountry, CountryPolicyProfil
     strategicOutlook:
       "A strong launch market for regional digital operations, especially when speed, scalability, and lower compliance friction matter.",
     demoDisclaimer:
-      "Mock data aligned to ESCAP RDTII Pillar 6 dimensions. Not legal advice and not an official country score."
+      "Prototype baseline aligned to ESCAP RDTII Pillar 6 dimensions. Review competition-designated evidence records before treating outputs as final legal support."
   },
   Japan: {
     country: "Japan",
     region: "Asia-Pacific",
     dataTransferPolicy:
-      "Illustrative mock profile: cross-border data movement is generally permitted with privacy and accountability controls rather than broad localization.",
+      "Current prototype baseline: cross-border data movement is generally permitted with privacy and accountability controls rather than broad localization.",
     localizationRules:
       "No general local storage mandate is assumed, though sector-sensitive controls may still shape implementation choices.",
     privacyFramework:
@@ -111,7 +111,7 @@ export const countryPolicyProfiles: Record<SupportedCountry, CountryPolicyProfil
       bindingAgreementGap: 0
     },
     internationalAgreements: [
-      "Mock profile assumes strong participation in trade arrangements supporting data flows.",
+      "The current prototype baseline assumes strong participation in trade arrangements supporting data flows.",
       "Interoperability posture is modeled as stronger than restrictive economies."
     ],
     complianceNotes: [
@@ -127,19 +127,19 @@ export const countryPolicyProfiles: Record<SupportedCountry, CountryPolicyProfil
     strategicOutlook:
       "Well suited for trust-sensitive B2B services that can sustain structured compliance operations.",
     demoDisclaimer:
-      "Mock data aligned to ESCAP RDTII Pillar 6 dimensions. Not legal advice and not an official country score."
+      "Prototype baseline aligned to ESCAP RDTII Pillar 6 dimensions. Review competition-designated evidence records before treating outputs as final legal support."
   },
   "European Union": {
     country: "European Union",
     region: "Europe",
     dataTransferPolicy:
-      "Illustrative mock profile: transfers are allowed, but exporters need recognized transfer mechanisms and strong accountability around personal data protection.",
+      "Current prototype baseline: transfers are allowed, but exporters need recognized transfer mechanisms and strong accountability around personal data protection.",
     localizationRules:
       "No blanket localization rule is assumed, but adequacy and transfer mechanism requirements introduce meaningful outbound friction.",
     privacyFramework:
       "Comprehensive rights-based privacy architecture with strong obligations for controllers and processors.",
     approvalMechanism:
-      "Adequacy, standard contractual safeguards, or approved internal rules typically anchor transfer legitimacy in the mock model.",
+      "Adequacy, standard contractual safeguards, or approved internal rules typically anchor transfer legitimacy in the current prototype baseline.",
     businessImpact: "Medium",
     opennessScore: 74,
     riskLevel: "Moderate",
@@ -152,7 +152,7 @@ export const countryPolicyProfiles: Record<SupportedCountry, CountryPolicyProfil
     },
     internationalAgreements: [
       "Cross-border data openness is paired with strong rights protection and adequacy logic.",
-      "Mock profile assumes meaningful interoperability, but with higher privacy-driven compliance effort than Singapore."
+      "The current prototype baseline assumes meaningful interoperability, but with higher privacy-driven compliance effort than Singapore."
     ],
     complianceNotes: [
       "Transfer impact analysis and contract governance can create moderate delivery overhead.",
@@ -167,15 +167,15 @@ export const countryPolicyProfiles: Record<SupportedCountry, CountryPolicyProfil
     strategicOutlook:
       "Attractive for trust-led digital services if the team can support structured privacy operations and transfer documentation.",
     demoDisclaimer:
-      "Mock data aligned to ESCAP RDTII Pillar 6 dimensions. Not legal advice and not an official country score."
+      "Prototype baseline aligned to ESCAP RDTII Pillar 6 dimensions. Review competition-designated evidence records before treating outputs as final legal support."
   },
   "United States": {
     country: "United States",
     region: "North America",
     dataTransferPolicy:
-      "Illustrative mock profile: the transfer environment is generally open at the federal market level, with compliance variation driven by sectoral rules and partner expectations.",
+      "Current prototype baseline: the transfer environment is generally open at the federal market level, with compliance variation driven by sectoral rules and partner expectations.",
     localizationRules:
-      "No broad federal localization requirement is assumed in this demo profile.",
+      "No broad federal localization requirement is assumed in the current prototype baseline.",
     privacyFramework:
       "Fragmented privacy landscape with sectoral and state-level obligations rather than one unified national regime.",
     approvalMechanism:
@@ -191,7 +191,7 @@ export const countryPolicyProfiles: Record<SupportedCountry, CountryPolicyProfil
       bindingAgreementGap: 1
     },
     internationalAgreements: [
-      "Mock profile reflects openness in commercial practice but less comprehensive binding digital trade coverage than the strongest interoperability cases.",
+      "The current prototype baseline reflects openness in commercial practice but less comprehensive binding digital trade coverage than the strongest interoperability cases.",
       "Cross-border trust can still depend on foreign counterpart requirements."
     ],
     complianceNotes: [
@@ -207,6 +207,6 @@ export const countryPolicyProfiles: Record<SupportedCountry, CountryPolicyProfil
     strategicOutlook:
       "Good for product scaling and cloud-native architectures, but cross-border programs still need partner-jurisdiction transfer planning.",
     demoDisclaimer:
-      "Mock data aligned to ESCAP RDTII Pillar 6 dimensions. Not legal advice and not an official country score."
+      "Prototype baseline aligned to ESCAP RDTII Pillar 6 dimensions. Review competition-designated evidence records before treating outputs as final legal support."
   }
 };

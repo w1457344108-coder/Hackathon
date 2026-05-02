@@ -48,6 +48,18 @@ function toSourceBasisLabel(source: CuratedSourceRecord) {
   return `${source.country}: ${source.title} (${new URL(source.sourceUrl).host})`;
 }
 
+function getSourceStrengthLabel(entry: CuratedSourceRecord) {
+  if (entry.title.includes("Economy Profile")) {
+    return "country profile";
+  }
+
+  if (entry.title.includes("Regulatory Database")) {
+    return "database entrypoint";
+  }
+
+  return "methodology support";
+}
+
 function mapIndicatorLabel(indicatorCode: Pillar6IndicatorCode) {
   switch (indicatorCode) {
     case "P6_1_BAN_LOCAL_PROCESSING":
@@ -65,10 +77,10 @@ function mapIndicatorLabel(indicatorCode: Pillar6IndicatorCode) {
 
 function getReviewNote(entry: CuratedSourceRecord, foundLiveExcerpt: boolean) {
   if (foundLiveExcerpt) {
-    return `${entry.reviewerNote} Live retrieval succeeded.`;
+    return `${entry.reviewerNote} Source strength: ${getSourceStrengthLabel(entry)}. Live retrieval succeeded.`;
   }
 
-  return `${entry.reviewerNote} Live retrieval fell back to curated excerpt text.`;
+  return `${entry.reviewerNote} Source strength: ${getSourceStrengthLabel(entry)}. Live retrieval fell back to curated excerpt text.`;
 }
 
 async function fetchSourceResponse(sourceUrl: string) {
@@ -219,7 +231,7 @@ export async function resolveEvidenceContext(
     return {
       evidenceRecords: fallbackEvidenceRecords,
       sourceMode: "mock",
-      sourceBasis: ["Mock evidence fallback only"],
+      sourceBasis: ["Fallback evidence set only"],
       realEvidenceCount: 0,
       fallbackEvidenceCount: fallbackEvidenceRecords.length
     };

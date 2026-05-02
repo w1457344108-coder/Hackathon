@@ -29,7 +29,7 @@ const fustat = Fustat({
 export const metadata: Metadata = {
   title: "Cross-Border Data Policy Multi-Agent Analyst",
   description:
-    "A hackathon-ready multi-agent dashboard for analyzing cross-border data policy scenarios using UN ESCAP-aligned mock data."
+    "A multi-agent dashboard for analyzing cross-border data policy scenarios with competition-designated UN ESCAP RDTII sources, structured evidence, and reviewable exports."
 };
 
 export default function RootLayout({

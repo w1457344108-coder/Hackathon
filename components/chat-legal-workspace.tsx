@@ -1,6 +1,10 @@
 "use client";
 
 import { FormEvent, SVGProps, useMemo, useRef, useState } from "react";
+import {
+  ChatAnalysisPanels,
+  type ChatAnalysisResult
+} from "@/components/chat-analysis-panels";
 
 type CoreModeId = "regulation" | "case" | "advisory";
 type SupportedCountry = "China" | "Singapore" | "Japan" | "European Union" | "United States";
@@ -11,6 +15,7 @@ interface ChatMessage {
   content: string;
   mode?: CoreModeId;
   status?: "loading" | "complete";
+  analysis?: ChatAnalysisResult;
 }
 
 interface ConversationItem {
@@ -167,6 +172,7 @@ export function ChatLegalWorkspace() {
           message.id === assistantMessageId
             ? {
                 ...message,
+                analysis: result,
                 content: formatBackendAnswer(result, selectedMode),
                 status: "complete"
               }
@@ -880,6 +886,9 @@ function ConversationMessages({ messages }: { messages: ChatMessage[] }) {
             <div className="rounded-[18px] border border-black/10 bg-white px-5 py-4 text-[15px] leading-7 text-black shadow-[0_12px_34px_rgba(0,0,0,0.05)]">
               {message.content}
             </div>
+            {message.analysis ? (
+              <ChatAnalysisPanels result={message.analysis} modeLabel={modeLabel} />
+            ) : null}
           </article>
         );
       })}
@@ -904,7 +913,7 @@ function AnalysisLoadingMessage({ modeLabel }: { modeLabel: string | null | unde
           <div className="min-w-0 flex-1">
             <p className="font-semibold tracking-[-0.2px]">Multi-agent legal workflow is running</p>
             <p className="text-[13px] leading-5 text-black/55">
-              DeepSeek is preparing evidence retrieval, legal reasoning, and compliance synthesis.
+              The backend is preparing evidence retrieval, legal reasoning, and compliance synthesis.
             </p>
           </div>
           <div className="flex items-center gap-1" aria-hidden="true">
@@ -921,39 +930,24 @@ function AnalysisLoadingMessage({ modeLabel }: { modeLabel: string | null | unde
   );
 }
 
-interface BackendWorkflowResult {
-  analysisRunId?: string | null;
-  providerId?: string;
-  providerModel?: string | null;
-  evidenceSourceMode?: "real" | "mock" | "hybrid";
-  input?: {
-    uploadedDocuments?: Array<{
-      fileName: string;
-      sizeBytes: number;
-      characterCount: number;
-    }>;
-  };
+interface BackendWorkflowResult extends ChatAnalysisResult {
   report?: {
     finalNarrative?: string;
     overallRisk?: string;
   };
-  evidenceRecords?: Array<{
-    citation?: string;
-    lawTitle?: string;
-    sourceUrl?: string;
-  }>;
-  supportingAgentResults?: {
+  supportingAgentResults?: ChatAnalysisResult["supportingAgentResults"] & {
     queryBuilder?: {
       data?: QueryBuilderData | null;
     };
     legalReviewExport?: {
       data?: {
         exportReadiness?: string;
+        exportJson?: Record<string, unknown>;
+        exportCsvRows?: Array<Record<string, string | number>>;
+        exportMarkdown?: string;
+        judgeSummary?: string;
       } | null;
     };
-  };
-  research?: {
-    sourceBasis?: string[];
   };
 }
 
@@ -1227,7 +1221,8 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
     exportReadiness ? `Export readiness: ${exportReadiness}.` : null,
     citations.length ? `Key citations: ${citations.join(" | ")}` : null,
     sourceBasis.length ? `Source basis: ${sourceBasis.join(" | ")}` : null,
-    result.analysisRunId ? `Review run ID: ${result.analysisRunId}` : null
+    result.analysisRunId ? `Review run ID: ${result.analysisRunId}` : null,
+    "Open the panels below to inspect evidence records, audit review, and JSON/CSV/Markdown export."
   ]
     .filter(Boolean)
     .join("\n\n");
