@@ -63,6 +63,18 @@ test("source pipeline expands real coverage for Japan and the United States", as
   assert.ok(context.sourceBasis.some((item) => item.includes("Competition-designated source set")));
 });
 
+test("pdf-based evidence excerpts avoid score-table spillover when highlighting Pillar 6", async () => {
+  const context = await resolveEvidenceContext("Singapore");
+  const singaporeProfile = context.evidenceRecords.find((record) =>
+    record.sourceUrl.includes("sgp-country-profile-en.pdf")
+  );
+
+  assert.ok(singaporeProfile);
+  assert.doesNotMatch(singaporeProfile.verbatimSnippet, /Pillar 1:|Pillar 2:|Pillar 3:/i);
+  assert.doesNotMatch(singaporeProfile.verbatimSnippet, /Table: Singapore'?s RDTII 2025 overall score/i);
+  assert.match(singaporeProfile.verbatimSnippet, /Pillar 6|cross-border data policies/i);
+});
+
 test("source pipeline expands real coverage for the European Union and the United States", async () => {
   const context = await resolveEvidenceContext("European Union", "United States");
 

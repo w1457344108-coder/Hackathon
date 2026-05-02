@@ -178,14 +178,14 @@ async function fetchSourceResponse(sourceUrl: string) {
 function splitPdfPages(rawText: string) {
   const byFormFeed = rawText
     .split("\f")
-    .map((page) => collapseWhitespace(page))
+    .map((page) => page.trim())
     .filter(Boolean);
 
   if (byFormFeed.length > 0) {
     return byFormFeed;
   }
 
-  const singlePage = collapseWhitespace(rawText);
+  const singlePage = rawText.trim();
   return singlePage ? [singlePage] : [];
 }
 
@@ -223,19 +223,77 @@ async function fetchSourceText(sourceUrl: string): Promise<ParsedSourceText> {
 }
 
 function extractExcerptFromPage(pageText: string, hint: string) {
-  const index = pageText.indexOf(hint);
+  const normalizedPageText = collapseWhitespace(pageText);
+  const index = normalizedPageText.indexOf(hint);
 
   if (index === -1) {
     return null;
   }
 
   const start = Math.max(0, index - 120);
-  const end = Math.min(pageText.length, index + hint.length + 260);
+  const end = Math.min(normalizedPageText.length, index + hint.length + 260);
 
   return {
-    excerpt: collapseWhitespace(pageText.slice(start, end)),
+    excerpt: collapseWhitespace(normalizedPageText.slice(start, end)),
     anchorIndex: index
   };
+}
+
+function normalizeLines(pageText: string) {
+  return pageText
+    .split(/\r?\n/)
+    .map((line) => collapseWhitespace(line))
+    .filter(Boolean);
+}
+
+function isTableLikeText(text: string) {
+  const pillarMatches = text.match(/Pillar\s+\d+/gi)?.length ?? 0;
+  const percentMatches = text.match(/-?\d+%/g)?.length ?? 0;
+  const numericChunks = text.match(/\b\d+(?:\.\d+)?\b/g)?.length ?? 0;
+  const hasDenseSeparators = text.includes("Table:") || text.includes("Index score");
+
+  return (
+    pillarMatches >= 2 ||
+    percentMatches >= 3 ||
+    numericChunks >= 10 ||
+    hasDenseSeparators
+  );
+}
+
+function extractParagraphContext(pageText: string, hint: string) {
+  const lines = normalizeLines(pageText);
+  const normalizedHint = hint.toLowerCase();
+
+  for (const [lineIndex, line] of lines.entries()) {
+    if (!line.toLowerCase().includes(normalizedHint)) {
+      continue;
+    }
+
+    const currentLineIsTable = isTableLikeText(line);
+    const previousLine = lines[lineIndex - 1];
+    const nextLine = lines[lineIndex + 1];
+    const followingLine = lines[lineIndex + 2];
+
+    const excerptLines = [
+      previousLine && !isTableLikeText(previousLine) ? previousLine : null,
+      currentLineIsTable
+        ? collapseWhitespace(line.slice(Math.max(0, line.toLowerCase().indexOf(normalizedHint))))
+        : line,
+      nextLine && !isTableLikeText(nextLine) ? nextLine : null,
+      followingLine && !isTableLikeText(followingLine) ? followingLine : null
+    ].filter(Boolean) as string[];
+
+    if (!excerptLines.length) {
+      continue;
+    }
+
+    return {
+      excerpt: excerptLines.join("\n"),
+      sentenceNumber: lineIndex + 1
+    };
+  }
+
+  return null;
 }
 
 function splitIntoSentences(text: string) {
@@ -246,7 +304,7 @@ function splitIntoSentences(text: string) {
 }
 
 function extractSentenceContext(pageText: string, hint: string) {
-  const sentences = splitIntoSentences(pageText);
+  const sentences = splitIntoSentences(collapseWhitespace(pageText));
 
   for (const [sentenceIndex, sentence] of sentences.entries()) {
     if (!sentence.includes(hint)) {
@@ -279,6 +337,18 @@ function extractExcerptContext(
 
   for (const hint of excerptHints) {
     for (const [pageIndex, pageText] of pages.entries()) {
+      const paragraphMatch = extractParagraphContext(pageText, hint);
+
+      if (paragraphMatch) {
+        return {
+          excerpt: paragraphMatch.excerpt,
+          supportingText: paragraphMatch.excerpt,
+          anchorIndex: normalizedText.indexOf(hint),
+          pageNumber: pageIndex + 1,
+          sentenceNumber: paragraphMatch.sentenceNumber
+        };
+      }
+
       const sentenceMatch = extractSentenceContext(pageText, hint);
 
       if (sentenceMatch) {
