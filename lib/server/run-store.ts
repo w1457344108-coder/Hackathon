@@ -4,8 +4,14 @@ import { randomUUID } from "node:crypto";
 import type { EvidenceReviewStatus } from "../pillar6-schema";
 import type { WorkflowResult } from "../types";
 
-const STORE_ROOT = resolve(process.cwd(), "data", "runtime");
+const DEFAULT_LOCAL_STORE_ROOT = resolve(process.cwd(), "data", "runtime");
+const DEFAULT_VERCEL_STORE_ROOT = resolve("/tmp", "cross-border-data-policy-multi-agent-analyst");
+const STORE_ROOT = resolve(
+  process.env.RUN_STORE_ROOT ||
+    (process.env.VERCEL ? DEFAULT_VERCEL_STORE_ROOT : DEFAULT_LOCAL_STORE_ROOT)
+);
 const RUNS_DIR = resolve(STORE_ROOT, "runs");
+const inMemoryRuns = new Map<string, StoredWorkflowRun>();
 
 export interface StoredEvidenceReview {
   evidenceId: string;
@@ -30,8 +36,15 @@ function getRunFilePath(runId: string) {
 }
 
 async function writeRun(run: StoredWorkflowRun) {
-  await ensureStore();
-  await writeFile(getRunFilePath(run.runId), JSON.stringify(run, null, 2), "utf8");
+  inMemoryRuns.set(run.runId, run);
+
+  try {
+    await ensureStore();
+    await writeFile(getRunFilePath(run.runId), JSON.stringify(run, null, 2), "utf8");
+  } catch {
+    // Serverless deployments can reject writes outside /tmp. Keep an in-memory
+    // fallback so the active request can still complete gracefully.
+  }
 }
 
 export async function createWorkflowRun(workflowResult: WorkflowResult) {
@@ -56,8 +69,18 @@ export async function createWorkflowRun(workflowResult: WorkflowResult) {
 }
 
 export async function getWorkflowRun(runId: string) {
-  const file = await readFile(getRunFilePath(runId), "utf8");
-  return JSON.parse(file) as StoredWorkflowRun;
+  try {
+    const file = await readFile(getRunFilePath(runId), "utf8");
+    return JSON.parse(file) as StoredWorkflowRun;
+  } catch (error) {
+    const cachedRun = inMemoryRuns.get(runId);
+
+    if (cachedRun) {
+      return cachedRun;
+    }
+
+    throw error;
+  }
 }
 
 export async function saveWorkflowRun(workflowResult: WorkflowResult) {
