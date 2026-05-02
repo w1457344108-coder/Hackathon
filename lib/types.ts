@@ -1,3 +1,5 @@
+import type { EvidenceRecord } from "./pillar6-schema";
+
 export type SupportedCountry =
   | "China"
   | "Singapore"
@@ -354,6 +356,11 @@ export interface DemoNarrative {
 }
 
 export interface WorkflowResult {
+  analysisRunId: string | null;
+  providerId: string;
+  providerModel: string | null;
+  evidenceSourceMode: "real" | "mock" | "hybrid";
+  evidenceRecords: EvidenceRecord[];
   input: WorkflowInput;
   research: ResearchAgentResult;
   policyAnalysis: PolicyAnalysisResult[];

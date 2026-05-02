@@ -18,11 +18,11 @@ export function AnalystDashboard() {
 
   const deferredWorkflowResult = useDeferredValue(workflowResult);
   const deferredReport = deferredWorkflowResult?.report ?? null;
-  const evidenceRecords = filterEvidenceByCountries(mockEvidenceRecords, countryA, countryB);
+  const evidenceRecords =
+    workflowResult?.evidenceRecords ??
+    filterEvidenceByCountries(mockEvidenceRecords, countryA, countryB);
   const selectedEvidenceRecord =
     evidenceRecords.find((record) => record.citation === selectedCitation) ?? evidenceRecords[0];
-  const queryBuilder = workflowResult?.supportingAgentResults.queryBuilder.data ?? null;
-  const relevanceFilter = workflowResult?.supportingAgentResults.relevanceFilter.data ?? null;
   const auditItems = workflowResult?.supportingAgentResults.auditCitation.data?.auditItems ?? [];
   const auditCoverageSummary =
     workflowResult?.supportingAgentResults.auditCitation.data?.coverageSummary ?? null;
@@ -39,7 +39,7 @@ export function AnalystDashboard() {
     if (evidenceRecords.length > 0) {
       setSelectedCitation(evidenceRecords[0].citation);
     }
-  }, [countryA, countryB]);
+  }, [countryA, countryB, evidenceRecords]);
 
   async function runAnalysis() {
     setIsRunning(true);
@@ -54,7 +54,10 @@ export function AnalystDashboard() {
         },
         body: JSON.stringify({
           countryA,
-          countryB: countryB || null
+          countryB: countryB || null,
+          businessScenario: "cross-border digital service operations",
+          userQuery:
+            "Find legal evidence describing how cross-border data transfers are permitted, conditioned, or restricted."
         })
       });
 
@@ -109,21 +112,64 @@ export function AnalystDashboard() {
     }
   }
 
+  function handleReviewSaved(payload: {
+    evidenceRecord: (typeof evidenceRecords)[number];
+    auditItem: (typeof auditItems)[number] | null;
+    exportPackage: typeof exportPackage;
+  }) {
+    setWorkflowResult((current) => {
+      if (!current) {
+        return current;
+      }
+
+      const updatedAuditItems =
+        current.supportingAgentResults.auditCitation.data?.auditItems.map((item) =>
+          payload.auditItem && item.evidenceId === payload.auditItem.evidenceId ? payload.auditItem : item
+        ) ?? [];
+
+      return {
+        ...current,
+        evidenceRecords: current.evidenceRecords.map((record) =>
+          record.evidenceId === payload.evidenceRecord.evidenceId ? payload.evidenceRecord : record
+        ),
+        supportingAgentResults: {
+          ...current.supportingAgentResults,
+          auditCitation: {
+            ...current.supportingAgentResults.auditCitation,
+            data: current.supportingAgentResults.auditCitation.data
+              ? {
+                  ...current.supportingAgentResults.auditCitation.data,
+                  auditItems: updatedAuditItems
+                }
+              : current.supportingAgentResults.auditCitation.data
+          },
+          legalReviewExport: {
+            ...current.supportingAgentResults.legalReviewExport,
+            data: payload.exportPackage ?? current.supportingAgentResults.legalReviewExport.data
+          }
+        }
+      };
+    });
+  }
+
   return (
     <main className="mx-auto min-h-screen max-w-7xl px-6 py-8 sm:px-8 lg:px-10">
       <section className="glass-panel stagger-in rounded-2xl px-8 py-10 sm:px-10">
         <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-3xl space-y-4">
             <span className="section-title inline-flex rounded-md border border-slate-200 bg-slate-50 px-3 py-1 text-[11px] font-medium text-slate-500">
-              United Nations AI Hackathon Demo
+              United Nations AI Hackathon Prototype
             </span>
             <div className="space-y-3">
               <h1 className="max-w-4xl text-3xl font-medium tracking-tight text-slate-900 sm:text-4xl">
-                Cross-Border Data Policy<br />Multi-Agent Analyst
+                Cross-Border Data Policy
+                <br />
+                Multi-Agent Analyst
               </h1>
               <p className="max-w-3xl text-sm leading-7 text-slate-500 sm:text-base">
                 Analyze cross-border data policy scenarios using UN ESCAP RDTII Pillar 6 logic.
-                Select countries below and run the multi-agent analysis workflow.
+                This streamlined interface keeps the judge-facing flow focused on report, evidence,
+                audit, and export while still running the real backend workflow underneath.
               </p>
             </div>
           </div>
@@ -163,10 +209,20 @@ export function AnalystDashboard() {
         </div>
 
         <div className="mt-6 flex flex-col gap-4 border-t border-slate-100 pt-6 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex gap-3">
-            <StatChip label="Mode" value="Mock + Streaming Agents" />
+          <div className="flex flex-wrap gap-3">
+            <StatChip
+              label="Mode"
+              value={
+                workflowResult
+                  ? `${workflowResult.evidenceSourceMode} + ${workflowResult.providerId}`
+                  : "RDTII sources + fallback"
+              }
+            />
             <StatChip label="Framework" value="Next.js App Router" />
-            <StatChip label="Ready For" value="Vercel Deployment" />
+            <StatChip
+              label="Review"
+              value={workflowResult?.analysisRunId ? "Persistent" : "Ready to save"}
+            />
           </div>
 
           <button
@@ -180,7 +236,9 @@ export function AnalystDashboard() {
         </div>
 
         <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm leading-6 text-slate-500">
-          Built on UN ESCAP RDTII structure. Models Pillar 6 policy dimensions including local processing, storage requirements, and conditional transfer regimes.
+          Built on UN ESCAP RDTII structure and competition-designated source adapters. When a
+          jurisdiction is not yet covered by the live source registry, the workflow falls back to
+          the existing mock evidence set instead of failing silently.
         </div>
 
         {errorMessage ? (
@@ -218,18 +276,24 @@ export function AnalystDashboard() {
 
             <PanelBox title="Source Basis">
               <div className="space-y-2 text-sm leading-6 text-slate-600">
-                <SourceLink
-                  href="https://www.unescap.org/projects/rcdtra"
-                  label="UN ESCAP RDTII initiative"
-                />
-                <SourceLink
-                  href="https://dtri.uneca.org/assets/data/publications/ESCAP-2025-MN-RDTII-2.1-guide-en.pdf"
-                  label="RDTII 2.1 Guide PDF"
-                />
-                <SourceLink
-                  href="https://www.unescap.org/kp/2025/regional-digital-trade-integration-index-rdtii-21-guide"
-                  label="RDTII 2.1 knowledge page"
-                />
+                {workflowResult?.research.sourceBasis?.length ? (
+                  workflowResult.research.sourceBasis.map((item: string) => (
+                    <div key={item} className="rounded-lg bg-slate-50 px-4 py-3">
+                      {item}
+                    </div>
+                  ))
+                ) : (
+                  <>
+                    <SourceLink
+                      href="https://www.unescap.org/projects/rcdtra"
+                      label="UN ESCAP RDTII initiative"
+                    />
+                    <SourceLink
+                      href="https://dtri.uneca.org/assets/data/publications/ESCAP-2025-MN-RDTII-2.1-guide-en.pdf"
+                      label="RDTII 2.1 Guide PDF"
+                    />
+                  </>
+                )}
               </div>
             </PanelBox>
           </div>
@@ -263,118 +327,23 @@ export function AnalystDashboard() {
         </div>
       </section>
 
-      <section className="glass-panel mt-8 rounded-2xl p-6">
-        <div className="mb-5 flex items-center justify-between">
-          <div>
-            <p className="section-title text-xs font-medium text-slate-400">Supporting Agents</p>
-            <h2 className="mt-2 text-xl font-medium text-slate-900">Sidecar Review Snapshot</h2>
-          </div>
-          <span className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-500">
-            Mainline logic unchanged
-          </span>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <SupportCard
-            title="Query Builder"
-            value={queryBuilder ? `${queryBuilder.queryPlan.length} queries` : "Pending"}
-            detail={
-              queryBuilder
-                ? `${queryBuilder.targetIndicators.length} indicator targets prepared for discovery.`
-                : "Runs before source discovery and packages a structured query plan."
-            }
-          />
-          <SupportCard
-            title="Relevance Filter"
-            value={
-              relevanceFilter ? `${relevanceFilter.reviewSummary.shortlistedCount} shortlisted` : "Pending"
-            }
-            detail={
-              relevanceFilter
-                ? `${relevanceFilter.reviewSummary.humanReviewCount} passage(s) still need human review.`
-                : "Shortlists only Pillar 6-relevant passages after document reading."
-            }
-          />
-          <SupportCard
-            title="Risk & Cost"
-            value={linkedRiskSummary ? linkedRiskSummary.riskLevel : "Pending"}
-            detail={
-              linkedRiskSummary
-                ? `${linkedRiskSummary.uncertaintyLevel} uncertainty with ${linkedRiskSummary.businessCostDrivers.length} cost driver(s).`
-                : "Packages the legal findings into business-facing risk signals."
-            }
-          />
-          <SupportCard
-            title="Export Package"
-            value={exportPackage ? exportPackage.exportReadiness : "Pending"}
-            detail={
-              exportPackage
-                ? `${exportPackage.reviewSummary.humanReviewCount} item(s) still flagged for human review.`
-                : "Builds judge-facing JSON, CSV, and Markdown outputs after audit packaging."
-            }
-          />
-        </div>
-      </section>
-
       <section className="mt-8 grid gap-6 2xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
         <EvidenceTable
           records={evidenceRecords}
-          selectedCitation={selectedEvidenceRecord.citation}
+          selectedCitation={selectedEvidenceRecord?.citation ?? ""}
           onSelect={setSelectedCitation}
         />
         <AuditView
           record={selectedEvidenceRecord}
+          analysisRunId={workflowResult?.analysisRunId ?? null}
           linkedAuditItem={selectedAuditItem}
           linkedCoverageSummary={auditCoverageSummary}
           linkedRiskSummary={linkedRiskSummary}
+          onReviewSaved={handleReviewSaved}
         />
       </section>
 
       <ExportPanel records={evidenceRecords} exportPackage={exportPackage} />
-
-      <section className="glass-panel mt-8 rounded-2xl p-6">
-        <div className="mb-5">
-          <p className="section-title text-xs font-medium text-slate-400">Comparison Table</p>
-          <h2 className="mt-2 text-xl font-medium text-slate-900">Cross-Jurisdiction View</h2>
-        </div>
-
-        {workflowResult?.report.comparisonTable.length ? (
-          <div className="overflow-x-auto">
-            <table className="min-w-full border-separate border-spacing-y-2">
-              <thead>
-                <tr className="text-left text-xs uppercase tracking-wider text-slate-400">
-                  <th className="px-4 py-2 font-medium">Metric</th>
-                  <th className="px-4 py-2 font-medium">{workflowResult.input.countryA}</th>
-                  <th className="px-4 py-2 font-medium">{workflowResult.input.countryB}</th>
-                  <th className="px-4 py-2 font-medium">Insight</th>
-                </tr>
-              </thead>
-              <tbody>
-                {workflowResult.report.comparisonTable.map((row) => (
-                  <tr key={row.metric} className="align-top">
-                    <td className="rounded-l-lg border border-slate-100 bg-white px-4 py-3 text-sm font-medium text-slate-900">
-                      {row.metric}
-                    </td>
-                    <td className="border-y border-slate-100 bg-white px-4 py-3 text-sm leading-6 text-slate-600">
-                      {row.countryA}
-                    </td>
-                    <td className="border-y border-slate-100 bg-white px-4 py-3 text-sm leading-6 text-slate-600">
-                      {row.countryB}
-                    </td>
-                    <td className="rounded-r-lg border border-slate-100 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-600">
-                      {row.insight}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ) : (
-          <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm leading-6 text-slate-400">
-            Add a second country to activate the Comparison Agent and populate the policy gap table.
-          </div>
-        )}
-      </section>
     </main>
   );
 }
@@ -382,15 +351,12 @@ export function AnalystDashboard() {
 function MetricBar({ label, value }: { label: string; value: number }) {
   return (
     <div>
-      <div className="mb-1.5 flex items-center justify-between text-xs text-slate-500">
+      <div className="mb-2 flex items-center justify-between text-sm text-slate-500">
         <span>{label}</span>
         <span>{value}/100</span>
       </div>
-      <div className="h-1.5 rounded-full bg-slate-100">
-        <div
-          className="h-1.5 rounded-full bg-slate-700"
-          style={{ width: `${value}%` }}
-        />
+      <div className="h-2 rounded-full bg-slate-100">
+        <div className="h-2 rounded-full bg-slate-900" style={{ width: `${value}%` }} />
       </div>
     </div>
   );
@@ -398,21 +364,21 @@ function MetricBar({ label, value }: { label: string; value: number }) {
 
 function RiskPill({ risk }: { risk: "Low" | "Moderate" | "High" }) {
   const map = {
-    Low: "bg-emerald-50 text-emerald-600 border-emerald-200",
-    Moderate: "bg-amber-50 text-amber-600 border-amber-200",
-    High: "bg-red-50 text-red-600 border-red-200"
+    Low: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    Moderate: "bg-amber-50 text-amber-700 border-amber-200",
+    High: "bg-red-50 text-red-700 border-red-200"
   };
 
   return (
-    <span className={`rounded-md border px-2.5 py-0.5 text-xs font-medium ${map[risk]}`}>{risk}</span>
+    <span className={`rounded-full border px-3 py-1 text-xs font-medium ${map[risk]}`}>{risk} Risk</span>
   );
 }
 
 function PanelBox({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-xl border border-slate-100 bg-white p-4">
-      <h3 className="text-xs font-medium uppercase tracking-wider text-slate-400">{title}</h3>
-      <div className="mt-3">{children}</div>
+      <h3 className="text-sm font-medium uppercase tracking-wider text-slate-400">{title}</h3>
+      <div className="mt-4">{children}</div>
     </div>
   );
 }
@@ -423,7 +389,7 @@ function SourceLink({ href, label }: { href: string; label: string }) {
       href={href}
       target="_blank"
       rel="noreferrer"
-      className="block rounded-lg border border-slate-100 bg-white px-4 py-2.5 text-slate-600 transition hover:border-slate-200 hover:text-slate-900"
+      className="block rounded-lg border border-slate-100 bg-slate-50 px-4 py-3 text-slate-600 transition hover:border-slate-200 hover:text-slate-900"
     >
       {label}
     </a>
@@ -432,33 +398,15 @@ function SourceLink({ href, label }: { href: string; label: string }) {
 
 function StatChip({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-lg border border-slate-100 bg-white px-3 py-2">
-      <p className="text-[10px] uppercase tracking-wider text-slate-400">{label}</p>
-      <p className="mt-0.5 text-xs font-medium text-slate-800">{value}</p>
-    </div>
-  );
-}
-
-function SupportCard({
-  title,
-  value,
-  detail
-}: {
-  title: string;
-  value: string;
-  detail: string;
-}) {
-  return (
-    <div className="rounded-xl border border-slate-100 bg-white p-4">
-      <p className="text-xs font-medium uppercase tracking-wider text-slate-400">{title}</p>
-      <p className="mt-2 text-base font-medium text-slate-900">{value}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-500">{detail}</p>
+    <div className="rounded-md border border-slate-200 bg-white px-3 py-2.5">
+      <p className="text-[11px] uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="mt-1 text-sm font-medium text-slate-900">{value}</p>
     </div>
   );
 }
 
 const defaultRecommendations = [
-  "Choose one country or two countries and launch the analysis workflow.",
-  "Use the comparison view to explain regulatory openness and business friction to judges.",
-  "Upgrade the API route later with real LLM-backed agents without changing the UI contract."
+  "Choose one or two jurisdictions and launch the analysis workflow.",
+  "Use the executive brief and risk snapshot as the main judge-facing summary.",
+  "Review evidence items in the audit panel before exporting the package."
 ];

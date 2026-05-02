@@ -7,43 +7,44 @@ const roadmapPhases = [
       "Establish /types/agent-schema.ts",
       "Define 10 Agent parameter contracts",
       "Lock Pillar 6 indicator enum",
-      "Use mock data to test UI"
+      "Preserve stable frontend rendering contract"
     ]
   },
   {
     id: "phase-2",
     title: "Phase 2: Mainline Agent Integration",
-    status: "Next",
+    status: "Current",
     goals: [
-      "Connect Intent Arbiter",
-      "Connect Source Discovery",
-      "Connect Document Reader",
-      "Connect Indicator Mapping",
-      "Connect Legal Reasoner"
+      "Connect provider adapter",
+      "Connect curated official-source pipeline",
+      "Connect structured legal reasoning",
+      "Keep mock fallback for uncovered jurisdictions",
+      "Stream real workflow output through /api/analyze"
     ]
   },
   {
     id: "phase-3",
-    title: "Phase 3: Supporting Agent Enhancement",
-    status: "Later",
+    title: "Phase 3: Review Persistence",
+    status: "Current",
     goals: [
-      "Add Query Builder",
-      "Add Relevance Filter",
-      "Add Risk & Cost Quantifier",
-      "Add Audit View & Citation",
-      "Add Legal Review & Export"
+      "Persist analysis runs",
+      "Persist reviewer status and notes",
+      "Recompute export state after review save",
+      "Expose run and review APIs",
+      "Keep audit UI contract stable"
     ]
   },
   {
     id: "phase-4",
-    title: "Phase 4: Hackathon Submission Package",
+    title: "Phase 4: Submission Package",
     status: "Later",
     goals: [
       "Export JSON / CSV / Markdown",
-      "Prepare technical memo",
-      "Prepare demo video",
-      "Prepare GitHub documentation",
-      "Prepare law student review workflow"
+      "Expand curated source coverage",
+      "Swap filesystem persistence for hosted storage",
+      "Add richer end-to-end tests",
+      "Tighten judge-facing documentation",
+      "Prepare submission walkthrough"
     ]
   }
 ] as const;
@@ -54,14 +55,6 @@ function getStatusClasses(status: (typeof roadmapPhases)[number]["status"]) {
       badge: "border-blue-200 bg-blue-100 text-blue-700",
       card: "border-blue-200 bg-blue-50/65 shadow-[0_12px_32px_rgba(37,99,235,0.08)]",
       line: "bg-blue-500"
-    };
-  }
-
-  if (status === "Next") {
-    return {
-      badge: "border-emerald-200 bg-emerald-100 text-emerald-700",
-      card: "border-emerald-200 bg-emerald-50/55 shadow-[0_12px_28px_rgba(16,185,129,0.06)]",
-      line: "bg-emerald-500"
     };
   }
 
@@ -82,9 +75,9 @@ export function DevelopmentRoadmap() {
             Pillar 6 Delivery Path from Mock Demo to Real Agent System
           </h2>
           <p className="mt-3 text-sm leading-7 text-slate-600 sm:text-base">
-            This roadmap tracks the staged build-out of the Pillar 6 system, starting with
-            contracts and mock UI validation, then moving through core agent integration,
-            supporting-agent enhancement, and final hackathon packaging.
+            This roadmap tracks the staged build-out of the Pillar 6 system from stable interface
+            contract to real provider integration, curated evidence retrieval, review persistence,
+            and final submission hardening.
           </p>
         </div>
 

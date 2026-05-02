@@ -72,7 +72,7 @@ export function AgentPipelineViewer({
             <LegendPill label="Topology" value="10 Specialized Agents" />
             <LegendPill
               label="Current State"
-              value={hasResult ? "Completed" : isRunning ? "Mock Execution" : "Architecture Ready"}
+              value={hasResult ? "Completed" : isRunning ? "Live / Hybrid Execution" : "Architecture Ready"}
             />
             <LegendPill label="Scope" value="Pillar 6 Only" />
           </div>

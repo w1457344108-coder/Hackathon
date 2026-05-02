@@ -243,7 +243,7 @@ export function LegalSearchWorkspace({
             <p className="mt-2 text-sm leading-6 text-slate-700">
               The review board below is showing the latest supporting `Query Builder` result and
               the mainline `Source Discovery` result from the streamed workflow, while this form
-              remains available for manual hackathon tuning.
+              remains available for manual review and tuning.
             </p>
           </div>
         ) : null}

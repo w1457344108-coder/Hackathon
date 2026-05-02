@@ -1,110 +1,177 @@
-# Cross-Border Data Policy Multi-Agent Analyst
+﻿# Cross-Border Data Policy Multi-Agent Analyst
 
-Hackathon-ready Next.js demo for analyzing cross-border data policy scenarios with a multi-agent workflow aligned to UN ESCAP RDTII Pillar 6 logic.
+Submission-ready UN AI Hackathon prototype for analyzing **UN ESCAP RDTII Pillar 6: Cross-border Data Policies**. The system now supports a real backend workflow with:
 
-## Stack
+- streaming `/api/analyze`
+- provider adapter architecture
+- competition-designated RDTII-source evidence ingestion
+- structured legal evidence records
+- multi-agent analysis outputs
+- audit review persistence
+- JSON / CSV / Markdown export
 
-- Next.js 15 App Router
-- React 19
-- TypeScript
-- Tailwind CSS 4
-- Vercel-friendly structure
+The UI contract from the original demo is preserved, and the original mock data remains available as fallback where live source coverage is still incomplete.
 
-## Included
+## What Is Real Now
 
-- `app/api/analyze/route.ts`: streaming analysis endpoint
-- `lib/agents.ts`: Research, Policy Analysis, Comparison, and Report agents
-- `lib/mock-data.ts`: Pillar 6-aligned mock country policy dataset
-- `lib/pillar6-schema.ts`: canonical Pillar 6 evidence and indicator types
-- `docs/agent-parameters.md`: ten-agent contract and human review gate baseline
-- `components/analyst-dashboard.tsx`: hackathon demo UI
+- **Model provider adapter:** implemented in [lib/server/provider-adapter.ts](lib/server/provider-adapter.ts:1)
+- **Live provider support:** OpenAI Responses API via `OPENAI_API_KEY`
+- **Real source pipeline:** competition-designated UN ESCAP RCDTRA and RDTII 2.1 sources plus live fetch / excerpt extraction in [lib/server/source-pipeline.ts](lib/server/source-pipeline.ts:1)
+- **Review persistence:** filesystem-backed run store in [lib/server/run-store.ts](lib/server/run-store.ts:1)
+- **Review APIs:** [app/api/reviews/route.ts](app/api/reviews/route.ts:1) and [app/api/runs/[runId]/route.ts](app/api/runs/[runId]/route.ts:1)
+- **Smoke tests:** `tests/source-pipeline-smoke.test.ts` and `tests/run-store-smoke.test.ts`
+
+## What Is Still Fallback / Planned
+
+- **Country policy profiles and scorecards:** still come from the existing structured mock profile layer in [lib/mock-data.ts](lib/mock-data.ts:1)
+- **Source coverage:** current competition-designated live-source coverage is strongest for China, Singapore, and the European Union
+- **Other jurisdictions:** fall back to existing mock evidence records rather than failing the workflow
+- **Persistence backend:** current implementation uses the local filesystem run store for prototype durability; swap the adapter for a hosted database or object store before production deployment
+- **Additional providers:** the adapter layer is designed for expansion, but only OpenAI is wired today
 
 ## Current implementation boundary
 
-This repository is currently a hackathon-ready mock workflow, not a production legal research engine. It uses structured mock data and deterministic mock orchestration to prove the Pillar 6 evidence workflow before real source discovery, document parsing, or LLM-backed reasoning is connected.
+- Real backend analysis, real provider adapter, competition-designated RDTII source retrieval, review persistence, and export are implemented now.
+- Country policy profiles, broader jurisdiction coverage, and production-grade storage still rely on fallback or planned layers.
+- The app surfaces hybrid behavior explicitly through `providerId` and `evidenceSourceMode` instead of pretending every run is fully live.
 
-The current boundary is intentional:
+## Architecture
 
-- **In scope:** UN ESCAP RDTII Pillar 6 cross-border data policy analysis, evidence review, citation traceability, law student review, and JSON / CSV / Markdown exports.
-- **Out of scope for this version:** Pillar 7, generalized domestic privacy compliance, production persistence, full legal database ingestion, and fully automated no-review legal conclusions.
-- **API-ready path:** the UI and `WorkflowResult` shape are designed so mock agent outputs can later be replaced by real API-backed agents without changing the review-facing modules.
+### Main entry points
 
-## Ten-agent readiness
+- [app/api/analyze/route.ts](app/api/analyze/route.ts:1): streaming analysis API and run persistence
+- [lib/agents.ts](lib/agents.ts:1): multi-agent orchestration, real-evidence integration, and export packaging
+- [components/chat-legal-workspace.tsx](components/chat-legal-workspace.tsx:1): active chat-style frontend
+- [components/analyst-dashboard.tsx](components/analyst-dashboard.tsx:1): retained analyst dashboard and review UI components
+- [components/audit-view.tsx](components/audit-view.tsx:1): reviewer workflow with backend save
 
-The app now exposes a ten-agent orchestration trace in the `/api/analyze` response through `agentTrace`. Each trace item records:
+### Adapter layer
 
-- `agentId` and display name
-- input and output summary
-- evidence IDs touched by the agent
-- downstream agent
-- `humanReviewGate` for law student review
+- [lib/server/provider-adapter.ts](lib/server/provider-adapter.ts:1)
+- [lib/server/source-registry.ts](lib/server/source-registry.ts:1)
+- [lib/server/source-pipeline.ts](lib/server/source-pipeline.ts:1)
+- [lib/server/run-store.ts](lib/server/run-store.ts:1)
 
-The canonical order is:
+### Current evidence strategy
 
-1. Intent Arbiter
-2. Query Builder
-3. Source Discovery
-4. Document Reader
-5. Relevance Filter
-6. Indicator Mapping
-7. Legal Reasoner
-8. Risk & Cost Quantifier
-9. Audit View & Citation
-10. Legal Review & Export
-
-Internal app and API fields use camelCase. Export adapters may transform fields for CSV or external JSON consumers, but TypeScript contracts, mock data, and future real-agent payloads should stay aligned with the camelCase app schema.
+1. Resolve requested jurisdictions.
+2. Load competition-designated RDTII sources where coverage exists.
+3. Fetch live HTML text when possible and extract a Pillar 6 excerpt.
+4. Fall back to curated excerpt text if live retrieval is partial.
+5. Fall back to legacy mock evidence only for uncovered jurisdictions.
 
 ## Mainline agent orchestration
 
-The five mainline agents are now wired into the mock workflow result through `mainlineAgentResults`:
+The mainline path keeps the existing contract and order:
 
-1. `intentArbiter`: normalizes the user request, chooses single-jurisdiction or cross-jurisdiction mode, and confirms Pillar 6 scope.
-2. `sourceDiscovery`: selects candidate legal sources from the Pillar 6 mock evidence set.
-3. `documentReader`: converts candidate sources into citation-ready passages.
-4. `indicatorMapping`: maps each passage to one canonical Pillar 6 indicator code.
-5. `legalReasoner`: produces evidence-backed legal findings with conclusion IDs and evidence IDs.
+1. `intent-arbiter`
+2. `source-discovery`
+3. `document-reader`
+4. `indicator-mapping`
+5. `legal-reasoner`
 
-These agents are deterministic mock implementations for the hackathon version, but their outputs follow the same contract shape expected from future API-backed agents.
+The first, second, and fourth steps remain mostly deterministic for stability. The `document-reader` and `legal-reasoner` steps now support live provider-backed structured reasoning with mock fallback.
 
-The five supporting agents are exposed through `supportingAgentResults`. They read the completed mainline results, add review-oriented structure, and prepare export-ready outputs without changing the mainline execution logic.
+## Ten-agent readiness
 
-## Demo narrative
+- All ten workflow agents still execute in the original orchestration order expected by the UI and validator scripts.
+- Supporting agents now consume the resolved evidence set from the real-or-hybrid source pipeline instead of reading only global mock arrays.
+- Audit, export, and human review gates are still present in the final trace and export objects.
 
-The recommended demo story is a fintech market-entry review: a team wants to understand whether data can move from China to Singapore while staying inside Pillar 6 scope. The walkthrough is:
+## Current Stack
 
-1. Generate a Search Profile JSON in Legal Search Workspace.
-2. Explain the ten-agent trace from intent classification through export.
-3. Open Evidence Audit View to compare legal source text with the AI claim and Pillar 6 mapping.
-4. Let a law student approve, revise, or reject the evidence.
-5. Export the reviewed evidence package as JSON, CSV, or Markdown.
+From `package.json`:
 
-Success for this demo means every conclusion remains tied to an evidence ID, source URL, citation, Pillar 6 indicator code, reviewer status, and reviewer note.
+- Next.js `16.2.4`
+- React `19.2.5`
+- React DOM `19.2.5`
+- TypeScript `5.8.3`
+- Tailwind CSS `3.4.19`
 
-## Run locally
+## Environment Variables
+
+### Optional for live model analysis
+
+```bash
+OPENAI_API_KEY=...
+OPENAI_MODEL=gpt-5.2
+ANALYSIS_PROVIDER=openai
+```
+
+### Optional overrides
+
+```bash
+OPENAI_BASE_URL=https://api.openai.com/v1
+ANALYSIS_PROVIDER=mock
+```
+
+If `OPENAI_API_KEY` is missing, the workflow still runs with structured mock fallback reasoning instead of pretending a live model is active.
+
+## Run Locally
 
 ```bash
 npm install
 npm run dev
 ```
 
-## Build
+Open [http://localhost:3000](http://localhost:3000).
+
+## Verification
+
+### Type check
+
+```bash
+npm run lint
+```
+
+### Smoke tests
+
+```bash
+npm run test:smoke
+```
+
+### Existing validator scripts
+
+```bash
+npm run validate:agents
+npm run validate:mainline
+```
+
+### Production build
 
 ```bash
 npm run build
 ```
 
-## Agent readiness check
+On this workstation, `npm run build` uses a small wrapper script in [scripts/run-next-build.mjs](scripts/run-next-build.mjs:1) to force Next.js onto the packaged WASM SWC fallback because the local native SWC binary fails code-signature loading. That workaround is for local build reliability only.
 
-```bash
-npm run validate:agents
-```
+## Demo Flow
 
-```bash
-npm run validate:mainline
-```
+1. Select one or two jurisdictions.
+2. Set a business scenario and analysis question.
+3. Run the multi-agent analysis.
+4. Inspect real or hybrid evidence records in the evidence queue.
+5. Open the audit view and save reviewer status / notes.
+6. Export the reviewed package as JSON, CSV, or Markdown.
 
-## Source basis
+## Demo narrative
 
-- https://www.unescap.org/projects/rcdtra
-- https://dtri.uneca.org/assets/data/publications/ESCAP-2025-MN-RDTII-2.1-guide-en.pdf
-- https://www.unescap.org/kp/2025/regional-digital-trade-integration-index-rdtii-21-guide
+The original hackathon demo narrative is still available in the workflow output because the front end already knows how to render it. It now sits alongside real run metadata, persisted review state, and real-or-hybrid evidence resolution so the prototype can stay presentation-friendly without hiding where fallback behavior is still used.
+
+## Current Real Source Coverage
+
+- Primary competition-designated portal:
+  - UN ESCAP RCDTRA project page / RDTII 2.1 Regulatory Database entry surface: [https://www.unescap.org/projects/rcdtra](https://www.unescap.org/projects/rcdtra)
+- Competition-designated methodology source:
+  - RDTII 2.1 guide PDF: [https://dtri.uneca.org/assets/data/publications/ESCAP-2025-MN-RDTII-2.1-guide-en.pdf](https://dtri.uneca.org/assets/data/publications/ESCAP-2025-MN-RDTII-2.1-guide-en.pdf)
+- Current jurisdiction coverage wired against that source set:
+  - China
+  - Singapore
+  - European Union
+
+## Submission Notes
+
+- The system is **not** a production legal research engine.
+- It **does** implement a real backend analysis path, a real provider adapter, a competition-designated RDTII-source pipeline, structured evidence outputs, and persisted reviewer workflow.
+- Where live coverage is incomplete, the app clearly falls back to the legacy mock layer instead of overstating functionality.
+

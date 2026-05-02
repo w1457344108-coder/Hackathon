@@ -10,7 +10,7 @@ export function EvidenceTable({
   onSelect: (citation: string) => void;
 }) {
   return (
-    <section className="glass-panel rounded-2xl p-6">
+    <section id="evidence" className="glass-panel rounded-2xl p-6">
       <div className="mb-5 flex items-end justify-between gap-4">
         <div>
           <p className="section-title text-xs font-medium text-slate-400">Evidence Table</p>

@@ -3,6 +3,7 @@
 import { FormEvent, SVGProps, useMemo, useRef, useState } from "react";
 
 type CoreModeId = "regulation" | "case" | "advisory";
+type SupportedCountry = "China" | "Singapore" | "Japan" | "European Union" | "United States";
 
 interface ChatMessage {
   id: string;
@@ -80,6 +81,7 @@ export function ChatLegalWorkspace() {
   const [activeConversation, setActiveConversation] = useState("current");
   const [messages, setMessages] = useState<ChatMessage[]>(starterMessages);
   const [inputValue, setInputValue] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const hasConversation = messages.length > 1;
 
   const mode = useMemo(
@@ -92,33 +94,66 @@ export function ChatLegalWorkspace() {
     setActiveMode(nextMode);
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const trimmed = inputValue.trim();
 
-    if (!trimmed) {
+    if (!trimmed || isSubmitting) {
       return;
     }
 
     const selectedMode = activeModeRef.current;
+    const userMessageId = `user-${Date.now()}`;
+    const assistantMessageId = `assistant-${Date.now()}`;
 
     setMessages((current) => [
       ...current,
       {
-        id: `user-${Date.now()}`,
+        id: userMessageId,
         role: "user",
         content: trimmed,
         mode: selectedMode
       },
       {
-        id: `assistant-${Date.now()}`,
+        id: assistantMessageId,
         role: "assistant",
         mode: selectedMode,
-        content: buildPlaceholderAnswer(selectedMode)
+        content: "Running the multi-agent legal analysis..."
       }
     ]);
     setInputValue("");
+    setIsSubmitting(true);
+
+    try {
+      const result = await runBackendAnalysis(trimmed, selectedMode);
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === assistantMessageId
+            ? {
+                ...message,
+                content: formatBackendAnswer(result, selectedMode)
+              }
+            : message
+        )
+      );
+    } catch (error) {
+      setMessages((current) =>
+        current.map((message) =>
+          message.id === assistantMessageId
+            ? {
+                ...message,
+                content:
+                  error instanceof Error
+                    ? `The backend analysis could not complete: ${error.message}`
+                    : "The backend analysis could not complete."
+              }
+            : message
+        )
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -164,6 +199,7 @@ export function ChatLegalWorkspace() {
                     surface="chat"
                     onModeChange={handleModeChange}
                     onInputChange={setInputValue}
+                    isSubmitting={isSubmitting}
                     onSubmit={handleSubmit}
                   />
                 </div>
@@ -185,6 +221,7 @@ export function ChatLegalWorkspace() {
                   surface="hero"
                   onModeChange={handleModeChange}
                   onInputChange={setInputValue}
+                  isSubmitting={isSubmitting}
                   onSubmit={handleSubmit}
                 />
               </div>
@@ -392,6 +429,7 @@ function SearchComposer({
   inputValue,
   modePrompt,
   surface,
+  isSubmitting,
   onModeChange,
   onInputChange,
   onSubmit
@@ -400,6 +438,7 @@ function SearchComposer({
   inputValue: string;
   modePrompt: string;
   surface: "hero" | "chat";
+  isSubmitting: boolean;
   onModeChange: (mode: CoreModeId) => void;
   onInputChange: (value: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -443,7 +482,7 @@ function SearchComposer({
           <button
             type="submit"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-white disabled:bg-black/25"
-            disabled={!inputValue.trim()}
+            disabled={!inputValue.trim() || isSubmitting}
             aria-label="Submit question"
           >
             <UpArrowIcon className="h-4 w-4" />
@@ -538,6 +577,135 @@ function ConversationMessages({ messages }: { messages: ChatMessage[] }) {
       })}
     </div>
   );
+}
+
+interface BackendWorkflowResult {
+  analysisRunId?: string | null;
+  providerId?: string;
+  providerModel?: string | null;
+  evidenceSourceMode?: "real" | "mock" | "hybrid";
+  report?: {
+    finalNarrative?: string;
+    overallRisk?: string;
+  };
+  evidenceRecords?: Array<{
+    citation?: string;
+    lawTitle?: string;
+    sourceUrl?: string;
+  }>;
+  supportingAgentResults?: {
+    legalReviewExport?: {
+      data?: {
+        exportReadiness?: string;
+      } | null;
+    };
+  };
+  research?: {
+    sourceBasis?: string[];
+  };
+}
+
+const supportedCountries: SupportedCountry[] = [
+  "China",
+  "Singapore",
+  "Japan",
+  "European Union",
+  "United States"
+];
+
+function inferCountries(question: string): {
+  countryA: SupportedCountry;
+  countryB: SupportedCountry | null;
+} {
+  const lowerQuestion = question.toLowerCase();
+  const matchedCountries = supportedCountries.filter((country) =>
+    lowerQuestion.includes(country.toLowerCase())
+  );
+
+  return {
+    countryA: matchedCountries[0] ?? "China",
+    countryB: matchedCountries[1] ?? null
+  };
+}
+
+function getScenarioLabel(mode: CoreModeId) {
+  if (mode === "regulation") {
+    return "regulation interpretation";
+  }
+
+  if (mode === "case") {
+    return "case analysis";
+  }
+
+  return "forward-looking advisory";
+}
+
+async function runBackendAnalysis(question: string, mode: CoreModeId) {
+  const countries = inferCountries(question);
+  const response = await fetch("/api/analyze", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      ...countries,
+      businessScenario: getScenarioLabel(mode),
+      userQuery: question
+    })
+  });
+
+  if (!response.ok) {
+    throw new Error(`API returned ${response.status}.`);
+  }
+
+  const streamText = await response.text();
+  const doneMatch = streamText.match(/event: done\ndata: (.+)\n/);
+  const errorMatch = streamText.match(/event: error\ndata: (.+)\n/);
+
+  if (errorMatch) {
+    const payload = JSON.parse(errorMatch[1]) as { message?: string };
+    throw new Error(payload.message ?? "The analysis API returned an error.");
+  }
+
+  if (!doneMatch) {
+    throw new Error("The analysis API returned no completed workflow payload.");
+  }
+
+  return JSON.parse(doneMatch[1]) as BackendWorkflowResult;
+}
+
+function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
+  const narrative =
+    result.report?.finalNarrative ??
+    "The workflow completed, but no final narrative was returned.";
+  const risk = result.report?.overallRisk ? `Overall risk: ${result.report.overallRisk}.` : null;
+  const provider = result.providerId
+    ? `Provider: ${result.providerId}${result.providerModel ? ` (${result.providerModel})` : ""}.`
+    : null;
+  const evidenceMode = result.evidenceSourceMode
+    ? `Evidence mode: ${result.evidenceSourceMode}.`
+    : null;
+  const exportReadiness =
+    result.supportingAgentResults?.legalReviewExport?.data?.exportReadiness ?? null;
+  const citations = (result.evidenceRecords ?? [])
+    .slice(0, 3)
+    .map((record) => record.citation || record.lawTitle || record.sourceUrl)
+    .filter(Boolean);
+  const sourceBasis = result.research?.sourceBasis?.slice(0, 2) ?? [];
+
+  return [
+    `${coreModes.find((item) => item.id === mode)?.english ?? "Legal analysis"} result:`,
+    narrative,
+    risk,
+    provider,
+    evidenceMode,
+    exportReadiness ? `Export readiness: ${exportReadiness}.` : null,
+    citations.length ? `Key citations: ${citations.join(" | ")}` : null,
+    sourceBasis.length ? `Source basis: ${sourceBasis.join(" | ")}` : null,
+    result.analysisRunId ? `Review run ID: ${result.analysisRunId}` : null
+  ]
+    .filter(Boolean)
+    .join("\n\n");
 }
 
 function buildPlaceholderAnswer(mode: CoreModeId) {

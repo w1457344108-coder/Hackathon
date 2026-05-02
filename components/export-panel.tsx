@@ -20,6 +20,7 @@ function escapeCsv(value: string | number) {
 
 function toCsv(records: EvidenceRecord[]) {
   const headers = [
+    "evidenceId",
     "country",
     "pillar",
     "indicator",
@@ -36,6 +37,7 @@ function toCsv(records: EvidenceRecord[]) {
 
   const rows = records.map((record) =>
     [
+      record.evidenceId,
       record.country,
       record.pillar,
       record.indicator,
@@ -60,13 +62,14 @@ function toMarkdown(records: EvidenceRecord[]) {
   const intro = [
     "# Pillar 6 Evidence Report",
     "",
-    "Mock evidence export for Cross-Border Data Policy Multi-Agent Analyst.",
+    "Evidence export for Cross-Border Data Policy Multi-Agent Analyst.",
     ""
   ];
 
   const sections = records.map((record) =>
     [
       `## ${record.country} · ${record.indicator}`,
+      `- Evidence ID: ${record.evidenceId}`,
       `- Law title: ${record.lawTitle}`,
       `- Citation: ${record.citation}`,
       `- Source type: ${record.sourceType}`,
@@ -119,30 +122,31 @@ export function ExportPanel({
   const markdownPayload = exportPackage?.exportMarkdown ?? toMarkdown(records);
 
   return (
-    <section className="glass-panel mt-8 rounded-2xl p-6">
+    <section id="export" className="glass-panel mt-8 rounded-2xl p-6">
       <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="section-title text-xs font-medium text-slate-400">Export</p>
           <h2 className="mt-2 text-xl font-medium text-slate-900">Download Evidence Packages</h2>
         </div>
         <span className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-500">
-          {exportPackage ? exportPackage.exportReadiness : "Mock export only, API-ready later"}
+          {exportPackage ? "Review-linked export ready" : "Fallback export from current evidence"}
         </span>
       </div>
 
       {exportPackage ? (
-        <div className="mb-5 grid gap-4 lg:grid-cols-[1.2fr_0.8fr]">
-          <div className="rounded-xl border border-slate-100 bg-white p-4">
-            <h3 className="text-xs font-medium uppercase tracking-wider text-slate-400">
-              Judge Summary
-            </h3>
+        <div className="mb-5 grid gap-4 md:grid-cols-2">
+          <div className="rounded-xl border border-slate-100 bg-white p-5">
+            <p className="text-xs uppercase tracking-wider text-slate-400">Judge Summary</p>
             <p className="mt-3 text-sm leading-6 text-slate-600">{exportPackage.judgeSummary}</p>
+            <p className="mt-3 text-sm leading-6 text-slate-500">{exportPackage.finalReport}</p>
           </div>
-          <div className="rounded-xl border border-slate-100 bg-slate-50 p-4">
-            <h3 className="text-xs font-medium uppercase tracking-wider text-slate-400">
-              Review Summary
-            </h3>
-            <div className="mt-3 grid gap-2 sm:grid-cols-2">
+
+          <div className="rounded-xl border border-slate-100 bg-slate-50 p-5">
+            <p className="text-xs uppercase tracking-wider text-slate-400">Export Readiness</p>
+            <p className="mt-3 text-lg font-medium text-slate-900">
+              {exportPackage.exportReadiness}
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
               <SummaryMetric label="Approved" value={exportPackage.reviewSummary.approvedCount} />
               <SummaryMetric
                 label="Needs Revision"
@@ -172,7 +176,7 @@ export function ExportPanel({
         >
           <p className="text-base font-medium text-slate-900">Export JSON</p>
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Structured evidence payload for future agent orchestration or evaluator pipelines.
+            Structured evidence payload for future evaluation or downstream workflows.
           </p>
         </button>
 
@@ -183,7 +187,7 @@ export function ExportPanel({
         >
           <p className="text-base font-medium text-slate-900">Export CSV</p>
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Reviewer-friendly flat table for spreadsheet validation and manual scoring workflows.
+            Flat review table for spreadsheet checks and submission prep.
           </p>
         </button>
 
@@ -192,9 +196,9 @@ export function ExportPanel({
           onClick={() => downloadFile("pillar6-report.md", markdownPayload, "text/markdown")}
           className="rounded-xl border border-slate-100 bg-white p-5 text-left transition hover:border-slate-200"
         >
-          <p className="text-base font-medium text-slate-900">Export Markdown Report</p>
+          <p className="text-base font-medium text-slate-900">Export Markdown</p>
           <p className="mt-2 text-sm leading-6 text-slate-500">
-            Lightweight narrative report with citations, snippets, and review notes for demo sharing.
+            Lightweight report with citations, evidence snippets, and reviewer notes.
           </p>
         </button>
       </div>
@@ -204,9 +208,9 @@ export function ExportPanel({
 
 function SummaryMetric({ label, value }: { label: string; value: number }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2.5">
-      <p className="text-[10px] uppercase tracking-wider text-slate-400">{label}</p>
-      <p className="mt-1 text-sm font-medium text-slate-800">{value}</p>
+    <div className="rounded-lg border border-slate-100 bg-white px-4 py-3">
+      <p className="text-xs font-medium uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="mt-1.5 text-lg font-medium text-slate-900">{value}</p>
     </div>
   );
 }

@@ -8,3 +8,5 @@ npm-debug.log*
 .tooling
 tsconfig.tsbuildinfo
 start-dev.command
+data/runtime/
+_incoming_hackthon_*/

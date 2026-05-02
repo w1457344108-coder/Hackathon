@@ -52,7 +52,7 @@ export const pillar6Agents: AgentMeta[] = [
     role: "Transforms scoped Pillar 6 intent into a structured query plan with indicator targets, source priorities, and reviewable search expressions.",
     input: "Normalized intent, target jurisdiction, business scenario, legal terms, and exclusions.",
     output: "Search profile JSON, structured query plan, and retrieval query strings.",
-    status: "Mock",
+    status: "Ready",
     agent_type: "supporting",
     owner_track: "my-supporting"
   },
@@ -74,7 +74,7 @@ export const pillar6Agents: AgentMeta[] = [
     role: "Structures raw source material into readable passages suitable for legal extraction, including PDF/OCR handling.",
     input: "Source URLs, downloaded legal texts, PDF pages, scanned notices, and OCR output.",
     output: "Normalized passages, section anchors, and machine-readable legal text segments.",
-    status: "Ready",
+    status: "API-ready",
     agent_type: "mainline",
     owner_track: "teammate-mainline"
   },

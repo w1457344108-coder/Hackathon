@@ -1,4 +1,4 @@
-import {
+import type {
   CandidateSource,
   CountryPolicyProfile,
   Pillar6IndicatorEnum,
