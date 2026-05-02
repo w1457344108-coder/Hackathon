@@ -13,12 +13,12 @@ import {
   RiskSummary
 } from "@/lib/types";
 
-const indicatorBadgeClass: Record<Pillar6IndicatorCode, string> = {
-  P6_1_BAN_LOCAL_PROCESSING: "bg-rose-100 text-rose-700 border-rose-200",
-  P6_2_LOCAL_STORAGE: "bg-amber-100 text-amber-700 border-amber-200",
-  P6_3_INFRASTRUCTURE: "bg-violet-100 text-violet-700 border-violet-200",
-  P6_4_CONDITIONAL_FLOW: "bg-blue-100 text-blue-700 border-blue-200",
-  P6_5_BINDING_COMMITMENT: "bg-emerald-100 text-emerald-700 border-emerald-200"
+const indicatorTone: Record<Pillar6IndicatorCode, string> = {
+  P6_1_BAN_LOCAL_PROCESSING: "border-rose-200 bg-rose-50 text-rose-700",
+  P6_2_LOCAL_STORAGE: "border-amber-200 bg-amber-50 text-amber-700",
+  P6_3_INFRASTRUCTURE: "border-violet-200 bg-violet-50 text-violet-700",
+  P6_4_CONDITIONAL_FLOW: "border-blue-200 bg-blue-50 text-blue-700",
+  P6_5_BINDING_COMMITMENT: "border-emerald-200 bg-emerald-50 text-emerald-700"
 };
 
 const reviewActionConfig: Array<{
@@ -64,8 +64,8 @@ export function AuditView({
 
   if (!record) {
     return (
-      <section className="glass-panel min-w-0 rounded-[2rem] border border-white/70 p-6">
-        <div className="rounded-3xl border border-dashed border-blue-100 bg-white/80 p-6 text-sm leading-6 text-slate-500">
+      <section className="glass-panel min-w-0 rounded-2xl p-6">
+        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-sm leading-6 text-slate-400">
           Select an evidence record to inspect its audit chain.
         </div>
       </section>
@@ -121,140 +121,90 @@ export function AuditView({
   }
 
   return (
-    <section className="glass-panel min-w-0 rounded-[2rem] border border-white/70 p-6">
-      <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <section className="glass-panel min-w-0 rounded-2xl p-6">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="section-title text-xs font-semibold text-blue-700">Audit View</p>
-          <h2 className="mt-2 text-2xl font-semibold text-slate-950">Evidence Audit View</h2>
-          <p className="mt-3 max-w-3xl text-sm leading-6 text-slate-600">
-            Designed for left-right legal review. The left panel preserves the original legal
-            source, and the right panel shows the AI claim, audit citation chain, and reviewer
-            actions produced by the supporting agents.
-          </p>
+          <p className="section-title text-xs font-medium text-slate-400">Audit View</p>
+          <h2 className="mt-2 text-xl font-medium text-slate-900">Legal Review</h2>
         </div>
-
-        <div className="flex flex-wrap gap-3">
-          <Pill badgeLabel="Evidence ID" value={record.evidenceId} />
+        <div className="flex flex-wrap gap-2">
+          <span className="rounded-md border border-slate-200 bg-white px-3 py-1.5 text-xs text-slate-500">
+            {activeRecord.evidenceId}
+          </span>
           <span
-            className={`rounded-full border px-4 py-2 text-xs font-semibold tracking-[0.14em] ${indicatorBadgeClass[record.indicatorCode]}`}
+            className={`rounded-md border px-3 py-1.5 text-xs font-medium ${indicatorTone[activeRecord.indicatorCode]}`}
           >
-            {record.indicatorCode}
+            {activeRecord.indicatorCode}
           </span>
         </div>
       </div>
 
       {linkedCoverageSummary ? (
-        <div className="mb-5 grid gap-3 md:grid-cols-3">
-          <SummaryPill label="Findings" value={linkedCoverageSummary.totalFindings} />
-          <SummaryPill label="Linked" value={linkedCoverageSummary.linkedFindings} />
-          <SummaryPill label="Needs Review" value={linkedCoverageSummary.needsReviewCount} />
+        <div className="mb-4 grid gap-3 sm:grid-cols-3">
+          <SummaryPill label="Findings" value={String(linkedCoverageSummary.totalFindings)} />
+          <SummaryPill label="Linked" value={String(linkedCoverageSummary.linkedFindings)} />
+          <SummaryPill label="Needs Review" value={String(linkedCoverageSummary.needsReviewCount)} />
         </div>
       ) : null}
 
       <div className="grid gap-4 2xl:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <article className="min-w-0 rounded-[1.5rem] border border-blue-100 bg-white/85 p-5">
-          <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Original Legal Text</p>
-          <h3 className="mt-2 text-lg font-semibold text-slate-950">{record.lawTitle}</h3>
+        <article className="min-w-0 rounded-xl border border-slate-100 bg-white p-5">
+          <p className="text-xs uppercase tracking-wider text-slate-400">Original Legal Text</p>
+          <h3 className="mt-2 text-base font-medium text-slate-900">
+            {activeRecord.lawTitle} · {activeRecord.citation}
+          </h3>
 
-          <div className="mt-4 grid gap-3 md:grid-cols-2">
-            <AuditMeta label="Article / Section number" value={record.citation} />
-            <AuditMeta label="Jurisdiction" value={record.country} />
-            <AuditMeta label="Source type" value={record.sourceType} />
-            <AuditMeta label="Indicator label" value={record.indicator} />
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            <MetaBlock label="Jurisdiction" value={activeRecord.country} />
+            <MetaBlock label="Source Type" value={activeRecord.sourceType} />
+            <MetaBlock label="Indicator" value={activeRecord.indicator} />
+            <MetaBlock label="Confidence" value={`${Math.round(activeRecord.confidence * 100)}%`} />
           </div>
 
-          <div className="mt-4 rounded-[1.35rem] border border-blue-100 bg-slate-50 p-4">
-            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-              Source URL
-            </p>
+          <div className="mt-4 rounded-lg border border-slate-100 bg-slate-50 p-4">
+            <p className="text-xs uppercase tracking-wider text-slate-400">Source URL</p>
             <a
-              href={record.sourceUrl}
+              href={activeRecord.sourceUrl}
               target="_blank"
               rel="noreferrer"
-              className="mt-2 inline-flex break-all text-sm font-medium text-blue-700 transition hover:text-blue-900"
+              className="mt-2 inline-flex break-all text-sm font-medium text-slate-700 transition hover:text-slate-900"
             >
-              {record.sourceUrl}
+              {activeRecord.sourceUrl}
             </a>
           </div>
 
-          <AuditPanelBlock title="Verbatim snippet" tone="neutral">
-            {record.verbatimSnippet}
-          </AuditPanelBlock>
-
-          <AuditPanelBlock title="Original legal text" tone="neutral">
-            {record.originalLegalText}
-          </AuditPanelBlock>
+          <AuditBlock title="Verbatim snippet" content={activeRecord.verbatimSnippet} />
+          <AuditBlock title="Original legal text" content={activeRecord.originalLegalText} />
         </article>
 
-        <article className="min-w-0 rounded-[1.5rem] border border-blue-100 bg-blue-50/60 p-5">
-          <p className="text-xs uppercase tracking-[0.16em] text-slate-500">Supporting Agent Review</p>
-
-          <div className="mt-4 space-y-4">
-            <AuditPanelBlock title="AI extracted claim">
-              {linkedAuditItem?.extractedClaim ?? record.aiExtraction}
-            </AuditPanelBlock>
-
-            <AuditPanelBlock title="Pillar 6 indicator mapping">
-              <div className="flex flex-wrap items-center gap-3">
-                <span
-                  className={`rounded-full border px-3 py-1 text-xs font-semibold tracking-[0.12em] ${indicatorBadgeClass[record.indicatorCode]}`}
-                >
-                  {linkedAuditItem?.indicatorId ?? record.indicatorCode}
-                </span>
-                <span className="text-sm font-medium text-slate-700">{record.indicator}</span>
-              </div>
-              <p className="mt-3 text-sm leading-6 text-slate-700">{record.pillar6Mapping}</p>
-            </AuditPanelBlock>
-
-            <AuditPanelBlock title="Citation chain">
-              <div className="space-y-2 text-sm leading-6 text-slate-700">
-                <p>Citation: {linkedAuditItem?.citationRef ?? record.citation}</p>
-                <p>Conclusion ID: {linkedAuditItem?.conclusionId ?? "Linked by supporting audit agent"}</p>
-                <p>Source URL: {linkedAuditItem?.sourceUrl ?? record.sourceUrl}</p>
-                {linkedAuditItem ? (
-                  <div className="flex flex-wrap gap-2 pt-1">
-                    <TraceabilityPill
-                      label={linkedAuditItem.traceabilityStatus}
-                      tone={
-                        linkedAuditItem.traceabilityStatus === "Complete" ? "green" : "amber"
-                      }
-                    />
-                    <TraceabilityPill
-                      label={linkedAuditItem.humanReviewNeeded ? "Human Review Needed" : "Ready"}
-                      tone={linkedAuditItem.humanReviewNeeded ? "amber" : "blue"}
-                    />
-                  </div>
-                ) : null}
-              </div>
-            </AuditPanelBlock>
-
-            <AuditPanelBlock title="Legal effect">
-              {linkedAuditItem?.legalEffect ?? record.riskImplication}
-            </AuditPanelBlock>
+        <article className="min-w-0 rounded-xl border border-slate-100 bg-slate-50 p-5">
+          <p className="text-xs uppercase tracking-wider text-slate-400">AI Extraction Review</p>
+          <div className="mt-4 space-y-3">
+            <AuditBlock
+              title="AI extraction"
+              content={linkedAuditItem?.extractedClaim ?? activeRecord.aiExtraction}
+            />
+            <AuditBlock title="Pillar 6 mapping" content={activeRecord.pillar6Mapping} />
+            <AuditBlock title="Citation" content={`${activeRecord.lawTitle}, ${activeRecord.citation}`} />
+            <AuditBlock title="Review status" content={reviewStatus} />
+            <AuditBlock title="Reviewer note" content={reviewerNote || "No reviewer note yet."} />
 
             {linkedAuditItem ? (
-              <AuditPanelBlock title="Traceability note">
-                <div className="space-y-2 text-sm leading-6 text-slate-700">
-                  <p>{linkedAuditItem.traceabilityNote}</p>
-                  <p>{linkedAuditItem.relevanceReason}</p>
-                </div>
-              </AuditPanelBlock>
+              <AuditBlock
+                title="Traceability note"
+                content={`${linkedAuditItem.traceabilityNote} ${linkedAuditItem.relevanceReason}`}
+              />
             ) : null}
 
             {linkedRiskSummary ? (
-              <AuditPanelBlock title="Risk & Cost Summary">
-                <div className="space-y-2 text-sm leading-6 text-slate-700">
-                  <p>Risk level: {linkedRiskSummary.riskLevel}</p>
-                  <p>Uncertainty: {linkedRiskSummary.uncertaintyLevel}</p>
-                  <p>{linkedRiskSummary.operationalImpact}</p>
-                </div>
-              </AuditPanelBlock>
+              <AuditBlock
+                title="Risk summary"
+                content={`Risk ${linkedRiskSummary.riskLevel}. Uncertainty ${linkedRiskSummary.uncertaintyLevel}. ${linkedRiskSummary.operationalImpact}`}
+              />
             ) : null}
 
-            <div className="rounded-2xl border border-white/70 bg-white/90 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Reviewer status
-              </p>
+            <div className="rounded-lg border border-slate-100 bg-white p-4">
+              <p className="text-xs uppercase tracking-wider text-slate-400">Reviewer controls</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 {reviewActionConfig.map((action) => {
                   const selected = reviewStatus === action.nextStatus;
@@ -264,10 +214,10 @@ export function AuditView({
                       key={action.label}
                       type="button"
                       onClick={() => setReviewStatus(action.nextStatus)}
-                      className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
+                      className={`rounded-md border px-3 py-2 text-sm font-medium transition ${
                         selected
-                          ? "border-blue-600 bg-blue-600 text-white"
-                          : "border-blue-100 bg-white text-slate-700 hover:border-blue-300"
+                          ? "border-slate-900 bg-slate-900 text-white"
+                          : "border-slate-200 bg-white text-slate-700 hover:border-slate-300"
                       }`}
                     >
                       {action.label}
@@ -275,28 +225,23 @@ export function AuditView({
                   );
                 })}
               </div>
-              <p className="mt-3 text-sm text-slate-600">Current status: {reviewStatus}</p>
-            </div>
 
-            <div className="rounded-2xl border border-white/70 bg-white/90 p-4">
-              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                Reviewer note
-              </p>
               <textarea
                 value={reviewerNote}
                 onChange={(event) => setReviewerNote(event.target.value)}
                 rows={5}
-                className="mt-3 w-full rounded-2xl border border-blue-100 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition focus:border-blue-400"
+                className="mt-3 w-full rounded-lg border border-slate-200 bg-white px-3 py-3 text-sm leading-6 text-slate-900 outline-none transition focus:border-slate-400"
               />
+
               <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
                 <p className="text-xs leading-5 text-slate-500">
-                  Review decisions are persisted through the backend run store for this prototype.
+                  Review decisions are persisted in the backend run store.
                 </p>
                 <button
                   type="button"
                   onClick={persistReview}
                   disabled={isSaving}
-                  className="rounded-full bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+                  className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:bg-slate-300"
                 >
                   {isSaving ? "Saving..." : "Save Review"}
                 </button>
@@ -310,71 +255,29 @@ export function AuditView({
   );
 }
 
-function AuditMeta({ label, value }: { label: string; value: string }) {
+function AuditBlock({ title, content }: { title: string; content: string }) {
   return (
-    <div className="rounded-[1.2rem] border border-blue-100 bg-slate-50 p-4">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-700">{value}</p>
+    <div className="min-w-0 rounded-lg border border-slate-100 bg-white p-3.5">
+      <p className="text-xs font-medium uppercase tracking-wider text-slate-400">{title}</p>
+      <p className="mt-1.5 text-sm leading-6 text-slate-600">{content}</p>
     </div>
   );
 }
 
-function AuditPanelBlock({
-  title,
-  children,
-  tone = "soft"
-}: {
-  title: string;
-  children: React.ReactNode;
-  tone?: "soft" | "neutral";
-}) {
+function MetaBlock({ label, value }: { label: string; value: string }) {
   return (
-    <div
-      className={`min-w-0 rounded-2xl border p-4 ${
-        tone === "neutral"
-          ? "border-blue-100 bg-slate-50"
-          : "border-white/70 bg-white/90"
-      }`}
-    >
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{title}</p>
-      <div className="mt-2 text-sm leading-6 text-slate-700">{children}</div>
+    <div className="rounded-lg border border-slate-100 bg-slate-50 p-3.5">
+      <p className="text-xs font-medium uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="mt-1.5 text-sm leading-6 text-slate-600">{value}</p>
     </div>
   );
 }
 
-function Pill({ badgeLabel, value }: { badgeLabel: string; value: string }) {
+function SummaryPill({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-full border border-blue-100 bg-white/85 px-4 py-2 text-sm text-slate-700">
-      <span className="font-semibold text-slate-900">{badgeLabel}:</span> {value}
-    </div>
-  );
-}
-
-function TraceabilityPill({
-  label,
-  tone
-}: {
-  label: string;
-  tone: "green" | "amber" | "blue";
-}) {
-  const toneClasses = {
-    green: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    amber: "border-amber-200 bg-amber-50 text-amber-700",
-    blue: "border-blue-200 bg-blue-50 text-blue-700"
-  };
-
-  return (
-    <span className={`rounded-full border px-3 py-1 text-xs font-semibold ${toneClasses[tone]}`}>
-      {label}
-    </span>
-  );
-}
-
-function SummaryPill({ label, value }: { label: string; value: number }) {
-  return (
-    <div className="rounded-[1.2rem] border border-blue-100 bg-white/85 px-4 py-3">
-      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">{label}</p>
-      <p className="mt-2 text-xl font-semibold text-slate-950">{value}</p>
+    <div className="rounded-lg border border-slate-200 bg-white px-3 py-3">
+      <p className="text-xs font-medium uppercase tracking-wider text-slate-400">{label}</p>
+      <p className="mt-1.5 text-base font-medium text-slate-900">{value}</p>
     </div>
   );
 }
