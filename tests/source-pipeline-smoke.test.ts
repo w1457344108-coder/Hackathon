@@ -45,6 +45,15 @@ test("source pipeline expands real coverage for Japan and the United States", as
       record.sourceUrl.includes("jpn-country-profile-en.pdf")
     )
   );
+  const japanProfile = context.evidenceRecords.find((record) =>
+    record.sourceUrl.includes("jpn-country-profile-en.pdf")
+  );
+  assert.ok(japanProfile);
+  assert.match(
+    japanProfile.sourceLocator ?? "",
+    /(Page \d+, sentence \d+|sentence-level fallback excerpt)/
+  );
+  assert.ok((japanProfile.originalLegalText ?? "").length <= 500);
   assert.ok(
     context.evidenceRecords.some(
       (record) =>

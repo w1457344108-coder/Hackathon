@@ -20,6 +20,14 @@ type ParsedSourceText = {
   resolvedUrl: string;
 };
 
+type ExcerptContext = {
+  excerpt: string;
+  supportingText: string;
+  anchorIndex: number;
+  pageNumber: number | null;
+  sentenceNumber: number | null;
+};
+
 const require = createRequire(import.meta.url);
 const pdfParse = require("pdf-parse/lib/pdf-parse.js") as PdfParseFn;
 
@@ -106,9 +114,15 @@ function mapIndicatorLabel(indicatorCode: Pillar6IndicatorCode) {
   }
 }
 
-function formatSourceLocator(entry: CuratedSourceRecord, pageNumber: number | null) {
+function formatSourceLocator(
+  entry: CuratedSourceRecord,
+  pageNumber: number | null,
+  sentenceNumber: number | null
+) {
   if (pageNumber !== null) {
-    return `Page ${pageNumber}`;
+    return sentenceNumber !== null
+      ? `Page ${pageNumber}, sentence ${sentenceNumber}`
+      : `Page ${pageNumber}`;
   }
 
   if (entry.title.includes("Regulatory Database")) {
@@ -116,10 +130,10 @@ function formatSourceLocator(entry: CuratedSourceRecord, pageNumber: number | nu
   }
 
   if (entry.title.includes("Economy Profile")) {
-    return "Pillar 6 section in economy profile";
+    return "Pillar 6 section in economy profile (sentence-level fallback excerpt)";
   }
 
-  return "Pillar 6 methodology section";
+  return "Pillar 6 methodology section (sentence-level fallback excerpt)";
 }
 
 function getReviewNote(
@@ -224,23 +238,68 @@ function extractExcerptFromPage(pageText: string, hint: string) {
   };
 }
 
+function splitIntoSentences(text: string) {
+  return text
+    .split(/(?<=[.!?])\s+/)
+    .map((sentence) => collapseWhitespace(sentence))
+    .filter(Boolean);
+}
+
+function extractSentenceContext(pageText: string, hint: string) {
+  const sentences = splitIntoSentences(pageText);
+
+  for (const [sentenceIndex, sentence] of sentences.entries()) {
+    if (!sentence.includes(hint)) {
+      continue;
+    }
+
+    const excerptSentences = [
+      sentences[sentenceIndex - 1],
+      sentence,
+      sentences[sentenceIndex + 1]
+    ].filter(Boolean) as string[];
+    const excerpt = collapseWhitespace(excerptSentences.join(" "));
+
+    return {
+      excerpt,
+      sentenceNumber: sentenceIndex + 1
+    };
+  }
+
+  return null;
+}
+
 function extractExcerptContext(
   fullText: string,
   pages: string[],
   excerptHints: string[],
   fallback: string
-) {
+): ExcerptContext {
   const normalizedText = collapseWhitespace(fullText);
 
   for (const hint of excerptHints) {
     for (const [pageIndex, pageText] of pages.entries()) {
+      const sentenceMatch = extractSentenceContext(pageText, hint);
+
+      if (sentenceMatch) {
+        return {
+          excerpt: sentenceMatch.excerpt,
+          supportingText: sentenceMatch.excerpt,
+          anchorIndex: normalizedText.indexOf(hint),
+          pageNumber: pageIndex + 1,
+          sentenceNumber: sentenceMatch.sentenceNumber
+        };
+      }
+
       const pageMatch = extractExcerptFromPage(pageText, hint);
 
       if (pageMatch) {
         return {
           excerpt: pageMatch.excerpt,
+          supportingText: pageMatch.excerpt,
           anchorIndex: normalizedText.indexOf(hint),
-          pageNumber: pageIndex + 1
+          pageNumber: pageIndex + 1,
+          sentenceNumber: null
         };
       }
     }
@@ -253,27 +312,21 @@ function extractExcerptContext(
 
       return {
         excerpt: collapseWhitespace(normalizedText.slice(start, end)),
+        supportingText: collapseWhitespace(normalizedText.slice(start, end)),
         anchorIndex: index,
-        pageNumber: null
+        pageNumber: null,
+        sentenceNumber: null
       };
     }
   }
 
   return {
     excerpt: fallback,
+    supportingText: fallback,
     anchorIndex: -1,
-    pageNumber: null
+    pageNumber: null,
+    sentenceNumber: null
   };
-}
-
-function extractOriginalTextWindow(fullText: string, anchorIndex: number) {
-  if (anchorIndex < 0) {
-    return fullText.slice(0, Math.min(1800, fullText.length));
-  }
-
-  const start = Math.max(0, anchorIndex - 240);
-  const end = Math.min(fullText.length, anchorIndex + 1560);
-  return collapseWhitespace(fullText.slice(start, end));
 }
 
 async function resolveCuratedEvidenceRecord(entry: CuratedSourceRecord): Promise<EvidenceRecord> {
@@ -285,10 +338,7 @@ async function resolveCuratedEvidenceRecord(entry: CuratedSourceRecord): Promise
       entry.excerptHints,
       entry.excerptFallback
     );
-    const originalLegalText =
-      liveSource.text.length > 200
-        ? extractOriginalTextWindow(liveSource.text, excerptContext.anchorIndex)
-        : liveSource.text;
+    const originalLegalText = excerptContext.supportingText;
 
     return {
       evidenceId: `EV-${entry.id}`,
@@ -300,7 +350,11 @@ async function resolveCuratedEvidenceRecord(entry: CuratedSourceRecord): Promise
       citation: entry.citation,
       verbatimSnippet: excerptContext.excerpt,
       sourceUrl: liveSource.resolvedUrl,
-      sourceLocator: formatSourceLocator(entry, excerptContext.pageNumber),
+      sourceLocator: formatSourceLocator(
+        entry,
+        excerptContext.pageNumber,
+        excerptContext.sentenceNumber
+      ),
       sourceStrength: getSourceStrength(entry),
       traceabilityTier: getTraceabilityTier(entry, excerptContext.pageNumber),
       sourceType: entry.sourceType,
@@ -325,7 +379,7 @@ async function resolveCuratedEvidenceRecord(entry: CuratedSourceRecord): Promise
       citation: entry.citation,
       verbatimSnippet: entry.excerptFallback,
       sourceUrl: entry.sourceUrl,
-      sourceLocator: formatSourceLocator(entry, null),
+      sourceLocator: formatSourceLocator(entry, null, null),
       sourceStrength: getSourceStrength(entry),
       traceabilityTier: getTraceabilityTier(entry, null),
       sourceType: entry.sourceType,

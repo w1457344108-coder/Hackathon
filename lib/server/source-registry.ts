@@ -91,7 +91,11 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
       "This source explains the RDTII interpretation frame rather than creating a legal obligation. It remains useful for score explanation and judge-facing traceability.",
     riskImplication:
       "Supports auditability and scoring explanation, but analysts still need the database row or linked legal text for final legal proof.",
-    excerptHints: ["Pillar 6", "Cross-border Data Policies", "binding commitments"]
+    excerptHints: [
+      "Pillar 6: Cross-border Data Policies",
+      "cross-border data policies",
+      "binding commitments"
+    ]
   },
   {
     id: "RDTII-SGP-001",
@@ -120,7 +124,11 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
       "This is a country-specific RDTII file rather than a generic portal page, which improves auditability while staying within the competition-designated source set.",
     riskImplication:
       "Strong for the prototype's evidence chain, though final legal claims should still be traced into the underlying acts cited in the profile.",
-    excerptHints: ["SINGAPORE", "Pillar 6: Cross-border data policies", "0.17"]
+    excerptHints: [
+      "Pillar 6: Cross-border data policies",
+      "Pillar 6",
+      "score of 0.17"
+    ]
   },
   {
     id: "RDTII-SGP-002",
@@ -148,7 +156,11 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
       "This record supports analytical framing rather than jurisdiction-specific legal proof.",
     riskImplication:
       "Useful for explaining the model to judges, but not sufficient on its own for a final legal conclusion.",
-    excerptHints: ["Pillar 6", "Cross-border Data Policies", "binding commitments"]
+    excerptHints: [
+      "Pillar 6: Cross-border Data Policies",
+      "cross-border data policies",
+      "binding commitments"
+    ]
   },
   {
     id: "RDTII-SGP-003",
@@ -206,7 +218,11 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
       "This is a country-specific RDTII file rather than a generic comparative narrative, improving traceability for Japan analyses.",
     riskImplication:
       "Strong for prototype evidence traceability, though final legal submissions should still verify the underlying acts and row-level legal links cited by the RDTII material.",
-    excerptHints: ["JAPAN", "Pillar 6", "Cross-border data policies"]
+    excerptHints: [
+      "Pillar 6: Cross-border data policies",
+      "Pillar 6",
+      "Cross-border data policies"
+    ]
   },
   {
     id: "RDTII-JPN-002",
@@ -234,7 +250,11 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
       "This record supports analytical framing rather than jurisdiction-specific legal proof.",
     riskImplication:
       "Useful for methodology explanation, but not sufficient on its own for a final legal conclusion.",
-    excerptHints: ["Pillar 6", "Cross-border Data Policies", "binding commitments"]
+    excerptHints: [
+      "Pillar 6: Cross-border Data Policies",
+      "cross-border data policies",
+      "binding commitments"
+    ]
   },
   {
     id: "RDTII-JPN-003",
@@ -320,7 +340,11 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
       "This source supports the analytical frame and judge-facing explanation rather than serving as direct legal proof.",
     riskImplication:
       "Helpful for the hackathon methodology story, but not enough by itself for a final legal conclusion.",
-    excerptHints: ["Pillar 6", "Cross-border Data Policies", "binding commitments"]
+    excerptHints: [
+      "Pillar 6: Cross-border Data Policies",
+      "cross-border data policies",
+      "binding commitments"
+    ]
   },
   {
     id: "RDTII-USA-001",
@@ -377,7 +401,11 @@ export const curatedSourceRegistry: CuratedSourceRecord[] = [
       "This source supports analytical framing and judge-facing explanation rather than direct legal proof.",
     riskImplication:
       "Useful for methodology explanation, but not sufficient on its own for a final legal conclusion.",
-    excerptHints: ["Pillar 6", "Cross-border Data Policies", "binding commitments"]
+    excerptHints: [
+      "Pillar 6: Cross-border Data Policies",
+      "cross-border data policies",
+      "binding commitments"
+    ]
   }
 ];
 
