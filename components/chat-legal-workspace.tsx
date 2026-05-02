@@ -894,7 +894,7 @@ function ConversationMessages({ messages }: { messages: ChatMessage[] }) {
           return (
             <article key={message.id} className="flex justify-end">
               <div className="max-w-[78%] rounded-[18px] bg-[#f2f2f2] px-5 py-3 text-[15px] leading-7 text-black">
-                {message.content}
+                <FormattedMessageContent content={message.content} />
               </div>
             </article>
           );
@@ -912,7 +912,7 @@ function ConversationMessages({ messages }: { messages: ChatMessage[] }) {
               </p>
             ) : null}
             <div className="rounded-[18px] border border-black/10 bg-white px-5 py-4 text-[15px] leading-7 text-black shadow-[0_12px_34px_rgba(0,0,0,0.05)]">
-              {message.content}
+              <FormattedMessageContent content={message.content} />
             </div>
             {message.analysis ? (
               <ChatAnalysisPanels result={message.analysis} modeLabel={modeLabel} />
@@ -920,6 +920,27 @@ function ConversationMessages({ messages }: { messages: ChatMessage[] }) {
           </article>
         );
       })}
+    </div>
+  );
+}
+
+function FormattedMessageContent({ content }: { content: string }) {
+  const paragraphs = content
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length <= 1) {
+    return <div className="whitespace-pre-wrap">{content}</div>;
+  }
+
+  return (
+    <div className="space-y-4">
+      {paragraphs.map((paragraph, index) => (
+        <p key={`${index}-${paragraph.slice(0, 24)}`} className="whitespace-pre-wrap">
+          {paragraph}
+        </p>
+      ))}
     </div>
   );
 }
@@ -1232,24 +1253,24 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
     .filter(Boolean);
   const sourceBasis = result.research?.sourceBasis?.slice(0, 2) ?? [];
   const legalFindings = result.mainlineAgentResults?.legalReasoner?.data?.legalFindings ?? [];
-  const findingHighlights = legalFindings.slice(0, 2).map((finding, index) =>
-    [
-      `Finding ${index + 1}: ${finding.conclusion ?? "No conclusion returned."}`,
-      finding.legalEffect ? `Effect: ${finding.legalEffect}` : null
+  const findingHighlights = legalFindings.slice(0, 2).map((finding, index) => {
+    return [
+      `- Finding ${index + 1}: ${finding.conclusion ?? "No conclusion returned."}`,
+      finding.legalEffect ? `  Effect: ${finding.legalEffect}` : null
     ]
       .filter(Boolean)
-      .join(" ")
-  );
-  const evidenceHighlights = (result.evidenceRecords ?? []).slice(0, 2).map((record) =>
-    [
-      record.lawTitle,
-      record.sourceLocator ? `Locator: ${record.sourceLocator}` : null,
-      record.verbatimSnippet ? `Excerpt: ${record.verbatimSnippet}` : null,
-      record.sourceUrl ? `Source: ${record.sourceUrl}` : null
+      .join("\n");
+  });
+  const evidenceHighlights = (result.evidenceRecords ?? []).slice(0, 2).map((record, index) => {
+    return [
+      `- Evidence ${index + 1}: ${record.lawTitle}`,
+      record.sourceLocator ? `  Locator: ${record.sourceLocator}` : null,
+      record.verbatimSnippet ? `  Excerpt: ${record.verbatimSnippet}` : null,
+      record.sourceUrl ? `  Source: ${record.sourceUrl}` : null
     ]
       .filter(Boolean)
-      .join(" | ")
-  );
+      .join("\n");
+  });
   const lacksClauseLevelEvidence =
     (result.evidenceRecords ?? []).length > 0 &&
     (result.evidenceRecords ?? []).every((record) =>
@@ -1282,34 +1303,68 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
           }
         });
 
-      return `${entry.country}: ${[...entry.strengths].join(", ") || "unspecified"}${
-        entry.locators.size ? ` (${[...entry.locators].slice(0, 2).join(" | ")})` : ""
-      }`;
+      return [
+        `- ${entry.country}: ${[...entry.strengths].join(", ") || "unspecified"}`,
+        entry.locators.size
+          ? `  Locators: ${[...entry.locators].slice(0, 2).join(" | ")}`
+          : null
+      ]
+        .filter(Boolean)
+        .join("\n");
     })
-    .join(" || ");
+    .join("\n");
   const traceabilityLimitation = lacksClauseLevelEvidence
     ? "Current retrieval did not yet pinpoint row-level statutes or article-level clauses; this run is grounded in competition-designated database, profile, and methodology files and still needs human drill-down."
     : null;
 
-  return [
-    `${coreModes.find((item) => item.id === mode)?.english ?? "Legal analysis"} result:`,
+  const summaryBlock = [
+    `${coreModes.find((item) => item.id === mode)?.english ?? "Legal analysis"} result`,
     narrative,
     risk,
     provider,
     evidenceMode,
-    uploadedDocuments.length
-      ? `Uploaded documents used: ${uploadedDocuments
-          .map((file) => `${file.fileName} (${file.characterCount.toLocaleString()} chars)`)
-          .join(" | ")}`
-      : null,
     exportReadiness ? `Export readiness: ${exportReadiness}.` : null,
-    citations.length ? `Key citations: ${citations.join(" | ")}` : null,
-    findingHighlights.length ? `Legal findings: ${findingHighlights.join(" || ")}` : null,
-    evidenceHighlights.length ? `Evidence highlights: ${evidenceHighlights.join(" || ")}` : null,
-    coverageDetail ? `Coverage detail: ${coverageDetail}` : null,
+    result.analysisRunId ? `Review run ID: ${result.analysisRunId}` : null
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const citationBlock = citations.length
+    ? ["Key citations", ...citations.map((citation) => `- ${citation}`)].join("\n")
+    : null;
+
+  const findingsBlock = findingHighlights.length
+    ? ["Legal findings", ...findingHighlights].join("\n")
+    : null;
+
+  const evidenceBlock = evidenceHighlights.length
+    ? ["Evidence highlights", ...evidenceHighlights].join("\n")
+    : null;
+
+  const coverageBlock = coverageDetail ? ["Coverage detail", coverageDetail].join("\n") : null;
+
+  const sourceBasisBlock = sourceBasis.length
+    ? ["Source basis", ...sourceBasis.map((item) => `- ${item}`)].join("\n")
+    : null;
+
+  const uploadsBlock = uploadedDocuments.length
+    ? [
+        "Uploaded documents used",
+        ...uploadedDocuments.map(
+          (file) => `- ${file.fileName} (${file.characterCount.toLocaleString()} chars)`
+        )
+      ].join("\n")
+    : null;
+
+  return [
+    summaryBlock,
+    citationBlock,
+    findingsBlock,
+    evidenceBlock,
+    coverageBlock,
     traceabilityLimitation,
-    sourceBasis.length ? `Source basis: ${sourceBasis.join(" | ")}` : null,
-    result.analysisRunId ? `Review run ID: ${result.analysisRunId}` : null,
+    sourceBasisBlock,
+    uploadsBlock,
     "Open the panels below to inspect evidence records, audit review, and JSON/CSV/Markdown export."
   ]
     .filter(Boolean)
