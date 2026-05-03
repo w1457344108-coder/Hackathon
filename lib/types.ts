@@ -392,6 +392,10 @@ export interface ReportAgentResult {
   title: string;
   overallRisk: RiskLevel;
   finalNarrative: string;
+  modeSections?: Array<{
+    heading: string;
+    body: string;
+  }>;
   policyRecommendations: string[];
   comparisonTable: ComparisonRow[];
 }

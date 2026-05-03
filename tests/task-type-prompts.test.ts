@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   classifyLegalTaskType,
+  buildModeSpecificReportFallback,
   getLegalReasonerInstructions,
   getReportAgentInstructions,
   intentArbiterAgent
@@ -54,4 +55,61 @@ test("legal reasoner and report prompts are complete for each task type", () => 
 
   assert.match(getLegalReasonerInstructions("forward-looking-advisory"), /Potential Legal Barriers/i);
   assert.match(getReportAgentInstructions("forward-looking-advisory"), /Compliance Roadmap/i);
+});
+
+test("mode-specific report fallback preserves user facts and produces task-specific content", () => {
+  const caseReport = buildModeSpecificReportFallback({
+    taskType: "case-analysis",
+    userQuery:
+      "Our company already transfers employee HR data from Singapore to Japan for payroll processing.",
+    countryA: "Singapore",
+    countryB: "Japan",
+    overallRisk: "Low",
+    evidenceSummary: "Singapore requires comparable protection; Japan requires a valid transfer basis.",
+    sourceLimit: "Source limits test.",
+    evidenceLabels: ["PDPA Transfer Limitation", "APPI foreign third party guidance"],
+    sourceUrls: ["https://www.pdpc.gov.sg/example", "https://www.ppc.go.jp/example"]
+  });
+
+  assert.match(caseReport.finalNarrative, /employee HR data/i);
+  assert.match(caseReport.finalNarrative, /payroll/i);
+  assert.match(caseReport.finalNarrative, /controller|processor|recipient/i);
+  assert.match(caseReport.finalNarrative, /comparable protection/i);
+  assert.match(caseReport.policyRecommendations.join(" "), /contract|transfer mechanism/i);
+
+  const advisoryReport = buildModeSpecificReportFallback({
+    taskType: "forward-looking-advisory",
+    userQuery:
+      "We plan to launch a new AI health analytics service in Japan using cloud infrastructure in Singapore.",
+    countryA: "Japan",
+    countryB: "Singapore",
+    overallRisk: "Low",
+    evidenceSummary: "Japan and Singapore both require a lawful cross-border transfer basis.",
+    sourceLimit: "Source limits test.",
+    evidenceLabels: ["APPI foreign transfer guidance", "PDPA Transfer Limitation"],
+    sourceUrls: ["https://www.ppc.go.jp/example", "https://www.pdpc.gov.sg/example"]
+  });
+
+  assert.match(advisoryReport.finalNarrative, /AI health analytics/i);
+  assert.match(advisoryReport.finalNarrative, /cloud infrastructure/i);
+  assert.match(advisoryReport.finalNarrative, /sensitive|health/i);
+  assert.match(advisoryReport.finalNarrative, /pre-launch|launch/i);
+  assert.match(advisoryReport.policyRecommendations.join(" "), /roadmap|before launch/i);
+
+  const regulationReport = buildModeSpecificReportFallback({
+    taskType: "regulation-interpretation",
+    userQuery: "Explain the PIPL rule for transferring personal information outside China.",
+    countryA: "China",
+    countryB: "Singapore",
+    overallRisk: "High",
+    evidenceSummary: "PIPL Chapter III imposes conditions on outbound personal-information transfers.",
+    sourceLimit: "Source limits test.",
+    evidenceLabels: ["PIPL Chapter III", "CAC outbound data flow provisions"],
+    sourceUrls: ["https://www.npc.gov.cn/example", "https://www.cac.gov.cn/example"]
+  });
+
+  assert.match(regulationReport.finalNarrative, /PIPL/i);
+  assert.match(regulationReport.finalNarrative, /legal elements/i);
+  assert.match(regulationReport.finalNarrative, /conditions|requirements/i);
+  assert.match(regulationReport.policyRecommendations.join(" "), /exact article|clause/i);
 });

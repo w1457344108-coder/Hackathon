@@ -184,9 +184,11 @@ export function getReportAgentInstructions(taskType: LegalTaskType) {
     "Produce a concise, evidence-aware final answer for a Pillar 6 cross-border data policy workflow.",
     "Do not invent jurisdictions, evidence, source claims, legal citations, or business facts.",
     "Use supplied legal findings and source records as the authority base.",
+    "The final answer must explicitly reuse the userQuery's material facts when the user supplied them.",
+    "If a prompt mentions data type, business purpose, vendor role, service type, or transfer route, the answer must discuss those facts directly.",
     "If the evidence is only row-level database, page-level, or incomplete, say so clearly.",
     "Do not mention other pillars unless you are explicitly explaining that the system excluded them as out of scope.",
-    "Write in user-facing prose with clear section labels."
+    "Return modeSections with the required headings. finalNarrative should be a readable serialization of those modeSections."
   ].join(" ");
 
   if (taskType === "case-analysis") {
@@ -194,6 +196,7 @@ export function getReportAgentInstructions(taskType: LegalTaskType) {
       commonRules,
       "This is Case Analysis. The finalNarrative must be tailored to the user's existing facts and must not read like a generic country-risk memo.",
       "Required sections inside finalNarrative: Case Facts Identified; Assumptions and Missing Facts; Relevant Pillar 6 Issues; Country-by-Country Analysis; Compliance Risk Assessment; Evidence Match; Practical Next Steps; Limits.",
+      "Case Facts Identified must name the concrete data type, business purpose, transfer route, and likely actor roles if they appear in userQuery.",
       "Policy recommendations must be case-specific compliance actions."
     ].join("\n");
   }
@@ -203,6 +206,7 @@ export function getReportAgentInstructions(taskType: LegalTaskType) {
       commonRules,
       "This is Forward-looking Advisory. The finalNarrative must focus on future planning, potential barriers, readiness, and launch risk.",
       "Required sections inside finalNarrative: Planned Activity Under Review; Key Planning Assumptions; Potential Legal Barriers; Forward-Looking Risk Forecast; Country-by-Country Readiness Review; Compliance Roadmap; Go / Caution / Stop Signals; Evidence and Citations; Limits.",
+      "Potential Legal Barriers and Compliance Roadmap must mention the planned service, sensitive data category, cloud or vendor setup, and pre-launch sequencing when they appear in userQuery.",
       "Policy recommendations must be staged pre-launch actions."
     ].join("\n");
   }
@@ -211,11 +215,236 @@ export function getReportAgentInstructions(taskType: LegalTaskType) {
     commonRules,
     "This is Regulation Interpretation. The finalNarrative must explain the rule itself before discussing business impact.",
     "Required sections inside finalNarrative: Direct Answer; Legal Source Located; Rule Explanation; Legal Elements; Application to the User's Question; Confidence and Limits; Citations.",
+    "Legal Elements must break the rule into conditions, permissions, restrictions, exceptions, approval or contract paths, and evidence limits when available.",
     "Policy recommendations must focus on how to verify, apply, and document the interpreted rule."
   ].join("\n");
 }
 
 // ── Source Discovery Agent Instructions ──────────────────────────
+
+type ModeSpecificReportSection = {
+  heading: string;
+  body: string;
+};
+
+type ModeSpecificReportFallback = {
+  title: string;
+  finalNarrative: string;
+  modeSections: ModeSpecificReportSection[];
+  policyRecommendations: string[];
+};
+
+function serializeModeSections(sections: ModeSpecificReportSection[]) {
+  return sections.map((section) => `${section.heading}: ${section.body}`).join("\n\n");
+}
+
+function compactList(values: string[]) {
+  return values.filter(Boolean).join("; ");
+}
+
+function inferScenarioSignals(userQuery: string) {
+  const normalized = userQuery.toLowerCase();
+  const signals: string[] = [];
+
+  if (normalized.includes("employee") || normalized.includes("hr")) {
+    signals.push("employee HR data");
+  }
+
+  if (normalized.includes("payroll")) {
+    signals.push("payroll processing");
+  }
+
+  if (normalized.includes("health")) {
+    signals.push("health data, which may require heightened sensitivity review");
+  }
+
+  if (normalized.includes("ai")) {
+    signals.push("AI-enabled service or analytics");
+  }
+
+  if (normalized.includes("cloud")) {
+    signals.push("cloud infrastructure or cloud vendor setup");
+  }
+
+  if (normalized.includes("personal")) {
+    signals.push("personal data or personal information");
+  }
+
+  if (normalized.includes("pipl")) {
+    signals.push("PIPL outbound-transfer rule");
+  }
+
+  return signals;
+}
+
+export function buildModeSpecificReportFallback(input: {
+  taskType: LegalTaskType;
+  userQuery: string;
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  overallRisk: RiskLevel;
+  evidenceSummary: string;
+  sourceLimit: string;
+  evidenceLabels: string[];
+  sourceUrls: string[];
+}): ModeSpecificReportFallback {
+  const countries = input.countryB ? `${input.countryA} and ${input.countryB}` : input.countryA;
+  const transferRoute = input.countryB
+    ? `${input.countryA} to ${input.countryB}`
+    : input.countryA;
+  const signals = inferScenarioSignals(input.userQuery);
+  const signalText = signals.length
+    ? `Key facts detected: ${compactList(signals)}.`
+    : "No specific data category, business purpose, or actor role was explicit in the user question.";
+  const evidenceText = input.evidenceLabels.length
+    ? compactList(input.evidenceLabels)
+    : "No citation-ready evidence label was returned.";
+  const sourceText = input.sourceUrls.length
+    ? compactList(input.sourceUrls)
+    : "No source URL was returned.";
+
+  if (input.taskType === "case-analysis") {
+    const modeSections = [
+      {
+        heading: "Case Facts Identified",
+        body: `The existing case described by the user is: "${input.userQuery}" The working transfer route is ${transferRoute}. ${signalText} The answer should treat the organisation as a data exporter/controller, the destination-side entity as recipient or processor where applicable, and verify those roles before final legal sign-off.`
+      },
+      {
+        heading: "Assumptions and Missing Facts",
+        body: "Confirm the precise exporter, recipient, processor/controller allocation, employee notice or consent status, contractual transfer mechanism, retention period, and whether payroll data contains sensitive employee attributes."
+      },
+      {
+        heading: "Relevant Pillar 6 Issues",
+        body: "The case should be mapped to cross-border transfer conditions, comparable-protection duties, localization or infrastructure restrictions, approval triggers, and any binding-commitment mechanism reflected in the retrieved Pillar 6 evidence."
+      },
+      {
+        heading: "Country-by-Country Analysis",
+        body: input.evidenceSummary
+      },
+      {
+        heading: "Compliance Risk Assessment",
+        body: `Overall risk is ${input.overallRisk}. The risk should be judged against the actual data category, transfer route, business purpose, and actor roles rather than only the country score.`
+      },
+      {
+        heading: "Evidence Match",
+        body: evidenceText
+      },
+      {
+        heading: "Practical Next Steps",
+        body: "Map the data flow, confirm whether the employment or payroll context changes the legal basis, put the transfer mechanism and processor obligations into contract, verify comparable-protection requirements, and prepare the record for human legal review."
+      },
+      {
+        heading: "Limits",
+        body: input.sourceLimit
+      }
+    ];
+
+    return {
+      title: "Case Analysis - Pillar 6 Cross-Border Data Review",
+      finalNarrative: serializeModeSections(modeSections),
+      modeSections,
+      policyRecommendations: [
+        "Build a case fact matrix covering data type, exporter, recipient, processor/controller roles, transfer purpose, and transfer route.",
+        "Confirm the contract or transfer mechanism that provides comparable protection before continuing the existing transfer.",
+        "Escalate missing facts and any employee-data sensitivity issues to human legal review."
+      ]
+    };
+  }
+
+  if (input.taskType === "forward-looking-advisory") {
+    const modeSections = [
+      {
+        heading: "Planned Activity Under Review",
+        body: `The planned activity described by the user is: "${input.userQuery}" The working planning corridor is ${transferRoute}. ${signalText}`
+      },
+      {
+        heading: "Key Planning Assumptions",
+        body: "Confirm the launch country, hosting country, data categories, whether health or other sensitive data is involved, whether AI analytics uses identifiable data, the vendor model, and whether any onward transfer will occur."
+      },
+      {
+        heading: "Potential Legal Barriers",
+        body: "Potential barriers include transfer-condition compliance, comparable protection or consent requirements, sensitive-data review, cloud-vendor contract controls, localization or infrastructure restrictions, and regulator approval or documentation triggers if the facts cross those thresholds."
+      },
+      {
+        heading: "Forward-Looking Risk Forecast",
+        body: `Overall risk is ${input.overallRisk}. ${input.evidenceSummary} Health, AI, and cloud facts should be treated as pre-launch risk multipliers until the exact data architecture is confirmed.`
+      },
+      {
+        heading: "Country-by-Country Readiness Review",
+        body: `For ${countries}, compare the stricter transfer pathway, the receiving-country protection standard, and operational controls needed before production launch.`
+      },
+      {
+        heading: "Compliance Roadmap",
+        body: "Before launch: map data flows, classify health and personal data, confirm whether data can be de-identified, select a lawful transfer mechanism, draft cloud/vendor clauses, prepare notices and consents if needed, verify source citations, and schedule human legal review."
+      },
+      {
+        heading: "Go / Caution / Stop Signals",
+        body: "Go only if the transfer mechanism, sensitive-data handling, vendor contract, and citation trail are confirmed. Use Caution if source evidence is guidance-level. Stop for human review if approval, localization, or sensitive-data triggers remain unresolved."
+      },
+      {
+        heading: "Evidence and Citations",
+        body: `${evidenceText}. Source URLs: ${sourceText}`
+      },
+      {
+        heading: "Limits",
+        body: input.sourceLimit
+      }
+    ];
+
+    return {
+      title: "Forward-Looking Advisory - Pillar 6 Launch Readiness Review",
+      finalNarrative: serializeModeSections(modeSections),
+      modeSections,
+      policyRecommendations: [
+        "Create a pre-launch compliance roadmap before launch, with separate workstreams for data classification, transfer mechanism, cloud-vendor controls, and human legal review.",
+        "Treat health data, AI analytics, and cross-border cloud hosting as heightened planning risks until the architecture and lawful basis are confirmed.",
+        "Use the strictest selected jurisdiction's transfer path as the launch gate rather than relying on the lower-risk country alone."
+      ]
+    };
+  }
+
+  const modeSections = [
+    {
+      heading: "Direct Answer",
+      body: `The user asked: "${input.userQuery}" The answer must explain the relevant Pillar 6 rule for ${countries} using the cited source rather than only a country-risk score.`
+    },
+    {
+      heading: "Legal Source Located",
+      body: evidenceText
+    },
+    {
+      heading: "Rule Explanation",
+      body: input.evidenceSummary
+    },
+    {
+      heading: "Legal Elements",
+      body: "Break the rule into legal elements: covered data, exporter or organisation duties, recipient obligations, transfer conditions or requirements, exceptions or exemptions, approval/security-review/contract paths, and evidence limits."
+    },
+    {
+      heading: "Application to the User's Question",
+      body: `Apply those conditions to the ${transferRoute} data-flow direction and the facts stated in the user question before making any compliance decision. ${signalText}`
+    },
+    {
+      heading: "Confidence and Limits",
+      body: `Overall risk is ${input.overallRisk}. ${input.sourceLimit}`
+    },
+    {
+      heading: "Citations",
+      body: sourceText
+    }
+  ];
+
+  return {
+    title: "Regulation Interpretation - Pillar 6 Rule Explanation",
+    finalNarrative: serializeModeSections(modeSections),
+    modeSections,
+    policyRecommendations: [
+      "Verify the exact article, clause, or regulator paragraph before relying on the rule.",
+      "Document each legal element separately from the business impact.",
+      "Escalate any missing statute text or article-level citation before presenting the interpretation as final legal authority."
+    ]
+  };
+}
 
 function getSearchStrategy(taskType: LegalTaskType): string {
   if (taskType === "case-analysis") {
@@ -888,65 +1117,24 @@ export async function reportAgent(results: {
   const sourceLimit = clauseLevelEvidenceRetrieved
     ? "At least one retrieved source is row-level or legal-text-level evidence."
     : "The available sources are still mainly guidance, policy, or summary-level evidence and need human review before being treated as exact clause authority.";
-  const fallbackNarrative =
-    taskType === "case-analysis"
-      ? [
-          `Case Facts Identified: The user describes an existing cross-border data situation involving ${results.comparison ? `${results.comparison.comparedCountries[0]} and ${results.comparison.comparedCountries[1]}` : primaryAnalysis.country}.`,
-          `Assumptions and Missing Facts: Data category, transfer mechanism, processor/controller roles, and whether consent or approval exists should be confirmed if not supplied.`,
-          `Relevant Pillar 6 Issues: The case should be checked against conditional transfer rules, localization requirements, infrastructure requirements, binding commitments, and transfer approvals.`,
-          `Country-by-Country Analysis: ${evidenceSummary}`,
-          `Compliance Risk Assessment: Overall risk is ${overallRisk}.`,
-          `Evidence Match: ${findingSummaries.map((finding) => finding.evidence).filter(Boolean).join("; ") || "No citation-ready finding was returned."}`,
-          `Practical Next Steps: Map the data flow, confirm legal basis, review transfer contracts, check approval or localization triggers, and keep evidence for human legal review.`,
-          `Limits: ${sourceLimit}`
-        ].join("\n\n")
-      : taskType === "forward-looking-advisory"
-        ? [
-            `Planned Activity Under Review: The user is evaluating a future cross-border data operation for ${results.comparison ? `${results.comparison.comparedCountries[0]} and ${results.comparison.comparedCountries[1]}` : primaryAnalysis.country}.`,
-            `Key Planning Assumptions: Launch plans should confirm data type, hosting location, transfer direction, vendors, and whether sensitive or regulated data is involved.`,
-            `Potential Legal Barriers: Check transfer conditions, localization, infrastructure, approval, and binding-commitment requirements before launch.`,
-            `Forward-Looking Risk Forecast: Overall risk is ${overallRisk}; ${evidenceSummary}`,
-            `Country-by-Country Readiness Review: Prioritize the stricter jurisdiction when the selected countries diverge.`,
-            `Compliance Roadmap: Verify legal sources, map data flows, design transfer safeguards, prepare contracts and notices, test approval needs, and schedule human legal review before rollout.`,
-            `Go / Caution / Stop Signals: Proceed only after evidence gaps and approval/localization triggers are cleared.`,
-            `Evidence and Citations: ${findingSummaries.map((finding) => finding.evidence).filter(Boolean).join("; ") || "No citation-ready finding was returned."}`,
-            `Limits: ${sourceLimit}`
-          ].join("\n\n")
-        : [
-            clauseLevelEvidenceRetrieved
-              ? `Direct Answer: The requested Pillar 6 rule should be interpreted from the cited country source rather than from a generic risk score.`
-              : "Direct Answer: The current evidence chain does not yet provide article-level or clause-level Pillar 6 legal text for this jurisdiction.",
-            `Legal Source Located: ${findingSummaries.map((finding) => finding.evidence).filter(Boolean).join("; ") || "No citation-ready finding was returned."}`,
-            clauseLevelEvidenceRetrieved
-              ? `Rule Explanation: ${evidenceSummary}`
-              : `Rule Explanation: The system can explain the Pillar 6 classification and transfer-policy posture, but it cannot yet quote an exact jurisdiction-specific clause from the current source chain.`,
-            `Legal Elements: Review whether the rule permits, restricts, conditions, or requires infrastructure/localization for cross-border data movement.`,
-            `Application to the User's Question: Apply the rule to the selected countries and data-transfer direction before making a compliance decision.`,
-            `Confidence and Limits: Overall risk is ${overallRisk}. ${sourceLimit}`,
-            `Citations: ${results.evidenceRecords.slice(0, 3).map((record) => record.sourceUrl).join("; ")}`
-          ].join("\n\n");
-  const fallbackRecommendations =
-    taskType === "case-analysis"
-      ? [
-          "Convert the user facts into a data-flow map with actors, data category, source country, destination country, and processing purpose.",
-          "Check whether the evidence triggers transfer conditions, localization, infrastructure, or approval obligations.",
-          "Document assumptions and send unresolved facts to human legal review."
-        ]
-      : taskType === "forward-looking-advisory"
-        ? [
-            "Run a pre-launch legal source verification step for every selected country.",
-            "Build a staged compliance roadmap before product or market entry decisions.",
-            "Treat approval, localization, and sensitive-data uncertainty as caution signals until reviewed."
-          ]
-        : [
-            "Verify the exact legal source and citation before relying on the rule.",
-            "Separate the rule meaning from its business impact in internal notes.",
-            "Escalate incomplete or page-level evidence before presenting it as exact legal authority."
-          ];
+  const fallbackReport = buildModeSpecificReportFallback({
+    taskType,
+    userQuery: results.userQuery,
+    countryA: primaryAnalysis.country,
+    countryB: results.comparison?.comparedCountries.find(
+      (country) => country !== primaryAnalysis.country
+    ),
+    overallRisk,
+    evidenceSummary,
+    sourceLimit,
+    evidenceLabels: findingSummaries.map((finding) => finding.evidence).filter(Boolean),
+    sourceUrls: results.evidenceRecords.slice(0, 4).map((record) => record.sourceUrl)
+  });
 
   const structuredReport = await provider.generateStructuredObject<{
     title: string;
     finalNarrative: string;
+    modeSections: ModeSpecificReportSection[];
     policyRecommendations: string[];
   }>({
     schemaName: "pillar6_report",
@@ -954,10 +1142,22 @@ export async function reportAgent(results: {
     schema: {
       type: "object",
       additionalProperties: false,
-      required: ["title", "finalNarrative", "policyRecommendations"],
+      required: ["title", "finalNarrative", "modeSections", "policyRecommendations"],
       properties: {
         title: { type: "string" },
         finalNarrative: { type: "string" },
+        modeSections: {
+          type: "array",
+          items: {
+            type: "object",
+            additionalProperties: false,
+            required: ["heading", "body"],
+            properties: {
+              heading: { type: "string" },
+              body: { type: "string" }
+            }
+          }
+        },
         policyRecommendations: {
           type: "array",
           items: { type: "string" }
@@ -978,16 +1178,36 @@ export async function reportAgent(results: {
       clauseLevelEvidenceRetrieved
     }),
     fallback: {
-      title: "Cross-Border Data Policy Multi-Agent Report",
-      finalNarrative: fallbackNarrative,
-      policyRecommendations: fallbackRecommendations
+      title: fallbackReport.title,
+      finalNarrative: fallbackReport.finalNarrative,
+      modeSections: fallbackReport.modeSections,
+      policyRecommendations: fallbackReport.policyRecommendations
     }
   });
+  const normalizedModeSections =
+    structuredReport.object.modeSections?.length > 0
+      ? structuredReport.object.modeSections
+      : fallbackReport.modeSections;
+  const sectionNarrative = serializeModeSections(normalizedModeSections);
+  const narrativeContainsUserFact =
+    inferScenarioSignals(results.userQuery).some((signal) =>
+      sectionNarrative.toLowerCase().includes(signal.split(",")[0].toLowerCase())
+    ) || sectionNarrative.includes(results.userQuery);
+  const finalNarrative = narrativeContainsUserFact
+    ? sectionNarrative
+    : serializeModeSections([
+        {
+          heading: "User Question Anchoring",
+          body: `The analysis is anchored to the user question: "${results.userQuery}"`
+        },
+        ...normalizedModeSections
+      ]);
 
   return {
     title: structuredReport.object.title,
     overallRisk,
-    finalNarrative: structuredReport.object.finalNarrative,
+    finalNarrative,
+    modeSections: normalizedModeSections,
     comparisonTable,
     policyRecommendations: structuredReport.object.policyRecommendations
   };
