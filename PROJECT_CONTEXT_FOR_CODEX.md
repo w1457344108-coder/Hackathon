@@ -51,20 +51,19 @@ Because direct `git clone` / `git pull` to `github.com:443` was not reachable fr
 
 ## Current Agent Progress
 
-The project now has a ten-agent architecture baseline and partial mock orchestration.
+The project now has a nine-agent demo architecture. The previous `source-discovery` and `relevance-filter` agents were removed from the active workflow so the current version can focus on an API-backed demo path. Source plumbing remains for later Wikipedia and database integration.
 
-### Ten-agent order
+### Current active agent order
 
 1. Intent Arbiter
 2. Query Builder
-3. Source Discovery
-4. Document Reader
-5. Relevance Filter
-6. Indicator Mapping
-7. Legal Reasoner
-8. Risk & Cost Quantifier
-9. Audit View & Citation
-10. Legal Review & Export
+3. Document Reader
+4. Indicator Mapping
+5. Legal Reasoner
+6. Rebuttal Review
+7. Risk & Cost Quantifier
+8. Audit View & Citation
+9. Legal Review & Export
 
 ### Implemented / wired in latest main
 
@@ -75,32 +74,24 @@ The current workflow exposes:
 - `WorkflowResult.mainlineAgentResults`
 - `WorkflowResult.supportingAgentResults.queryBuilder`
 
-The five mainline agents are wired as deterministic mock functions:
+The current mainline agents are wired as deterministic or provider-backed functions:
 
 - `intentArbiter`
-- `sourceDiscovery`
 - `documentReader`
 - `indicatorMapping`
 - `legalReasoner`
 
-The supporting `queryBuilder` agent is also adapted as a pre-discovery input layer. Its output is exposed through:
+The supporting `queryBuilder` agent is retained as a prompt/search-plan helper for the future source layer. Its output is exposed through:
 
 ```ts
 supportingAgentResults.queryBuilder
 ```
 
-and consumed by `sourceDiscovery` through a generated `queryPlan`.
+and can later feed Wikipedia or database retrieval through a generated `queryPlan`.
 
-### Not yet fully wired
+### Future source work
 
-The remaining supporting agents still need implementation as contract-ready mock agents:
-
-- `relevanceFilter`
-- `riskCostQuantifier`
-- `auditCitation`
-- `legalReviewExport`
-
-After those are wired, the full ten-agent mock workflow should be connected end to end.
+The removed source-discovery layer should be replaced later with Wikipedia and database retrieval. The current demo keeps the downstream evidence and audit contracts stable while that source layer is out of scope.
 
 ## Current Mock vs Future LLM/API Boundary
 
@@ -211,7 +202,7 @@ A fintech team wants to understand whether data can move from China to Singapore
 Demo path:
 
 1. Use Legal Search Workspace to generate Search Profile JSON.
-2. Explain the ten-agent trace.
+2. Explain the nine-agent trace.
 3. Show candidate evidence and Pillar 6 mapping.
 4. Open Evidence Audit View.
 5. Let law student reviewer approve, revise, or reject evidence.
@@ -219,17 +210,13 @@ Demo path:
 
 ## Immediate Next Work
 
-The next best task is to wire the remaining supporting mock agents:
+The next best task is to wire the future source layer to Wikipedia and database retrieval:
 
-1. `relevanceFilter`
-   - Input: document-reader passages and focus indicators.
-   - Output: shortlisted evidence with relevance reasons.
-
-2. `riskCostQuantifier`
+1. `riskCostQuantifier`
    - Input: legal findings.
    - Output: risk level, cost drivers, operational impact.
 
-3. `auditCitation`
+2. `auditCitation`
    - Input: legal findings and evidence lookup.
    - Output: audit items linking claims to legal text and citations.
 
@@ -240,7 +227,7 @@ The next best task is to wire the remaining supporting mock agents:
 After that, update:
 
 - `SupportingAgentResults`
-- `runMainlineAgents` or a new `runTenAgentWorkflow`
+- `runMainlineAgents` or a new `runWorkflowAgentWorkflow`
 - validation scripts
 - README
 - API response shape if needed
@@ -250,6 +237,5 @@ After that, update:
 - Keep everything scoped to Pillar 6.
 - Keep internal app/API field names in camelCase.
 - Preserve evidence traceability through `evidenceId`, `sourceUrl`, and `citationRef`.
-- Do not replace the UI contracts while wiring mock agents.
-- Do not jump to real LLM API integration until the ten-agent mock workflow is stable.
-
+- Do not replace the UI contracts while wiring demo agents.
+- Keep real source retrieval changes behind the future source layer rather than reintroducing ad hoc workflow agents.

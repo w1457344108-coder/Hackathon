@@ -20,7 +20,7 @@ function assertOrdered(file, expectedItems) {
   let lastIndex = -1;
 
   for (const item of expectedItems) {
-    const nextIndex = content.indexOf(item);
+    const nextIndex = content.indexOf(item, lastIndex + 1);
 
     if (nextIndex === -1) {
       throw new Error(`${file} is missing ordered item: ${item}`);
@@ -36,28 +36,30 @@ function assertOrdered(file, expectedItems) {
 
 const mainlineOrder = [
   "intent-arbiter",
-  "source-discovery",
   "document-reader",
   "indicator-mapping",
-  "legal-reasoner"
+  "legal-reasoner",
+  "rebuttal-agent"
 ];
 
 assertIncludes("lib/types.ts", "export interface AgentResult");
 assertIncludes("lib/types.ts", "export interface IntentArbiterOutput");
-assertIncludes("lib/types.ts", "export interface SourceDiscoveryOutput");
+assertIncludes("lib/types.ts", "export interface QueryBuilderOutput");
 assertIncludes("lib/types.ts", "export interface DocumentReaderOutput");
 assertIncludes("lib/types.ts", "export interface IndicatorMappingOutput");
 assertIncludes("lib/types.ts", "export interface LegalReasonerOutput");
+assertIncludes("lib/types.ts", "export interface RebuttalAgentOutput");
 assertIncludes("lib/types.ts", "export interface MainlineAgentResults");
 assertIncludes("lib/types.ts", "mainlineAgentResults");
 
 assertIncludes("lib/agents.ts", "runMainlineAgents");
 assertIncludes("lib/agents.ts", "intentArbiterAgent");
-assertIncludes("lib/agents.ts", "sourceDiscoveryAgent");
 assertIncludes("lib/agents.ts", "documentReaderAgent");
 assertIncludes("lib/agents.ts", "indicatorMappingAgent");
 assertIncludes("lib/agents.ts", "legalReasonerAgent");
+assertIncludes("lib/agents.ts", "rebuttalAgent");
 assertOrdered("lib/agents.ts", mainlineOrder);
+assertIncludes("lib/agents.ts", "queryBuilderAgent");
 
 assertIncludes("README.md", "Mainline agent orchestration");
 assertIncludes("package.json", "validate:mainline");

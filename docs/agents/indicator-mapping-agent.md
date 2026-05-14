@@ -1,7 +1,7 @@
 # Indicator Mapping Agent
 
 ## 1. Purpose
-The Indicator Mapping Agent aligns each shortlisted legal passage with one or more of the five RDTII Pillar 6 indicators.
+The Indicator Mapping Agent aligns each citation-ready legal passage with one or more of the five RDTII Pillar 6 indicators.
 
 ## 2. Position in Workflow
 `Evidence & Reasoning Layer`
@@ -10,11 +10,10 @@ The Indicator Mapping Agent aligns each shortlisted legal passage with one or mo
 ```ts
 interface IndicatorMappingInput {
   jurisdiction: string;
-  shortlistedPassages: Array<{
+  passages: Array<{
     lawTitle: string;
     citationAnchor: string;
     text: string;
-    relevanceReason: string;
   }>;
 }
 ```
@@ -36,7 +35,7 @@ interface IndicatorMappingOutput {
 ```
 
 ## 5. Core Logic
-1. Inspect each shortlisted passage.
+1. Inspect each citation-ready passage.
 2. Compare its legal meaning to the five Pillar 6 indicators.
 3. Assign the best-fit indicator.
 4. Record a short justification for the mapping.
@@ -65,12 +64,11 @@ Mock input:
 ```json
 {
   "jurisdiction": "European Union",
-  "shortlistedPassages": [
+  "passages": [
     {
       "lawTitle": "Mock Adequacy and Safeguards Regulation",
       "citationAnchor": "Art. 44-46",
-      "text": "Transfers to a third country may take place where an adequacy finding exists or where appropriate safeguards are in place.",
-      "relevanceReason": "Describes transfer conditions."
+      "text": "Transfers to a third country may take place where an adequacy finding exists or where appropriate safeguards are in place."
     }
   ]
 }

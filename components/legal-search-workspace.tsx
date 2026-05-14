@@ -12,7 +12,6 @@ import {
   PreferredSourceType,
   QueryBuilderOutput,
   QueryPlanItem,
-  RelevanceFilterOutput,
   SearchQueryReviewStatus
 } from "@/lib/types";
 import { SearchProfileJson } from "@/lib/pillar6-schema";
@@ -38,13 +37,11 @@ function buildInitialProfile(defaultJurisdiction: string) {
 export function LegalSearchWorkspace({
   defaultJurisdiction,
   linkedQueryBuilder,
-  linkedSourceDiscovery,
-  linkedRelevanceFilter
+  linkedSourceDiscovery
 }: {
   defaultJurisdiction: string;
   linkedQueryBuilder?: QueryBuilderOutput | null;
   linkedSourceDiscovery?: { candidateSources: CandidateSource[] } | null;
-  linkedRelevanceFilter?: RelevanceFilterOutput | null;
 }) {
   const [jurisdiction, setJurisdiction] = useState(defaultJurisdiction);
   const [businessScenario, setBusinessScenario] = useState("fintech");
@@ -193,12 +190,6 @@ export function LegalSearchWorkspace({
     } as Record<"total" | "Primary" | "Supporting" | "ready" | "needsCheck", number>
   );
 
-  const relevanceSummary = linkedRelevanceFilter?.reviewSummary ?? {
-    shortlistedCount: 0,
-    filteredOutCount: 0,
-    humanReviewCount: 0
-  };
-
   const outputJson = JSON.stringify(
     linkedQueryBuilder
       ? {
@@ -241,9 +232,9 @@ export function LegalSearchWorkspace({
               Workflow Connected
             </p>
             <p className="mt-2 text-sm leading-6 text-slate-700">
-              The review board below is showing the latest supporting `Query Builder` result and
-              the mainline `Source Discovery` result from the streamed workflow, while this form
-              remains available for manual review and tuning.
+              The review board below is showing the latest supporting `Query Builder` result from
+              the streamed workflow, while the source preview stays available for future Wikipedia
+              and database retrieval.
             </p>
           </div>
         ) : null}
@@ -368,7 +359,7 @@ export function LegalSearchWorkspace({
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-600">
             Each query is mapped to a specific Pillar 6 indicator and preferred source type before
-            source discovery begins.
+            evidence reading begins.
           </p>
 
           <div className="mt-5 grid gap-3 md:grid-cols-4">
@@ -457,9 +448,7 @@ export function LegalSearchWorkspace({
         </div>
 
         <div className="glass-panel min-w-0 rounded-[2rem] border border-white/70 p-6">
-          <p className="section-title text-xs font-semibold text-blue-700">
-            Source Discovery Output
-          </p>
+          <p className="section-title text-xs font-semibold text-blue-700">Source Layer Preview</p>
           <div className="mt-2 flex flex-wrap items-center gap-3">
             <h2 className="text-2xl font-semibold text-slate-950">Candidate Source Review</h2>
             <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-700">
@@ -467,9 +456,8 @@ export function LegalSearchWorkspace({
             </span>
           </div>
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            Source Discovery now consumes the structured query plan, filters for Pillar 6 scope,
-            and returns authority-ranked sources that law students can spot-check before document
-            reading starts.
+            The source layer is retained as a preview surface for future Wikipedia and database
+            retrieval. It is not part of the current nine-agent demo workflow.
           </p>
 
           <div className="mt-5 grid gap-3 md:grid-cols-4">
@@ -485,60 +473,6 @@ export function LegalSearchWorkspace({
             ))}
           </div>
         </div>
-
-        {linkedRelevanceFilter ? (
-          <div className="glass-panel min-w-0 rounded-[2rem] border border-white/70 p-6">
-            <p className="section-title text-xs font-semibold text-blue-700">
-              Relevance Filter Output
-            </p>
-            <div className="mt-2 flex flex-wrap items-center gap-3">
-              <h2 className="text-2xl font-semibold text-slate-950">Shortlisted Passage Review</h2>
-              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                {relevanceSummary.shortlistedCount} shortlisted
-              </span>
-            </div>
-            <p className="mt-3 text-sm leading-6 text-slate-600">
-              This supporting agent reads the completed mainline passages, keeps only Pillar 6-fit
-              evidence, and flags borderline items for human review before audit packaging.
-            </p>
-
-            <div className="mt-5 grid gap-3 md:grid-cols-3">
-              <StatusPill label="Shortlisted" value={relevanceSummary.shortlistedCount} tone="green" />
-              <StatusPill label="Filtered Out" value={relevanceSummary.filteredOutCount} tone="slate" />
-              <StatusPill label="Needs Review" value={relevanceSummary.humanReviewCount} tone="amber" />
-            </div>
-
-            <div className="mt-5 space-y-4">
-              {linkedRelevanceFilter.shortlistedPassages.map((item) => (
-                <article
-                  key={item.evidenceId}
-                  className="rounded-[1.5rem] border border-blue-100 bg-white/90 p-4 shadow-sm shadow-slate-200/40"
-                >
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-500">
-                        {item.evidenceId}
-                      </p>
-                      <h3 className="mt-1 text-base font-semibold text-slate-950">
-                        {item.indicatorId} · {item.lawTitle}
-                      </h3>
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      <MetaBadge value={item.sourceType} tone="blue" />
-                      <MetaBadge value={item.relevanceBand} tone={item.relevanceBand === "Direct Match" ? "green" : "amber"} />
-                    </div>
-                  </div>
-
-                  <p className="mt-3 text-sm leading-6 text-slate-700">{item.relevanceReason}</p>
-                  <p className="mt-2 text-sm leading-6 text-slate-600">{item.reviewerPrompt}</p>
-                  <div className="mt-3 rounded-[1.2rem] border border-slate-200 bg-slate-950 p-3 text-xs leading-6 text-cyan-100">
-                    {item.text}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        ) : null}
 
         <div className="glass-panel min-w-0 rounded-[2rem] border border-white/70 p-6">
           <p className="section-title text-xs font-semibold text-blue-700">Generated Output</p>

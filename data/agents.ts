@@ -35,6 +35,17 @@ export const pillar6Agents: AgentMeta[] = [
     owner_track: "my-supporting"
   },
   {
+    id: "rebuttal-agent",
+    name: "Rebuttal Review Agent",
+    layer: "Strategic Control & Reasoning Layer",
+    role: "Challenges each legal conclusion against cited evidence and flags overclaims, weak support, or missing citation chains before export.",
+    input: "Legal findings, cited evidence IDs, source passages, reviewer status, and citation metadata.",
+    output: "Supported / weakly supported / unsupported review results with rebuttal notes and suggested revisions.",
+    status: "API-ready",
+    agent_type: "supporting",
+    owner_track: "my-supporting"
+  },
+  {
     id: "legal-review-export",
     name: "Legal Review & Export Agent",
     layer: "Strategic Control & Reasoning Layer",
@@ -57,44 +68,22 @@ export const pillar6Agents: AgentMeta[] = [
     owner_track: "my-supporting"
   },
   {
-    id: "source-discovery",
-    name: "Source Discovery Agent",
-    layer: "Input & Discovery Layer",
-    role: "Routes reviewed query-plan items to official statutes, regulator guidance, ministry portals, treaty databases, and RDTII references for Pillar 6 evidence discovery.",
-    input: "Query plan, search profile JSON, source preferences, and jurisdictional retrieval priorities.",
-    output: "Traceable candidate source inventory with authority ranking, query linkage, and retrieval status.",
-    status: "API-ready",
-    agent_type: "mainline",
-    owner_track: "teammate-mainline"
-  },
-  {
     id: "document-reader",
     name: "Document Reader Agent",
     layer: "Input & Discovery Layer",
-    role: "Structures raw source material into readable passages suitable for legal extraction, including PDF/OCR handling.",
-    input: "Source URLs, downloaded legal texts, PDF pages, scanned notices, and OCR output.",
+    role: "Structures the scoped demo evidence set into readable passages suitable for legal extraction.",
+    input: "Resolved evidence records, source URLs, legal texts, PDF pages, and uploaded context.",
     output: "Normalized passages, section anchors, and machine-readable legal text segments.",
     status: "API-ready",
     agent_type: "mainline",
     owner_track: "teammate-mainline"
   },
   {
-    id: "relevance-filter",
-    name: "Relevance Filter Agent",
-    layer: "Filtering, Mapping & Review Layer",
-    role: "Removes non-Pillar 6 material and keeps only clauses tied to transfer conditions, localization, commitments, or approvals.",
-    input: "Parsed legal passages, metadata tags, and transfer-focused search objectives.",
-    output: "Shortlisted evidence snippets with relevance decisions and discard rationale.",
-    status: "Ready",
-    agent_type: "supporting",
-    owner_track: "my-supporting"
-  },
-  {
     id: "indicator-mapping",
     name: "Indicator Mapping Agent",
     layer: "Filtering, Mapping & Review Layer",
-    role: "Matches shortlisted passages against the five RDTII Pillar 6 indicators with explicit mapping logic.",
-    input: "Shortlisted snippets, Pillar 6 indicator definitions, and jurisdiction context.",
+    role: "Matches citation-ready passages against the five RDTII Pillar 6 indicators with explicit mapping logic.",
+    input: "Citation-ready snippets, Pillar 6 indicator definitions, and jurisdiction context.",
     output: "Indicator-level evidence mapping with score direction and justification.",
     status: "Ready",
     agent_type: "mainline",

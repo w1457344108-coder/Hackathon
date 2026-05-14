@@ -10,6 +10,7 @@ import {
   AuditCitationItem,
   AuditCitationOutput,
   LegalReviewExportOutput,
+  RebuttalAgentOutput,
   RiskSummary
 } from "@/lib/types";
 
@@ -39,6 +40,9 @@ export interface ChatAnalysisResult {
       data?: {
         riskSummary?: RiskSummary | null;
       } | null;
+    };
+    rebuttalAgent?: {
+      data?: RebuttalAgentOutput | null;
     };
     legalReviewExport?: {
       data?: LegalReviewExportOutput | null;
@@ -213,6 +217,7 @@ export function ChatAnalysisPanels({
   );
   const coverageSummary = result.supportingAgentResults?.auditCitation?.data?.coverageSummary ?? null;
   const riskSummary = result.supportingAgentResults?.riskCostQuantifier?.data?.riskSummary ?? null;
+  const rebuttalSummary = result.supportingAgentResults?.rebuttalAgent?.data?.summary ?? null;
   const sourceBasis = result.research?.sourceBasis ?? [];
   const coverageNote = toCoverageSummary(result, evidenceRecords);
   const sourceStrengthNote = toSourceStrengthSummary(result, evidenceRecords);
@@ -323,6 +328,12 @@ export function ChatAnalysisPanels({
         {riskSummary ? (
           <p className="mt-2 text-sm leading-6 text-black/72">
             {`Risk ${riskSummary.riskLevel}. Uncertainty ${riskSummary.uncertaintyLevel}. ${riskSummary.operationalImpact}`}
+          </p>
+        ) : null}
+
+        {rebuttalSummary ? (
+          <p className="mt-2 text-sm leading-6 text-black/72">
+            {`Rebuttal review: ${rebuttalSummary.supportedCount} supported, ${rebuttalSummary.weaklySupportedCount} weakly supported, ${rebuttalSummary.unsupportedCount} unsupported.`}
           </p>
         ) : null}
 

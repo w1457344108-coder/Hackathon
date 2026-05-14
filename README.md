@@ -64,20 +64,26 @@ The UI contract from the original demo is preserved, and the original mock data 
 
 ## Mainline agent orchestration
 
-The mainline path keeps the existing contract and order:
+The current demo mainline is intentionally small and assumes the user names the target Pillar and indicator in the prompt, for example `Pillar 6 indicator 6.4`. Agent2 is kept as a bypass / future Query Builder + Legal Term Wiki slot and does not affect the mainline result.
 
 1. `intent-arbiter`
-2. `source-discovery`
-3. `document-reader`
-4. `indicator-mapping`
-5. `legal-reasoner`
+2. `document-reader`
+3. `indicator-mapping`
+4. `legal-reasoner`
+5. `rebuttal-agent`
+6. `risk-cost-quantifier`
+7. `audit-citation`
+8. `legal-review-export`
 
-The first, second, and fourth steps remain mostly deterministic for stability. The `document-reader` and `legal-reasoner` steps now support live provider-backed structured reasoning with mock fallback.
+For the current API-first demo, the previous `source-discovery` agent is removed from the active orchestration. Source plumbing remains in `lib/server/source-pipeline.ts` so later Wikipedia and database retrieval can be connected without changing the downstream analysis contract.
 
-## Ten-agent readiness
+## Demo workflow readiness
 
-- All ten workflow agents still execute in the original orchestration order expected by the UI and validator scripts.
-- Supporting agents now consume the resolved evidence set from the real-or-hybrid source pipeline instead of reading only global mock arrays.
+- The active trace now runs eight mainline demo steps and skips Agent2, `source-discovery`, and `relevance-filter`.
+- Agent1 outputs `taskType`, `workflowMode`, `selectedPillarId`, `selectedIndicatorId`, `businessScenario`, `scopeConfirmed`, and `focusIndicators`.
+- Agent3 reads manually imported evidence records directly, and Agent4 tags passages with the user-specified Pillar and indicator instead of inferring the label.
+- Supporting agents consume the resolved evidence set from the real-or-hybrid source pipeline instead of reading only global mock arrays.
+- A rebuttal-style review agent challenges legal conclusions against cited evidence before risk packaging, audit, and export.
 - Audit, export, and human review gates are still present in the final trace and export objects.
 
 ## Current Stack
@@ -187,4 +193,3 @@ The original hackathon demo narrative is still available in the workflow output 
 - The system is **not** a production legal research engine.
 - It **does** implement a real backend analysis path, a real provider adapter, a competition-designated RDTII-source pipeline, structured evidence outputs, and persisted reviewer workflow.
 - Where live coverage is incomplete, the app clearly falls back to the legacy mock layer instead of overstating functionality.
-

@@ -1,7 +1,7 @@
 # Audit View & Citation Agent
 
 ## 1. Purpose
-The Audit View & Citation Agent is a supporting sidecar that links mainline legal findings back to shortlisted evidence, verbatim source text, and reviewer context.
+The Audit View & Citation Agent is a supporting sidecar that links mainline legal findings back to citation-ready evidence, verbatim source text, and reviewer context.
 
 ## 2. Position in Workflow
 `Review & Delivery Layer`
@@ -9,7 +9,7 @@ The Audit View & Citation Agent is a supporting sidecar that links mainline lega
 ## 3. Input Schema
 ```ts
 interface AuditViewCitationInput {
-  shortlistedPassages: RelevanceFilterOutput["shortlistedPassages"];
+  passages: DocumentReaderOutput["passages"];
   legalFindings: LegalReasonerOutput["legalFindings"];
 }
 ```
@@ -47,7 +47,7 @@ interface AuditViewCitationOutput {
 
 ## 5. Core Logic
 1. Read completed mainline legal findings.
-2. Match each finding to the sidecar relevance shortlist.
+2. Match each finding to the document-reader passage set.
 3. Preserve citation, verbatim snippet, original legal text, and review status together.
 4. Mark whether the citation chain is complete or still needs human confirmation.
 5. Return UI-ready audit objects for legal review and final export.

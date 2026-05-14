@@ -37,18 +37,13 @@ test("filesystem run store persists and reloads an analysis run", async () => {
         agentId: "intent-arbiter",
         data: {
           normalizedIntent: "Smoke test intent",
-          workflowMode: "cross-jurisdiction",
+          workflowMode: "case-analysis",
           taskType: "case-analysis",
-          pillar6ScopeConfirmed: true,
-          focusIndicators: ["P6_4_CONDITIONAL_FLOW"]
-        },
-        message: "ok"
-      },
-      sourceDiscovery: {
-        status: "success",
-        agentId: "source-discovery",
-        data: {
-          candidateSources: []
+          selectedPillarId: "P6",
+          selectedIndicatorId: "6.4",
+          businessScenario: "Smoke test scenario",
+          scopeConfirmed: true,
+          focusIndicators: ["P6:6.4"]
         },
         message: "ok"
       },
@@ -91,18 +86,17 @@ test("filesystem run store persists and reloads an analysis run", async () => {
         },
         message: "ok"
       },
-      relevanceFilter: {
+      rebuttalAgent: {
         status: "success",
-        agentId: "relevance-filter",
+        agentId: "rebuttal-agent",
         data: {
-          shortlistedPassages: [],
-          filteredOutEvidenceIds: [],
-          reviewSummary: {
-            shortlistedCount: 0,
-            filteredOutCount: 0,
-            humanReviewCount: 0
-          },
-          reviewerChecklist: []
+          reviews: [],
+          summary: {
+            supportedCount: 0,
+            weaklySupportedCount: 0,
+            unsupportedCount: 0,
+            humanReviewNeeded: false
+          }
         },
         message: "ok"
       },
@@ -112,7 +106,8 @@ test("filesystem run store persists and reloads an analysis run", async () => {
         data: {
           riskSummary: {
             riskLevel: "Low",
-            businessCostDrivers: [],
+            riskSummary: "Smoke test risk",
+            businessImpactSummary: "Smoke test impact",
             operationalImpact: "Smoke test impact",
             uncertaintyLevel: "Low",
             humanReviewNeeded: false

@@ -1,8 +1,8 @@
 # Agent Parameter Contract
 
-This document defines the shared parameter contract for the Ten-Agent Pillar 6 Architecture in the `Cross-Border Data Policy Multi-Agent Analyst` project. Its purpose is to ensure that multiple developers can implement or upgrade agents independently without breaking downstream integration.
+This document defines the shared parameter contract for the current local demo architecture in the `Cross-Border Data Policy Multi-Agent Analyst` project. Its purpose is to ensure that multiple developers can implement or upgrade agents independently without breaking downstream integration.
 
-The scope of this contract is strictly limited to **UN ESCAP RDTII Pillar 6: Cross-Border Data Policies**.
+The current demo does not run a full legal database, Wikipedia retrieval, or large-scale search. The user names the target Pillar and indicator in the prompt, and the backend reads manually imported evidence records before calling the API-backed analysis agents.
 
 ## 1. Global Rules
 
@@ -13,8 +13,8 @@ All agents must follow these rules:
 - Agents must not emit undefined or undocumented fields.
 - Failure cases must use one unified error format.
 - Every evidence object must retain either `sourceUrl` or `citationRef`.
-- Every legal conclusion must bind to at least one `evidenceId`.
-- The project processes only Pillar 6 and must not introduce Pillar 7 logic.
+- Every legal conclusion must bind to at least one `evidenceId` and one `passageId`.
+- The active demo supports `selectedPillarId: "P6" | "P7"` and a string `selectedIndicatorId`.
 
 ### Canonical field casing
 
@@ -28,16 +28,16 @@ The current hackathon version treats law student review as a first-class orchest
 
 The required review checkpoints are:
 
-1. Confirm Pillar 6 scope before retrieval.
-2. Revise search terms before discovery.
-3. Spot-check official source authority.
-4. Confirm parsing quality.
-5. Approve relevance shortlist.
-6. Approve indicator mapping.
-7. Review legal conclusion.
-8. Review business impact.
-9. Approve citation chain.
-10. Confirm export package.
+1. Confirm analysis scope.
+2. Confirm parsing quality.
+3. Approve indicator mapping.
+4. Review legal conclusion.
+5. Review rebuttal findings.
+6. Review business impact.
+7. Approve citation chain.
+8. Confirm export package.
+
+Agent2 `query-builder` is intentionally kept as a bypass / future Legal Term Wiki expansion point and is not part of the active mainline trace. The earlier `source-discovery` and `relevance-filter` agents are intentionally removed from the active demo workflow. The source pipeline code remains in place as plumbing for later Wikipedia and database integrations.
 
 Reference wrapper:
 
@@ -62,6 +62,7 @@ interface EvidenceRef {
 interface LegalConclusionRef {
   conclusionId: string;
   evidenceIds: string[];
+  passageIds: string[];
 }
 ```
 
@@ -87,26 +88,22 @@ interface GlobalFailureOutput {
 }
 ```
 
-## 3. Pillar 6 Indicator Enum
+## 3. Demo Scope Fields
 
-All indicator mapping must use this canonical enum:
+Agent1 routes the demo to a selected Pillar and indicator:
 
 ```ts
-type Pillar6IndicatorEnum =
-  | "P6_1_BAN_LOCAL_PROCESSING"
-  | "P6_2_LOCAL_STORAGE"
-  | "P6_3_INFRASTRUCTURE"
-  | "P6_4_CONDITIONAL_FLOW"
-  | "P6_5_BINDING_COMMITMENT";
+type PillarId = "P6" | "P7";
+
+interface DemoScope {
+  selectedPillarId: PillarId;
+  selectedIndicatorId: string; // examples: "6.4", "7.1"
+  scopeConfirmed: boolean;
+  focusIndicators: string[]; // examples: ["P6:6.4"], ["P7:7.1"]
+}
 ```
 
-Indicator meanings:
-
-- `P6_1_BAN_LOCAL_PROCESSING`
-- `P6_2_LOCAL_STORAGE`
-- `P6_3_INFRASTRUCTURE`
-- `P6_4_CONDITIONAL_FLOW`
-- `P6_5_BINDING_COMMITMENT`
+Legacy Pillar 6 enum values remain in older evidence records, but the active demo mapping writes the user-specified `selectedPillarId` and `selectedIndicatorId` onto passages and mapped evidence.
 
 ## 4. Agent-by-Agent Contract
 
@@ -129,9 +126,13 @@ interface IntentArbiterInput {
 ```ts
 interface IntentArbiterOutput {
   normalizedIntent: string;
-  workflowMode: "single-jurisdiction" | "cross-jurisdiction";
-  pillar6ScopeConfirmed: true;
-  focusIndicators: Pillar6IndicatorEnum[];
+  taskType: LegalTaskType;
+  workflowMode: LegalTaskType;
+  selectedPillarId: "P6" | "P7";
+  selectedIndicatorId: string;
+  businessScenario: string;
+  scopeConfirmed: boolean;
+  focusIndicators: string[];
 }
 ```
 
@@ -142,11 +143,12 @@ interface IntentArbiterOutput {
 - `optional_fields`
   - `countryB`
 - `downstream_agent`
-  - `query-builder`
+  - `document-reader`
 
 ### 4.2 Query Builder Agent
 
 - `agent_id`: `query-builder`
+- `mainline_status`: bypass only; kept for future Query Builder / Legal Term Wiki expansion and does not affect the active workflow result.
 - `input`
 
 ```ts
@@ -196,70 +198,20 @@ interface QueryBuilderOutput {
 - `optional_fields`
   - `countryB`
 - `downstream_agent`
-  - `source-discovery`
+  - none in the active demo workflow
 
-### 4.3 Source Discovery Agent
-
-- `agent_id`: `source-discovery`
-- `input`
-
-```ts
-interface SourceDiscoveryInput {
-  countryA: SupportedCountry;
-  countryB?: SupportedCountry | null;
-  queryPlan: QueryPlanItem[];
-  normalizedIntent: string;
-  searchQueries: string[];
-  focusIndicators: Pillar6IndicatorEnum[];
-}
-```
-
-- `output`
-
-```ts
-interface SourceDiscoveryOutput {
-  candidateSources: Array<{
-    sourceId: string;
-    evidenceId: string;
-    queryId?: string;
-    indicatorId?: Pillar6IndicatorEnum;
-    title: string;
-    jurisdiction: string;
-    sourceType: PreferredSourceType | string;
-    sourceUrl: string;
-    authorityLevel?: "Primary" | "Supporting";
-    jurisdictionMatch?: "Direct" | "Regional / Comparative";
-    relevanceNote: string;
-    discoveryReason?: string;
-    retrievalStatus?: "Ready for Reading" | "Needs Human Check";
-    matchedTerms?: string[];
-  }>;
-}
-```
-
-- `required_fields`
-  - `countryA`
-  - `queryPlan`
-  - `normalizedIntent`
-  - `searchQueries`
-  - `focusIndicators`
-- `optional_fields`
-  - `countryB`
-- `downstream_agent`
-  - `document-reader`
-
-### 4.4 Document Reader Agent
+### 4.3 Document Reader Agent
 
 - `agent_id`: `document-reader`
 - `input`
 
 ```ts
 interface DocumentReaderInput {
-  sources: Array<{
-    title: string;
-    sourceType: string;
-    url: string;
-  }>;
+  evidenceRecords: EvidenceRecord[];
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  selectedPillarId: "P6" | "P7";
+  selectedIndicatorId: string;
 }
 ```
 
@@ -268,90 +220,40 @@ interface DocumentReaderInput {
 ```ts
 interface DocumentReaderOutput {
   passages: Array<{
+    passageId: string;
+    evidenceId: string;
     lawTitle: string;
-    citationAnchor: string;
-    text: string;
-    sourceUrl: string;
-  }>;
-}
-```
-
-- `required_fields`
-  - `sources`
-- `optional_fields`
-  - none
-- `downstream_agent`
-  - `relevance-filter`
-
-### 4.5 Relevance Filter Agent
-
-- `agent_id`: `relevance-filter`
-- `input`
-
-```ts
-interface RelevanceFilterInput {
-  jurisdiction: string;
-  passages: Array<{
-    evidenceId: string;
-    citationRef: string;
-    sourceUrl: string;
-    text: string;
-  }>;
-  focusIndicators: Pillar6IndicatorEnum[];
-}
-```
-
-- `output`
-
-```ts
-interface RelevanceFilterOutput {
-  shortlistedPassages: Array<{
-    evidenceId: string;
-    sourceId: string;
     jurisdiction: string;
-    indicatorId: Pillar6IndicatorEnum;
-    lawTitle: string;
+    pillarId: "P6" | "P7";
+    indicatorId: string;
     citationRef: string;
-    sourceUrl: string;
-    sourceType: string;
     text: string;
-    relevanceReason: string;
-    relevanceBand: "Direct Match" | "Borderline";
-    humanReviewNeeded: boolean;
-    reviewerPrompt: string;
+    sourceUrl: string;
   }>;
-  filteredOutEvidenceIds: string[];
-  reviewSummary: {
-    shortlistedCount: number;
-    filteredOutCount: number;
-    humanReviewCount: number;
-  };
-  reviewerChecklist: string[];
 }
 ```
 
 - `required_fields`
-  - `jurisdiction`
-  - `passages`
-  - `focusIndicators`
+  - `evidenceRecords`
+  - `countryA`
+  - `selectedPillarId`
+  - `selectedIndicatorId`
 - `optional_fields`
-  - none
+  - `countryB`
 - `downstream_agent`
   - `indicator-mapping`
 
-### 4.6 Indicator Mapping Agent
+### 4.4 Indicator Mapping Agent
 
 - `agent_id`: `indicator-mapping`
 - `input`
 
 ```ts
 interface IndicatorMappingInput {
-  shortlistedEvidence: Array<{
-    evidenceId: string;
-    citationRef: string;
-    sourceUrl: string;
-    text: string;
-  }>;
+  evidenceRecords: EvidenceRecord[];
+  passages: DocumentReaderOutput["passages"];
+  selectedPillarId: "P6" | "P7";
+  selectedIndicatorId: string;
 }
 ```
 
@@ -361,7 +263,9 @@ interface IndicatorMappingInput {
 interface IndicatorMappingOutput {
   mappedEvidence: Array<{
     evidenceId: string;
-    indicatorId: Pillar6IndicatorEnum;
+    passageId: string;
+    pillarId: "P6" | "P7";
+    indicatorId: string;
     mappingReason: string;
     citationRef: string;
   }>;
@@ -369,26 +273,27 @@ interface IndicatorMappingOutput {
 ```
 
 - `required_fields`
-  - `shortlistedEvidence`
+  - `passages`
 - `optional_fields`
   - none
 - `downstream_agent`
   - `legal-reasoner`
 
-### 4.7 Legal Reasoner Agent
+### 4.5 Legal Reasoner Agent
 
 - `agent_id`: `legal-reasoner`
 - `input`
 
 ```ts
 interface LegalReasonerInput {
-  jurisdiction: string;
-  mappedEvidence: Array<{
-    evidenceId: string;
-    indicatorId: Pillar6IndicatorEnum;
-    mappingReason: string;
-  }>;
-  evidenceTextLookup: Record<string, string>;
+  countryA: SupportedCountry;
+  countryB?: SupportedCountry | null;
+  businessScenario: string;
+  taskType?: LegalTaskType;
+  userQuery: string;
+  evidenceRecords: EvidenceRecord[];
+  passages: DocumentReaderOutput["passages"];
+  mappedEvidence: IndicatorMappingOutput["mappedEvidence"];
 }
 ```
 
@@ -399,39 +304,82 @@ interface LegalReasonerOutput {
   legalFindings: Array<{
     conclusionId: string;
     jurisdiction: string;
-    indicatorId: Pillar6IndicatorEnum;
+    pillarId: "P6" | "P7";
+    indicatorId: string;
     conclusion: string;
     legalEffect: string;
     evidenceIds: string[];
+    passageIds: string[];
   }>;
 }
 ```
 
 - `required_fields`
-  - `jurisdiction`
+  - `userQuery`
+  - `businessScenario`
+  - `passages`
   - `mappedEvidence`
-  - `evidenceTextLookup`
+- `optional_fields`
+  - none
+- `downstream_agent`
+  - `rebuttal-agent`
+
+### 4.6 Rebuttal Review Agent
+
+- `agent_id`: `rebuttal-agent`
+- `input`
+
+```ts
+interface RebuttalAgentInput {
+  evidenceRecords: EvidenceRecord[];
+  passages: DocumentReaderOutput["passages"];
+  legalFindings: LegalReasonerOutput["legalFindings"];
+}
+```
+
+- `output`
+
+```ts
+interface RebuttalAgentOutput {
+  reviews: Array<{
+    conclusionId: string;
+    status: "Supported" | "Weakly Supported" | "Unsupported";
+    issueType?: "Missing Citation" | "Overclaim" | "Wrong Indicator" | "Insufficient Evidence";
+    rebuttalNote: string;
+    citedEvidenceIds: string[];
+    suggestedRevision?: string;
+  }>;
+  summary: {
+    supportedCount: number;
+    weaklySupportedCount: number;
+    unsupportedCount: number;
+    humanReviewNeeded: boolean;
+  };
+}
+```
+
+- `required_fields`
+  - `evidenceRecords`
+  - `passages`
+  - `legalFindings`
 - `optional_fields`
   - none
 - `downstream_agent`
   - `risk-cost-quantifier`
 
-### 4.8 Risk & Cost Quantifier Agent
+### 4.7 Risk & Cost Quantifier Agent
 
 - `agent_id`: `risk-cost-quantifier`
 - `input`
 
 ```ts
 interface RiskCostQuantifierInput {
-  jurisdiction: string;
-  legalFindings: Array<{
-    conclusionId: string;
-    jurisdiction: string;
-    indicatorId: Pillar6IndicatorEnum;
-    conclusion: string;
-    legalEffect: string;
-    evidenceIds: string[];
-  }>;
+  evidenceRecords: EvidenceRecord[];
+  jurisdiction: SupportedCountry;
+  taskType?: LegalTaskType;
+  businessScenario: string;
+  legalFindings: LegalReasonerOutput["legalFindings"];
+  rebuttalReview?: RebuttalAgentOutput | null;
 }
 ```
 
@@ -441,8 +389,8 @@ interface RiskCostQuantifierInput {
 interface RiskCostQuantifierOutput {
   riskSummary: {
     riskLevel: "Low" | "Moderate" | "High";
-    businessCostDrivers: string[];
-    operationalImpact: string;
+    riskSummary: string;
+    businessImpactSummary: string;
     uncertaintyLevel: "Low" | "Moderate" | "High";
     humanReviewNeeded: boolean;
   };
@@ -452,19 +400,21 @@ interface RiskCostQuantifierOutput {
 - `required_fields`
   - `jurisdiction`
   - `legalFindings`
+  - `businessScenario`
 - `optional_fields`
-  - none
+  - `rebuttalReview`
 - `downstream_agent`
   - `audit-citation`
 
-### 4.9 Audit View & Citation Agent
+### 4.8 Audit View & Citation Agent
 
 - `agent_id`: `audit-citation`
 - `input`
 
 ```ts
 interface AuditCitationInput {
-  shortlistedPassages: RelevanceFilterOutput["shortlistedPassages"];
+  evidenceRecords: EvidenceRecord[];
+  passages: DocumentReaderOutput["passages"];
   legalFindings: LegalReasonerOutput["legalFindings"];
 }
 ```
@@ -478,7 +428,9 @@ interface AuditCitationOutput {
     evidenceId: string;
     sourceId: string;
     jurisdiction: string;
-    indicatorId: Pillar6IndicatorEnum;
+    pillarId: "P6" | "P7";
+    indicatorId: string;
+    passageId: string;
     lawTitle: string;
     citationRef: string;
     sourceUrl: string;
@@ -509,7 +461,7 @@ interface AuditCitationOutput {
 - `downstream_agent`
   - `legal-review-export`
 
-### 4.10 Legal Review & Export Agent
+### 4.9 Legal Review & Export Agent
 
 - `agent_id`: `legal-review-export`
 - `input`
@@ -526,8 +478,10 @@ interface LegalReviewExportInput {
   }>;
   riskSummary: {
     riskLevel: "Low" | "Moderate" | "High";
-    businessCostDrivers: string[];
-    operationalImpact: string;
+    riskSummary: string;
+    businessImpactSummary: string;
+    uncertaintyLevel: "Low" | "Moderate" | "High";
+    humanReviewNeeded: boolean;
   };
   comparisonView?: Record<string, string>;
 }
@@ -582,9 +536,13 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "agent_id": "intent-arbiter",
   "data": {
     "normalizedIntent": "Assess outbound transfer approval conditions in China under Pillar 6.",
-    "workflowMode": "single-jurisdiction",
-    "pillar6ScopeConfirmed": true,
-    "focusIndicators": ["P6_4_CONDITIONAL_FLOW"]
+    "taskType": "case-analysis",
+    "workflowMode": "case-analysis",
+    "selectedPillarId": "P6",
+    "selectedIndicatorId": "6.4",
+    "businessScenario": "Demo review of a manually imported legal evidence block for cross-border data compliance.",
+    "scopeConfirmed": true,
+    "focusIndicators": ["P6:6.4"]
   }
 }
 ```
@@ -625,35 +583,6 @@ Below is a simplified JSON-compatible example of the expected data flow from use
 }
 ```
 
-### Source Discovery Output
-
-```json
-{
-  "status": "success",
-  "agent_id": "source-discovery",
-  "data": {
-    "candidateSources": [
-      {
-        "sourceId": "src_001",
-        "evidenceId": "ev_001",
-        "queryId": "QB-4-1",
-        "indicatorId": "P6_4_CONDITIONAL_FLOW",
-        "title": "China Conditional flow regimes Compliance Guidance",
-        "jurisdiction": "China",
-        "sourceType": "Regulator guidance",
-        "sourceUrl": "https://regulator.example.cn/conditional-flow-regimes",
-        "authorityLevel": "Primary",
-        "jurisdictionMatch": "Direct",
-        "relevanceNote": "Likely contains transfer approval conditions.",
-        "discoveryReason": "Spawned from QB-4-1 because the query prioritized regulator guidance first.",
-        "retrievalStatus": "Ready for Reading",
-        "matchedTerms": ["China", "cross-border transfer approval", "security assessment"]
-      }
-    ]
-  }
-}
-```
-
 ### Document Reader Output
 
 ```json
@@ -668,43 +597,6 @@ Below is a simplified JSON-compatible example of the expected data flow from use
         "text": "Outbound transfer of important datasets shall complete the designated security review before the transfer is activated.",
         "sourceUrl": "https://example.gov.cn/mock-export-notice"
       }
-    ]
-  }
-}
-```
-
-### Relevance Filter Output
-
-```json
-{
-  "status": "success",
-  "agent_id": "relevance-filter",
-  "data": {
-    "shortlistedPassages": [
-      {
-        "evidenceId": "EV-CHN-001",
-        "sourceId": "SRC-EV-CHN-001",
-        "jurisdiction": "China",
-        "indicatorId": "P6_4_CONDITIONAL_FLOW",
-        "lawTitle": "Mock Personal Information Export Compliance Notice",
-        "citationRef": "Art. 12",
-        "sourceUrl": "https://example.gov.cn/mock-export-notice",
-        "sourceType": "Regulator guidance",
-        "text": "Outbound transfer of important datasets shall complete the designated security review before the transfer is activated.",
-        "relevanceReason": "Directly describes transfer conditions, approvals, or safeguard gates.",
-        "relevanceBand": "Direct Match",
-        "humanReviewNeeded": false,
-        "reviewerPrompt": "This passage is a strong Pillar 6 fit and can move into audit packaging."
-      }
-    ],
-    "filteredOutEvidenceIds": [],
-    "reviewSummary": {
-      "shortlistedCount": 1,
-      "filteredOutCount": 0,
-      "humanReviewCount": 0
-    },
-    "reviewerChecklist": [
-      "Confirm every shortlisted passage still belongs to Pillar 6 rather than general privacy compliance."
     ]
   }
 }
@@ -759,11 +651,8 @@ Below is a simplified JSON-compatible example of the expected data flow from use
   "data": {
     "riskSummary": {
       "riskLevel": "Moderate",
-      "businessCostDrivers": [
-        "approval preparation burden",
-        "transfer assessment lead time"
-      ],
-      "operationalImpact": "The current legal findings indicate a moderate operational risk posture across 1 Pillar 6 indicator area. The resulting risk picture is relatively stable for demo planning and cost discussion.",
+      "riskSummary": "Risk is Moderate for the selected indicator based on the bound legal findings.",
+      "businessImpactSummary": "The current legal findings indicate a moderate operational risk posture for P6 indicator 6.4. Business planning can proceed, but teams should validate exceptions and trigger conditions.",
       "uncertaintyLevel": "Low",
       "humanReviewNeeded": false
     }

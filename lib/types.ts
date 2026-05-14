@@ -16,6 +16,8 @@ export type LegalTaskType =
   | "case-analysis"
   | "forward-looking-advisory";
 
+export type PillarId = "P6" | "P7";
+
 export type Pillar6IndicatorEnum =
   | "P6_1_BAN_LOCAL_PROCESSING"
   | "P6_2_LOCAL_STORAGE"
@@ -48,10 +50,10 @@ export type SourceRetrievalStatus = "Ready for Reading" | "Needs Human Check";
 
 export interface AgentResult<T> {
   status: "success" | "error";
-  agentId: TenAgentId;
+  agentId: WorkflowAgentId;
   data: T | null;
   message: string;
-  downstreamAgent?: TenAgentId;
+  downstreamAgent?: WorkflowAgentId;
 }
 
 export interface RdtiiStyleScore {
@@ -126,14 +128,13 @@ export interface WorkflowInput {
   }>;
 }
 
-export type TenAgentId =
+export type WorkflowAgentId =
   | "intent-arbiter"
   | "query-builder"
-  | "source-discovery"
   | "document-reader"
-  | "relevance-filter"
   | "indicator-mapping"
   | "legal-reasoner"
+  | "rebuttal-agent"
   | "risk-cost-quantifier"
   | "audit-citation"
   | "legal-review-export";
@@ -143,33 +144,36 @@ export interface AgentHumanReviewGate {
   reviewerRole: "law-student" | "none";
   action:
     | "Confirm Pillar 6 scope before retrieval"
+    | "Confirm analysis scope"
     | "Revise search terms before discovery"
-    | "Spot-check official source authority"
     | "Confirm parsing quality"
-    | "Approve relevance shortlist"
     | "Approve indicator mapping"
     | "Review legal conclusion"
+    | "Review rebuttal findings"
     | "Review business impact"
     | "Approve citation chain"
     | "Confirm export package";
 }
 
 export interface WorkflowAgentTrace {
-  agentId: TenAgentId;
+  agentId: WorkflowAgentId;
   name: string;
   inputSummary: string;
   outputSummary: string;
   evidenceIds: string[];
   humanReviewGate: AgentHumanReviewGate;
-  nextAgent: TenAgentId | null;
+  nextAgent: WorkflowAgentId | null;
 }
 
 export interface IntentArbiterOutput {
   normalizedIntent: string;
-  workflowMode: "single-jurisdiction" | "cross-jurisdiction";
+  workflowMode: LegalTaskType;
   taskType: LegalTaskType;
-  pillar6ScopeConfirmed: true;
-  focusIndicators: Pillar6IndicatorEnum[];
+  selectedPillarId: PillarId;
+  selectedIndicatorId: string;
+  businessScenario: string;
+  scopeConfirmed: boolean;
+  focusIndicators: string[];
 }
 
 export interface QueryPlanItem {
@@ -202,7 +206,7 @@ export interface CandidateSource {
   sourceId: string;
   evidenceId: string;
   queryId?: string;
-  indicatorId?: Pillar6IndicatorEnum;
+  indicatorId?: string;
   title: string;
   jurisdiction: string;
   sourceType: PreferredSourceType | string;
@@ -220,9 +224,13 @@ export interface SourceDiscoveryOutput {
 }
 
 export interface LegalPassage {
+  passageId: string;
   evidenceId: string;
   sourceId: string;
   lawTitle: string;
+  jurisdiction: string;
+  pillarId: PillarId;
+  indicatorId: string;
   citationRef: string;
   sourceUrl: string;
   text: string;
@@ -234,7 +242,9 @@ export interface DocumentReaderOutput {
 
 export interface MappedEvidenceItem {
   evidenceId: string;
-  indicatorId: Pillar6IndicatorEnum;
+  passageId: string;
+  pillarId: PillarId;
+  indicatorId: string;
   mappingReason: string;
   citationRef: string;
 }
@@ -246,49 +256,53 @@ export interface IndicatorMappingOutput {
 export interface LegalFinding {
   conclusionId: string;
   jurisdiction: string;
-  indicatorId: Pillar6IndicatorEnum;
+  pillarId: PillarId;
+  indicatorId: string;
   conclusion: string;
   legalEffect: string;
   evidenceIds: string[];
+  passageIds: string[];
 }
 
 export interface LegalReasonerOutput {
   legalFindings: LegalFinding[];
 }
 
-export interface RelevanceShortlistItem {
-  evidenceId: string;
-  sourceId: string;
-  jurisdiction: string;
-  indicatorId: Pillar6IndicatorEnum;
-  lawTitle: string;
-  citationRef: string;
-  sourceUrl: string;
-  sourceType: string;
-  text: string;
-  relevanceReason: string;
-  relevanceBand: "Direct Match" | "Borderline";
-  humanReviewNeeded: boolean;
-  reviewerPrompt: string;
+export type RebuttalReviewStatus = "Supported" | "Weakly Supported" | "Unsupported";
+
+export type RebuttalIssueType =
+  | "Missing Citation"
+  | "Overclaim"
+  | "Wrong Indicator"
+  | "Insufficient Evidence";
+
+export interface RebuttalReviewItem {
+  conclusionId: string;
+  status: RebuttalReviewStatus;
+  issueType?: RebuttalIssueType;
+  rebuttalNote: string;
+  citedEvidenceIds: string[];
+  suggestedRevision?: string;
 }
 
-export interface RelevanceFilterOutput {
-  shortlistedPassages: RelevanceShortlistItem[];
-  filteredOutEvidenceIds: string[];
-  reviewSummary: {
-    shortlistedCount: number;
-    filteredOutCount: number;
-    humanReviewCount: number;
+export interface RebuttalAgentOutput {
+  reviews: RebuttalReviewItem[];
+  summary: {
+    supportedCount: number;
+    weaklySupportedCount: number;
+    unsupportedCount: number;
+    humanReviewNeeded: boolean;
   };
-  reviewerChecklist: string[];
 }
 
 export type ReasoningUncertaintyLevel = "Low" | "Moderate" | "High";
 
 export interface RiskSummary {
   riskLevel: RiskLevel;
-  businessCostDrivers: string[];
-  operationalImpact: string;
+  riskSummary: string;
+  businessImpactSummary: string;
+  businessCostDrivers?: string[];
+  operationalImpact?: string;
   uncertaintyLevel: ReasoningUncertaintyLevel;
   humanReviewNeeded: boolean;
 }
@@ -302,7 +316,9 @@ export interface AuditCitationItem {
   sourceId: string;
   conclusionId: string;
   jurisdiction: string;
-  indicatorId: Pillar6IndicatorEnum;
+  indicatorId: string;
+  pillarId?: PillarId;
+  passageId?: string;
   lawTitle: string;
   citationRef: string;
   sourceUrl: string;
@@ -347,7 +363,6 @@ export interface LegalReviewExportOutput {
 
 export interface MainlineAgentResults {
   intentArbiter: AgentResult<IntentArbiterOutput>;
-  sourceDiscovery: AgentResult<SourceDiscoveryOutput>;
   documentReader: AgentResult<DocumentReaderOutput>;
   indicatorMapping: AgentResult<IndicatorMappingOutput>;
   legalReasoner: AgentResult<LegalReasonerOutput>;
@@ -355,7 +370,7 @@ export interface MainlineAgentResults {
 
 export interface SupportingAgentResults {
   queryBuilder: AgentResult<QueryBuilderOutput>;
-  relevanceFilter: AgentResult<RelevanceFilterOutput>;
+  rebuttalAgent: AgentResult<RebuttalAgentOutput>;
   riskCostQuantifier: AgentResult<RiskCostQuantifierOutput>;
   auditCitation: AgentResult<AuditCitationOutput>;
   legalReviewExport: AgentResult<LegalReviewExportOutput>;

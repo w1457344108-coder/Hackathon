@@ -334,23 +334,10 @@ export const pipelineStages: PipelineAgentStage[] = [
     output: "Search Profile JSON and query strings"
   },
   {
-    id: "source-discovery",
-    name: "Source Discovery Agent",
-    purpose:
-      "Executes reviewed query-plan items against the right authority channel and returns traceable candidate sources first.",
-    output: "Authority-ranked candidate source inventory"
-  },
-  {
     id: "document-reader",
     name: "Document Reader Agent",
     purpose: "Reads target documents and segments provisions relevant to cross-border data transfer.",
     output: "Passage set with source anchors"
-  },
-  {
-    id: "relevance-filter",
-    name: "Relevance Filter Agent",
-    purpose: "Filters out low-value clauses and keeps only evidence linked to Pillar 6 indicators.",
-    output: "Shortlisted evidence snippets"
   },
   {
     id: "indicator-mapping",

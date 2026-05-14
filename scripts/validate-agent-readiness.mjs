@@ -20,7 +20,7 @@ function assertOrdered(file, expectedItems) {
   let lastIndex = -1;
 
   for (const item of expectedItems) {
-    const nextIndex = content.indexOf(item);
+    const nextIndex = content.indexOf(item, lastIndex + 1);
 
     if (nextIndex === -1) {
       throw new Error(`${file} is missing ordered item: ${item}`);
@@ -34,14 +34,12 @@ function assertOrdered(file, expectedItems) {
   }
 }
 
-const tenAgentOrder = [
+const workflowAgentOrder = [
   "intent-arbiter",
-  "query-builder",
-  "source-discovery",
   "document-reader",
-  "relevance-filter",
   "indicator-mapping",
   "legal-reasoner",
+  "rebuttal-agent",
   "risk-cost-quantifier",
   "audit-citation",
   "legal-review-export"
@@ -50,15 +48,16 @@ const tenAgentOrder = [
 assertIncludes("lib/types.ts", "export interface WorkflowAgentTrace");
 assertIncludes("lib/types.ts", "export interface DemoNarrative");
 assertIncludes("lib/types.ts", "humanReviewGate");
-assertIncludes("lib/agents.ts", "buildTenAgentTrace");
+assertIncludes("lib/agents.ts", "buildWorkflowAgentTrace");
 assertIncludes("lib/agents.ts", "agentTrace");
 assertIncludes("lib/agents.ts", "demoNarrative");
-assertOrdered("lib/agents.ts", tenAgentOrder);
+assertOrdered("lib/agents.ts", workflowAgentOrder);
+assertIncludes("lib/agents.ts", "queryBuilderAgent");
 assertIncludes("docs/agent-parameters.md", "Canonical field casing");
 assertIncludes("docs/agent-parameters.md", "camelCase");
 assertIncludes("docs/agent-parameters.md", "Human review gates");
 assertIncludes("README.md", "Current implementation boundary");
 assertIncludes("README.md", "Demo narrative");
-assertIncludes("README.md", "Ten-agent readiness");
+assertIncludes("README.md", "Demo workflow readiness");
 
 console.log("Agent orchestration readiness checks passed.");

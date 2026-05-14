@@ -58,18 +58,18 @@ export function AgentPipelineViewer({
           <div className="max-w-4xl">
             <p className="section-title text-xs font-semibold text-blue-700">Evidence Pipeline</p>
             <h2 className="mt-2 text-2xl font-semibold text-slate-950 sm:text-3xl">
-              Ten-Agent Pillar 6 Architecture
+              Nine-Agent Pillar 6 Demo Architecture
             </h2>
             <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-600 sm:text-base">
               This architecture is scoped only to UN ESCAP RDTII Pillar 6: Cross-Border Data
-              Policies. It organizes legal intake, evidence extraction, indicator mapping,
-              reasoning, quantification, citation review, and export into a policy-analysis-ready
-              multi-agent system with a streamlined 5 + 5 structure.
+              Policies. It keeps source integration pluggable for future Wikipedia and database
+              retrieval while the current demo focuses on API-backed passage extraction, indicator
+              mapping, reasoning, rebuttal review, quantification, citation review, and export.
             </p>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
-            <LegendPill label="Topology" value="10 Specialized Agents" />
+            <LegendPill label="Topology" value="9 Demo Agents" />
             <LegendPill
               label="Current State"
               value={hasResult ? "Completed" : isRunning ? "Live / Hybrid Execution" : "Architecture Ready"}
@@ -82,14 +82,14 @@ export function AgentPipelineViewer({
       <div className="mt-6 space-y-6">
         <AgentRow
           title="Mainline Agents"
-          summary="Five core agents drive the path from user intent to legal conclusion."
+          summary="Four core agents drive the path from user intent to legal conclusion."
           agents={mainlineAgents}
           isRunning={isRunning}
           hasResult={hasResult}
         />
         <AgentRow
           title="Supporting Agents"
-          summary="Five supporting agents strengthen retrieval quality, evidence transparency, and export readiness."
+          summary="Five supporting agents strengthen prompt quality, hallucination checks, evidence transparency, and export readiness."
           agents={supportingAgents}
           isRunning={isRunning}
           hasResult={hasResult}
