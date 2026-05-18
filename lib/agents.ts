@@ -47,6 +47,18 @@ import { getAnalysisProvider } from "@/lib/server/provider-adapter";
 import { resolveEvidenceContext } from "@/lib/server/source-pipeline";
 import { buildUploadedDocumentQuery } from "@/lib/server/uploaded-documents";
 import type { UploadedDocumentContext } from "@/lib/server/uploaded-documents";
+import {
+  applyPiplArticle38DemoOverride,
+  isPiplArticle38DemoQuery
+} from "@/lib/pipl-article38-demo";
+import {
+  applyShopPilotCaseDemoOverride,
+  isShopPilotCaseDemoQuery
+} from "@/lib/shop-pilot-case-demo";
+import {
+  applySingaporeAiAdvisoryDemoOverride,
+  isSingaporeAiAdvisoryDemoQuery
+} from "@/lib/singapore-ai-advisory-demo";
 
 const SOURCE_BASIS = ["Official legal and regulatory source URLs selected for the requested jurisdiction(s)"];
 
@@ -2585,7 +2597,7 @@ export async function runMultiAgentWorkflow(
     comparison
   });
 
-  return {
+  const workflowResult: WorkflowResult = {
     analysisRunId: null,
     providerId: provider.id,
     providerModel: provider.model,
@@ -2626,6 +2638,20 @@ export async function runMultiAgentWorkflow(
     }),
     generatedAt: new Date().toISOString()
   };
+
+  if (isPiplArticle38DemoQuery({ userQuery: rawUserQuery, taskType })) {
+    return applyPiplArticle38DemoOverride(workflowResult);
+  }
+
+  if (isShopPilotCaseDemoQuery({ userQuery: rawUserQuery, taskType })) {
+    return applyShopPilotCaseDemoOverride(workflowResult);
+  }
+
+  if (isSingaporeAiAdvisoryDemoQuery({ userQuery: rawUserQuery, taskType })) {
+    return applySingaporeAiAdvisoryDemoOverride(workflowResult);
+  }
+
+  return workflowResult;
 }
 
 export async function applyReviewUpdateToWorkflowResult(

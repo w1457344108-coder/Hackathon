@@ -106,7 +106,9 @@ export function ChatLegalWorkspace() {
   const [selectedCountryA, setSelectedCountryA] = useState<SupportedCountry>("China");
   const [selectedCountryB, setSelectedCountryB] = useState<SupportedCountry>("Singapore");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isComposerCollapsed, setIsComposerCollapsed] = useState(false);
   const hasConversation = messages.length > 1;
+  const hasPendingAssistant = messages.some((message) => message.status === "loading");
 
   const mode = useMemo(
     () => coreModes.find((item) => item.id === activeMode) ?? coreModes[0],
@@ -156,6 +158,7 @@ export function ChatLegalWorkspace() {
         }
       ]);
       setInputValue("");
+      setIsComposerCollapsed(true);
       return;
     }
 
@@ -177,6 +180,7 @@ export function ChatLegalWorkspace() {
     ]);
     setInputValue("");
     setUploadedFiles([]);
+    setIsComposerCollapsed(true);
     setIsSubmitting(true);
 
     try {
@@ -220,7 +224,7 @@ export function ChatLegalWorkspace() {
   }
 
   return (
-    <main className="flex min-h-screen overflow-hidden bg-white text-black">
+    <main className="flex h-screen overflow-hidden bg-white text-black">
       <ConversationSidebar
         activeConversation={activeConversation}
         onConversationChange={setActiveConversation}
@@ -229,13 +233,14 @@ export function ChatLegalWorkspace() {
           setActiveConversation("current");
           setInputValue("");
           setUploadedFiles([]);
+          setIsComposerCollapsed(false);
           setSelectedCountryA("China");
           setSelectedCountryB("Singapore");
           handleModeChange("regulation");
         }}
       />
 
-      <section className={`relative min-w-0 flex-1 overflow-hidden ${hasConversation ? "bg-white" : "bg-[#f8f8f8]"}`}>
+      <section className={`relative h-screen min-w-0 flex-1 overflow-hidden ${hasConversation ? "bg-white" : "bg-[#f8f8f8]"}`}>
         {!hasConversation ? (
           <>
             <VideoBackground />
@@ -244,36 +249,43 @@ export function ChatLegalWorkspace() {
         ) : null}
 
         <div
-          className={`relative z-10 flex min-h-screen flex-col ${
+          className={`relative z-10 flex h-full min-h-0 flex-col ${
             hasConversation ? "bg-white px-6 py-4 lg:px-[72px]" : "px-6 py-4 lg:px-[120px]"
           }`}
         >
-          <Navigation />
+          {hasConversation ? null : <Navigation />}
 
           {hasConversation ? (
             <section className="flex min-h-0 flex-1 flex-col">
-              <div className="mx-auto min-h-0 w-full max-w-[860px] flex-1 overflow-y-auto py-8">
+              <div className="mx-auto min-h-0 w-full max-w-[860px] flex-1 overflow-y-auto overscroll-contain py-8">
                 <ConversationMessages messages={messages.slice(1)} />
               </div>
 
               <div className="border-t border-black/10 bg-white py-4">
                 <div className="mx-auto w-full max-w-[860px]">
-                  <SearchComposer
-                    activeMode={activeMode}
-                    inputValue={inputValue}
-                    modePrompt={mode.prompt}
-                    surface="chat"
-                    onModeChange={handleModeChange}
-                    onInputChange={setInputValue}
-                    uploadedFiles={uploadedFiles}
-                    onUploadedFilesChange={setUploadedFiles}
-                    selectedCountryA={selectedCountryA}
-                    selectedCountryB={selectedCountryB}
-                    onSelectedCountryAChange={setSelectedCountryA}
-                    onSelectedCountryBChange={setSelectedCountryB}
-                    isSubmitting={isSubmitting}
-                    onSubmit={handleSubmit}
-                  />
+                  {isComposerCollapsed ? (
+                    <CollapsedComposerBar
+                      isSubmitting={isSubmitting || hasPendingAssistant}
+                      onExpand={() => setIsComposerCollapsed(false)}
+                    />
+                  ) : (
+                    <SearchComposer
+                      activeMode={activeMode}
+                      inputValue={inputValue}
+                      surface="chat"
+                      onModeChange={handleModeChange}
+                      onInputChange={setInputValue}
+                      uploadedFiles={uploadedFiles}
+                      onUploadedFilesChange={setUploadedFiles}
+                      selectedCountryA={selectedCountryA}
+                      selectedCountryB={selectedCountryB}
+                      onSelectedCountryAChange={setSelectedCountryA}
+                      onSelectedCountryBChange={setSelectedCountryB}
+                      isSubmitting={isSubmitting}
+                      onCollapse={() => setIsComposerCollapsed(true)}
+                      onSubmit={handleSubmit}
+                    />
+                  )}
                 </div>
               </div>
             </section>
@@ -289,7 +301,6 @@ export function ChatLegalWorkspace() {
                 <SearchComposer
                   activeMode={activeMode}
                   inputValue={inputValue}
-                  modePrompt={mode.prompt}
                   surface="hero"
                   onModeChange={handleModeChange}
                   onInputChange={setInputValue}
@@ -300,6 +311,7 @@ export function ChatLegalWorkspace() {
                   onSelectedCountryAChange={setSelectedCountryA}
                   onSelectedCountryBChange={setSelectedCountryB}
                   isSubmitting={isSubmitting}
+                  onCollapse={undefined}
                   onSubmit={handleSubmit}
                 />
               </div>
@@ -321,11 +333,11 @@ function ConversationSidebar({
   onNewChat: () => void;
 }) {
   return (
-    <aside className="flex w-[108px] shrink-0 flex-col border-r border-[#242424] bg-[#171717] font-schibsted text-white sm:w-[250px] lg:w-[292px]">
+    <aside className="flex h-screen w-[108px] shrink-0 flex-col overflow-hidden border-r border-[#242424] bg-[#171717] font-schibsted text-white sm:w-[250px] lg:w-[292px]">
       <div className="flex h-16 items-center justify-between border-b border-white/10 px-2 sm:px-4">
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold">Legal</p>
-          <p className="hidden truncate text-xs text-white/55 sm:block">Pillar 6 Workspace</p>
+          <p className="hidden truncate text-xs text-white/55 sm:block">Pillar 6/7 Workspace</p>
         </div>
         <button
           type="button"
@@ -337,7 +349,7 @@ function ConversationSidebar({
         </button>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-2 py-4 sm:px-3">
+      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-2 py-4 sm:px-3">
         <p className="px-2 text-xs font-medium text-white/45">Chats</p>
         <nav className="mt-2 space-y-1">
           {historyItems.map((item) => {
@@ -487,10 +499,43 @@ function Navigation() {
   );
 }
 
+function CollapsedComposerBar({
+  isSubmitting,
+  onExpand
+}: {
+  isSubmitting: boolean;
+  onExpand: () => void;
+}) {
+  return (
+    <div className="rounded-[16px] border border-black/10 bg-white px-4 py-3 shadow-[0_12px_34px_rgba(0,0,0,0.05)]">
+      <button
+        type="button"
+        onClick={onExpand}
+        disabled={isSubmitting}
+        className="flex w-full items-center justify-between gap-3 rounded-[12px] bg-[#f7f7f7] px-4 py-3 text-left font-schibsted transition hover:bg-[#f1f1f1] disabled:cursor-not-allowed disabled:opacity-70"
+        aria-label={isSubmitting ? "Analysis is running" : "Expand question composer"}
+      >
+        <span className="min-w-0">
+          <span className="block text-[14px] font-semibold text-black">
+            {isSubmitting ? "Analysis is running..." : "Continue asking"}
+          </span>
+          <span className="mt-0.5 block truncate text-[12px] font-medium text-black/50">
+            {isSubmitting
+              ? "The input panel is hidden while the result is being prepared."
+              : "Expand the question panel when you are ready to ask a follow-up."}
+          </span>
+        </span>
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-black text-[16px] font-semibold leading-none text-white">
+          {isSubmitting ? "..." : "▼"}
+        </span>
+      </button>
+    </div>
+  );
+}
+
 function SearchComposer({
   activeMode,
   inputValue,
-  modePrompt,
   surface,
   selectedCountryA,
   selectedCountryB,
@@ -501,11 +546,11 @@ function SearchComposer({
   onUploadedFilesChange,
   onSelectedCountryAChange,
   onSelectedCountryBChange,
+  onCollapse,
   onSubmit
 }: {
   activeMode: CoreModeId;
   inputValue: string;
-  modePrompt: string;
   surface: "hero" | "chat";
   selectedCountryA: SupportedCountry;
   selectedCountryB: SupportedCountry;
@@ -516,6 +561,7 @@ function SearchComposer({
   onUploadedFilesChange: (files: File[]) => void;
   onSelectedCountryAChange: (country: SupportedCountry) => void;
   onSelectedCountryBChange: (country: SupportedCountry) => void;
+  onCollapse?: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   const isHero = surface === "hero";
@@ -664,14 +710,19 @@ function SearchComposer({
       ) : null}
 
       <div
-        className={`flex items-center justify-end px-1 pb-2 font-schibsted text-[12px] font-medium ${
+        className={`flex items-center px-1 pb-2 font-schibsted text-[12px] font-medium ${
           isHero ? "text-white" : "text-black"
         }`}
       >
-        <div className="flex items-center gap-1.5">
-          <AISparkleIcon className="h-4 w-4" />
-          <span>Powered by DeepSeek</span>
-        </div>
+        {onCollapse ? (
+          <button
+            type="button"
+            onClick={onCollapse}
+            className="rounded-full bg-black/5 px-3 py-1.5 text-[12px] font-semibold text-black/60 transition hover:bg-black/10 hover:text-black"
+          >
+            Hide ▲
+          </button>
+        ) : null}
       </div>
 
       <div className="rounded-[12px] bg-white shadow-[0_12px_30px_rgba(0,0,0,0.12)]">
@@ -817,16 +868,6 @@ function SearchComposer({
           );
         })}
       </div>
-
-      <p
-        className={`mt-2 truncate px-1 font-schibsted text-[12px] font-medium ${
-          isHero ? "text-white/85" : "text-black/55"
-        }`}
-      >
-        {countrySelectionMode === "dual"
-          ? `${modePrompt} Retrieval will stay within official legal sources for ${selectedCountryA} and ${selectedCountryB}.`
-          : `${modePrompt} Retrieval will stay within official legal sources for ${selectedCountryA}.`}
-      </p>
     </form>
   );
 }
@@ -1363,6 +1404,16 @@ function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
   const narrative =
     result.report?.finalNarrative ??
     "The workflow completed, but no final narrative was returned.";
+  const exportJson = result.supportingAgentResults?.legalReviewExport?.data?.exportJson;
+
+  if (
+    exportJson?.answerType === "REGULATION_EXPLANATION" ||
+    exportJson?.answerType === "CASE_ANALYSIS" ||
+    exportJson?.answerType === "FORWARD_LOOKING_ADVISORY"
+  ) {
+    return narrative;
+  }
+
   const risk = result.report?.overallRisk ? `Overall risk: ${result.report.overallRisk}.` : null;
   const provider = result.providerId
     ? `Provider: ${result.providerId}${result.providerModel ? ` (${result.providerModel})` : ""}.`
