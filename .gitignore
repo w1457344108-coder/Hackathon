@@ -13,3 +13,9 @@ tsconfig.tsbuildinfo
 start-dev.command
 data/runtime/
 _incoming_hackthon_*/
+
+# legal_ast_llm_wiki generated backups and Python cache
+legal_ast_llm_wiki/**/__pycache__/
+legal_ast_llm_wiki/**/*.pyc
+legal_ast_llm_wiki/**/*.*.bak.*
+legal_ast_llm_wiki/**/_backups/

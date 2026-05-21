@@ -1,0 +1,4156 @@
+[
+  {
+    "mapping_id": "mapping_a12e4913fb8f",
+    "colloquial_expression": "Can a company send my data overseas?",
+    "mapped_standard_terms": [
+      "cross-border transfer of personal data"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0011_ast",
+      "companies_act_1967_c8232023ef_chunk_0012_ast",
+      "companies_act_1967_c8232023ef_chunk_0024_ast",
+      "companies_act_1967_c8232023ef_chunk_0025_ast",
+      "companies_act_1967_c8232023ef_chunk_0031_ast",
+      "companies_act_1967_c8232023ef_chunk_0039_ast",
+      "companies_act_1967_c8232023ef_chunk_0040_ast",
+      "companies_act_1967_c8232023ef_chunk_0042_ast",
+      "companies_act_1967_c8232023ef_chunk_0081_ast",
+      "companies_act_1967_c8232023ef_chunk_0109_ast",
+      "companies_act_1967_c8232023ef_chunk_0110_ast",
+      "companies_act_1967_c8232023ef_chunk_0132_ast",
+      "companies_act_1967_c8232023ef_chunk_0133_ast",
+      "companies_act_1967_c8232023ef_chunk_0134_ast",
+      "companies_act_1967_c8232023ef_chunk_0139_ast",
+      "companies_act_1967_c8232023ef_chunk_0140_ast",
+      "companies_act_1967_c8232023ef_chunk_0144_ast",
+      "companies_act_1967_c8232023ef_chunk_0145_ast",
+      "companies_act_1967_c8232023ef_chunk_0155_ast",
+      "companies_act_1967_c8232023ef_chunk_0156_ast",
+      "companies_act_1967_c8232023ef_chunk_0231_ast",
+      "companies_act_1967_c8232023ef_chunk_0244_ast",
+      "companies_act_1967_c8232023ef_chunk_0291_ast",
+      "companies_act_1967_c8232023ef_chunk_0333_ast",
+      "companies_act_1967_c8232023ef_chunk_0334_ast",
+      "companies_act_1967_c8232023ef_chunk_0336_ast",
+      "companies_act_1967_c8232023ef_chunk_0371_ast",
+      "companies_act_1967_c8232023ef_chunk_0374_ast",
+      "companies_act_1967_c8232023ef_chunk_0383_ast",
+      "companies_act_1967_c8232023ef_chunk_0388_ast",
+      "companies_act_1967_c8232023ef_chunk_0389_ast",
+      "companies_act_1967_c8232023ef_chunk_0390_ast",
+      "companies_act_1967_c8232023ef_chunk_0392_ast",
+      "companies_act_1967_c8232023ef_chunk_0393_ast",
+      "companies_act_1967_c8232023ef_chunk_0394_ast",
+      "companies_act_1967_c8232023ef_chunk_0395_ast",
+      "companies_act_1967_c8232023ef_chunk_0396_ast",
+      "companies_act_1967_c8232023ef_chunk_0397_ast",
+      "companies_act_1967_c8232023ef_chunk_0398_ast",
+      "companies_act_1967_c8232023ef_chunk_0399_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Seed colloquial expression mapped to AST-backed terms; pending review."
+    ]
+  },
+  {
+    "mapping_id": "mapping_5077085e45a8",
+    "colloquial_expression": "Can an organisation share my information?",
+    "mapped_standard_terms": [
+      "disclosure of personal data"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0001_ast",
+      "companies_act_1967_c8232023ef_chunk_0002_ast",
+      "companies_act_1967_c8232023ef_chunk_0003_ast",
+      "companies_act_1967_c8232023ef_chunk_0004_ast",
+      "companies_act_1967_c8232023ef_chunk_0005_ast",
+      "companies_act_1967_c8232023ef_chunk_0006_ast",
+      "companies_act_1967_c8232023ef_chunk_0007_ast",
+      "companies_act_1967_c8232023ef_chunk_0008_ast",
+      "companies_act_1967_c8232023ef_chunk_0009_ast",
+      "companies_act_1967_c8232023ef_chunk_0010_ast",
+      "companies_act_1967_c8232023ef_chunk_0011_ast",
+      "companies_act_1967_c8232023ef_chunk_0012_ast",
+      "companies_act_1967_c8232023ef_chunk_0013_ast",
+      "companies_act_1967_c8232023ef_chunk_0014_ast",
+      "companies_act_1967_c8232023ef_chunk_0015_ast",
+      "companies_act_1967_c8232023ef_chunk_0016_ast",
+      "companies_act_1967_c8232023ef_chunk_0017_ast",
+      "companies_act_1967_c8232023ef_chunk_0019_ast",
+      "companies_act_1967_c8232023ef_chunk_0020_ast",
+      "companies_act_1967_c8232023ef_chunk_0021_ast",
+      "companies_act_1967_c8232023ef_chunk_0022_ast",
+      "companies_act_1967_c8232023ef_chunk_0023_ast",
+      "companies_act_1967_c8232023ef_chunk_0024_ast",
+      "companies_act_1967_c8232023ef_chunk_0025_ast",
+      "companies_act_1967_c8232023ef_chunk_0026_ast",
+      "companies_act_1967_c8232023ef_chunk_0027_ast",
+      "companies_act_1967_c8232023ef_chunk_0028_ast",
+      "companies_act_1967_c8232023ef_chunk_0029_ast",
+      "companies_act_1967_c8232023ef_chunk_0030_ast",
+      "companies_act_1967_c8232023ef_chunk_0031_ast",
+      "companies_act_1967_c8232023ef_chunk_0032_ast",
+      "companies_act_1967_c8232023ef_chunk_0033_ast",
+      "companies_act_1967_c8232023ef_chunk_0034_ast",
+      "companies_act_1967_c8232023ef_chunk_0035_ast",
+      "companies_act_1967_c8232023ef_chunk_0036_ast",
+      "companies_act_1967_c8232023ef_chunk_0037_ast",
+      "companies_act_1967_c8232023ef_chunk_0038_ast",
+      "companies_act_1967_c8232023ef_chunk_0039_ast",
+      "companies_act_1967_c8232023ef_chunk_0040_ast",
+      "companies_act_1967_c8232023ef_chunk_0041_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Seed colloquial expression mapped to AST-backed terms; pending review."
+    ]
+  },
+  {
+    "mapping_id": "mapping_32cdf88262a6",
+    "colloquial_expression": "Do I need to agree before my data is used?",
+    "mapped_standard_terms": [
+      "consent requirement"
+    ],
+    "mapped_issue": "consent_requirement",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0003_ast",
+      "companies_act_1967_c8232023ef_chunk_0004_ast",
+      "companies_act_1967_c8232023ef_chunk_0006_ast",
+      "companies_act_1967_c8232023ef_chunk_0015_ast",
+      "companies_act_1967_c8232023ef_chunk_0017_ast",
+      "companies_act_1967_c8232023ef_chunk_0019_ast",
+      "companies_act_1967_c8232023ef_chunk_0021_ast",
+      "companies_act_1967_c8232023ef_chunk_0022_ast",
+      "companies_act_1967_c8232023ef_chunk_0045_ast",
+      "companies_act_1967_c8232023ef_chunk_0074_ast",
+      "companies_act_1967_c8232023ef_chunk_0085_ast",
+      "companies_act_1967_c8232023ef_chunk_0091_ast",
+      "companies_act_1967_c8232023ef_chunk_0092_ast",
+      "companies_act_1967_c8232023ef_chunk_0093_ast",
+      "companies_act_1967_c8232023ef_chunk_0101_ast",
+      "companies_act_1967_c8232023ef_chunk_0102_ast",
+      "companies_act_1967_c8232023ef_chunk_0103_ast",
+      "companies_act_1967_c8232023ef_chunk_0108_ast",
+      "companies_act_1967_c8232023ef_chunk_0109_ast",
+      "companies_act_1967_c8232023ef_chunk_0126_ast",
+      "companies_act_1967_c8232023ef_chunk_0127_ast",
+      "companies_act_1967_c8232023ef_chunk_0129_ast",
+      "companies_act_1967_c8232023ef_chunk_0131_ast",
+      "companies_act_1967_c8232023ef_chunk_0135_ast",
+      "companies_act_1967_c8232023ef_chunk_0138_ast",
+      "companies_act_1967_c8232023ef_chunk_0150_ast",
+      "companies_act_1967_c8232023ef_chunk_0170_ast",
+      "companies_act_1967_c8232023ef_chunk_0171_ast",
+      "companies_act_1967_c8232023ef_chunk_0189_ast",
+      "companies_act_1967_c8232023ef_chunk_0191_ast",
+      "companies_act_1967_c8232023ef_chunk_0196_ast",
+      "companies_act_1967_c8232023ef_chunk_0202_ast",
+      "companies_act_1967_c8232023ef_chunk_0208_ast",
+      "companies_act_1967_c8232023ef_chunk_0212_ast",
+      "companies_act_1967_c8232023ef_chunk_0223_ast",
+      "companies_act_1967_c8232023ef_chunk_0224_ast",
+      "companies_act_1967_c8232023ef_chunk_0225_ast",
+      "companies_act_1967_c8232023ef_chunk_0256_ast",
+      "companies_act_1967_c8232023ef_chunk_0258_ast",
+      "companies_act_1967_c8232023ef_chunk_0294_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Seed colloquial expression mapped to AST-backed terms; pending review."
+    ]
+  },
+  {
+    "mapping_id": "mapping_8edca08cbfb9",
+    "colloquial_expression": "What counts as personal data?",
+    "mapped_standard_terms": [
+      "definition of personal data"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0001_ast",
+      "companies_act_1967_c8232023ef_chunk_0002_ast",
+      "companies_act_1967_c8232023ef_chunk_0003_ast",
+      "companies_act_1967_c8232023ef_chunk_0004_ast",
+      "companies_act_1967_c8232023ef_chunk_0005_ast",
+      "companies_act_1967_c8232023ef_chunk_0006_ast",
+      "companies_act_1967_c8232023ef_chunk_0007_ast",
+      "companies_act_1967_c8232023ef_chunk_0008_ast",
+      "companies_act_1967_c8232023ef_chunk_0009_ast",
+      "companies_act_1967_c8232023ef_chunk_0010_ast",
+      "companies_act_1967_c8232023ef_chunk_0011_ast",
+      "companies_act_1967_c8232023ef_chunk_0012_ast",
+      "companies_act_1967_c8232023ef_chunk_0013_ast",
+      "companies_act_1967_c8232023ef_chunk_0014_ast",
+      "companies_act_1967_c8232023ef_chunk_0015_ast",
+      "companies_act_1967_c8232023ef_chunk_0016_ast",
+      "companies_act_1967_c8232023ef_chunk_0017_ast",
+      "companies_act_1967_c8232023ef_chunk_0019_ast",
+      "companies_act_1967_c8232023ef_chunk_0020_ast",
+      "companies_act_1967_c8232023ef_chunk_0021_ast",
+      "companies_act_1967_c8232023ef_chunk_0022_ast",
+      "companies_act_1967_c8232023ef_chunk_0023_ast",
+      "companies_act_1967_c8232023ef_chunk_0024_ast",
+      "companies_act_1967_c8232023ef_chunk_0025_ast",
+      "companies_act_1967_c8232023ef_chunk_0026_ast",
+      "companies_act_1967_c8232023ef_chunk_0027_ast",
+      "companies_act_1967_c8232023ef_chunk_0028_ast",
+      "companies_act_1967_c8232023ef_chunk_0029_ast",
+      "companies_act_1967_c8232023ef_chunk_0030_ast",
+      "companies_act_1967_c8232023ef_chunk_0031_ast",
+      "companies_act_1967_c8232023ef_chunk_0032_ast",
+      "companies_act_1967_c8232023ef_chunk_0033_ast",
+      "companies_act_1967_c8232023ef_chunk_0034_ast",
+      "companies_act_1967_c8232023ef_chunk_0035_ast",
+      "companies_act_1967_c8232023ef_chunk_0036_ast",
+      "companies_act_1967_c8232023ef_chunk_0037_ast",
+      "companies_act_1967_c8232023ef_chunk_0038_ast",
+      "companies_act_1967_c8232023ef_chunk_0039_ast",
+      "companies_act_1967_c8232023ef_chunk_0040_ast",
+      "companies_act_1967_c8232023ef_chunk_0041_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Seed colloquial expression mapped to AST-backed terms; pending review."
+    ]
+  },
+  {
+    "mapping_id": "mapping_a8305cf2ee3d",
+    "colloquial_expression": "What cybersecurity duties does a network operator have?",
+    "mapped_standard_terms": [
+      "cybersecurity obligation"
+    ],
+    "mapped_issue": "cybersecurity_obligation",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0022_ast",
+      "companies_act_1967_c8232023ef_chunk_0032_ast",
+      "companies_act_1967_c8232023ef_chunk_0042_ast",
+      "companies_act_1967_c8232023ef_chunk_0079_ast",
+      "companies_act_1967_c8232023ef_chunk_0080_ast",
+      "companies_act_1967_c8232023ef_chunk_0158_ast",
+      "companies_act_1967_c8232023ef_chunk_0185_ast",
+      "companies_act_1967_c8232023ef_chunk_0186_ast",
+      "companies_act_1967_c8232023ef_chunk_0199_ast",
+      "companies_act_1967_c8232023ef_chunk_0201_ast",
+      "companies_act_1967_c8232023ef_chunk_0253_ast",
+      "companies_act_1967_c8232023ef_chunk_0264_ast",
+      "companies_act_1967_c8232023ef_chunk_0327_ast",
+      "companies_act_1967_c8232023ef_chunk_0328_ast",
+      "companies_act_1967_c8232023ef_chunk_0360_ast",
+      "companies_act_1967_c8232023ef_chunk_0361_ast",
+      "companies_act_1967_c8232023ef_chunk_0408_ast",
+      "companies_act_1967_c8232023ef_chunk_0436_ast",
+      "companies_act_1967_c8232023ef_chunk_0448_ast",
+      "companies_act_1967_c8232023ef_chunk_0497_ast",
+      "companies_act_1967_c8232023ef_chunk_0507_ast",
+      "companies_act_1967_c8232023ef_chunk_0508_ast",
+      "companies_act_1967_c8232023ef_chunk_0535_ast",
+      "companies_act_1967_c8232023ef_chunk_0592_ast",
+      "companies_act_1967_c8232023ef_chunk_0629_ast",
+      "companies_act_1967_c8232023ef_chunk_0728_ast",
+      "companies_act_1967_c8232023ef_chunk_0779_ast",
+      "companies_act_1967_c8232023ef_chunk_0781_ast",
+      "companies_act_1967_c8232023ef_chunk_0784_ast",
+      "companies_act_1967_c8232023ef_chunk_0800_ast",
+      "companies_act_1967_c8232023ef_chunk_0801_ast",
+      "companies_act_1967_c8232023ef_chunk_0879_ast",
+      "companies_act_1967_c8232023ef_chunk_0883_ast",
+      "companies_act_1967_c8232023ef_chunk_0919_ast",
+      "companies_act_1967_c8232023ef_chunk_0922_ast",
+      "companies_act_1967_c8232023ef_chunk_0947_ast",
+      "companies_act_1967_c8232023ef_chunk_0982_ast",
+      "companies_act_1967_c8232023ef_chunk_0989_ast",
+      "companies_act_1967_c8232023ef_chunk_1071_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0004_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Seed colloquial expression mapped to AST-backed terms; pending review."
+    ]
+  },
+  {
+    "mapping_id": "mapping_e04af610df0e",
+    "colloquial_expression": "What does (2) In sub-paragraph (1)(e), “ongoing relationship mean in this source?",
+    "mapped_standard_terms": [
+      "(2) In sub-paragraph (1)(e), “ongoing relationship",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0138_ast"
+    ],
+    "confidence": "medium",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_2a9e9c6e0101",
+    "colloquial_expression": "What does (6) In this section, “applicable purpose mean in this source?",
+    "mapped_standard_terms": [
+      "(6) In this section, “applicable purpose"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0040_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_e69cfdc8ada6",
+    "colloquial_expression": "What does Accounting Standards mean in this source?",
+    "mapped_standard_terms": [
+      "Accounting Standards"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0044_ast"
+    ],
+    "confidence": "medium",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_32a917fa681f",
+    "colloquial_expression": "What does accounting transaction mean in this source?",
+    "mapped_standard_terms": [
+      "accounting transaction",
+      "retain records",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0732_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_c624c5ccfcee",
+    "colloquial_expression": "What does accounts mean in this source?",
+    "mapped_standard_terms": [
+      "accounts",
+      "ACRA administered Act",
+      "annual return",
+      "approved exchange in Singapore",
+      "audit requirements",
+      "Authority"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0045_ast"
+    ],
+    "confidence": "medium",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_99e04bbc6a0a",
+    "colloquial_expression": "What does address-harvesting software mean in this source?",
+    "mapped_standard_terms": [
+      "address-harvesting software",
+      "applicable message",
+      "applicable telephone number",
+      "collect data",
+      "business",
+      "digital governance"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "digital governance",
+    "source_node_ids": [
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0048_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0082_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_ffc2c6902bd5",
+    "colloquial_expression": "What does appeal mean in this source?",
+    "mapped_standard_terms": [
+      "appeal",
+      "authority"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0193_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_92ca8e4cdca8",
+    "colloquial_expression": "What does applicable purpose mean in this source?",
+    "mapped_standard_terms": [
+      "applicable purpose",
+      "authority"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0067_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_d329cecb21d2",
+    "colloquial_expression": "What does appointed day mean in this source?",
+    "mapped_standard_terms": [
+      "appointed day",
+      "nominee director",
+      "authority",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0436_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_18629807ea13",
+    "colloquial_expression": "What does business day mean in this source?",
+    "mapped_standard_terms": [
+      "business day",
+      "business"
+    ],
+    "mapped_issue": "consent_requirement",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0047_ast"
+    ],
+    "confidence": "medium",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_70e22290b76b",
+    "colloquial_expression": "What does calling line identity mean in this source?",
+    "mapped_standard_terms": [
+      "calling line identity",
+      "checker",
+      "goods",
+      "message",
+      "register",
+      "consumer protection"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0038_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0061_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_854f2ea54493",
+    "colloquial_expression": "What does commencement date mean in this source?",
+    "mapped_standard_terms": [
+      "commencement date",
+      "authority",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0903_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_4fb988294f78",
+    "colloquial_expression": "What does complainant mean in this source?",
+    "mapped_standard_terms": [
+      "complainant",
+      "business"
+    ],
+    "mapped_issue": "consent_requirement",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0812_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_124df1ff49cc",
+    "colloquial_expression": "What does consent mean in this source?",
+    "mapped_standard_terms": [
+      "consent",
+      "notify",
+      "authority",
+      "business",
+      "data protection",
+      "obtain consent",
+      "disclosure",
+      "offence",
+      "disclose data",
+      "liability",
+      "individual",
+      "foreign company"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0017_ast",
+      "companies_act_1967_c8232023ef_chunk_0074_ast",
+      "companies_act_1967_c8232023ef_chunk_0101_ast",
+      "companies_act_1967_c8232023ef_chunk_0102_ast",
+      "companies_act_1967_c8232023ef_chunk_0103_ast",
+      "companies_act_1967_c8232023ef_chunk_0170_ast",
+      "companies_act_1967_c8232023ef_chunk_0171_ast",
+      "companies_act_1967_c8232023ef_chunk_0189_ast",
+      "companies_act_1967_c8232023ef_chunk_0191_ast",
+      "companies_act_1967_c8232023ef_chunk_0212_ast",
+      "companies_act_1967_c8232023ef_chunk_0256_ast",
+      "companies_act_1967_c8232023ef_chunk_0258_ast",
+      "companies_act_1967_c8232023ef_chunk_0312_ast",
+      "companies_act_1967_c8232023ef_chunk_0314_ast",
+      "companies_act_1967_c8232023ef_chunk_0317_ast",
+      "companies_act_1967_c8232023ef_chunk_0319_ast",
+      "companies_act_1967_c8232023ef_chunk_0320_ast",
+      "companies_act_1967_c8232023ef_chunk_0357_ast",
+      "companies_act_1967_c8232023ef_chunk_0437_ast",
+      "companies_act_1967_c8232023ef_chunk_0439_ast",
+      "companies_act_1967_c8232023ef_chunk_0454_ast",
+      "companies_act_1967_c8232023ef_chunk_0542_ast",
+      "companies_act_1967_c8232023ef_chunk_0559_ast",
+      "companies_act_1967_c8232023ef_chunk_0572_ast",
+      "companies_act_1967_c8232023ef_chunk_0573_ast",
+      "companies_act_1967_c8232023ef_chunk_0647_ast",
+      "companies_act_1967_c8232023ef_chunk_0720_ast",
+      "companies_act_1967_c8232023ef_chunk_0721_ast",
+      "companies_act_1967_c8232023ef_chunk_0722_ast",
+      "companies_act_1967_c8232023ef_chunk_0828_ast",
+      "companies_act_1967_c8232023ef_chunk_0836_ast",
+      "companies_act_1967_c8232023ef_chunk_0837_ast",
+      "companies_act_1967_c8232023ef_chunk_0845_ast",
+      "companies_act_1967_c8232023ef_chunk_0850_ast",
+      "companies_act_1967_c8232023ef_chunk_0892_ast",
+      "companies_act_1967_c8232023ef_chunk_0900_ast",
+      "companies_act_1967_c8232023ef_chunk_0901_ast",
+      "companies_act_1967_c8232023ef_chunk_0930_ast",
+      "companies_act_1967_c8232023ef_chunk_0931_ast",
+      "companies_act_1967_c8232023ef_chunk_1008_ast",
+      "companies_act_1967_c8232023ef_chunk_1009_ast",
+      "companies_act_1967_c8232023ef_chunk_1030_ast",
+      "companies_act_1967_c8232023ef_chunk_1033_ast",
+      "companies_act_1967_c8232023ef_chunk_1040_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0013_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0024_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0033_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0075_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0106_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0042_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0047_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0053_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0067_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0099_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0103_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0004_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0073_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0077_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0078_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0079_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0081_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0100_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0133_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0137_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0145_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0153_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_34fb64fdceb7",
+    "colloquial_expression": "What does consolidated total assets mean in this source?",
+    "mapped_standard_terms": [
+      "consolidated total assets",
+      "consolidated revenue",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_1081_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_9ce57dcccf23",
+    "colloquial_expression": "What does contingent purchase contract mean in this source?",
+    "mapped_standard_terms": [
+      "contingent purchase contract",
+      "authority",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0323_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_716e62408d14",
+    "colloquial_expression": "What does control mean in this source?",
+    "mapped_standard_terms": [
+      "control"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0052_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0065_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0086_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_a55cff87892e",
+    "colloquial_expression": "What does corporation mean in this source?",
+    "mapped_standard_terms": [
+      "corporation",
+      "notify",
+      "authority",
+      "business",
+      "consumer protection"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "consumer protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0050_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_5e58aa7ec202",
+    "colloquial_expression": "What does credit transaction mean in this source?",
+    "mapped_standard_terms": [
+      "credit transaction",
+      "quasi-loan",
+      "business"
+    ],
+    "mapped_issue": "consent_requirement",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0502_ast"
+    ],
+    "confidence": "medium",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_c851e98207c2",
+    "colloquial_expression": "What does data controller mean in this source?",
+    "mapped_standard_terms": [
+      "data controller",
+      "comply with obligation",
+      "authority",
+      "data protection",
+      "business"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0096_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0109_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0110_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_30e46c01aad0",
+    "colloquial_expression": "What does data protection mean in this source?",
+    "mapped_standard_terms": [
+      "data protection",
+      "data subject",
+      "data controller",
+      "authority",
+      "notify",
+      "Appeal Committee",
+      "organisation",
+      "individual",
+      "offence",
+      "liability",
+      "Appeal Panel",
+      "enforcement"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0028_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0073_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0085_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0094_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0005_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0087_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0088_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0006_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0009_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0023_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0026_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0027_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0121_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0186_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_6967e6044bfb",
+    "colloquial_expression": "What does data subject mean in this source?",
+    "mapped_standard_terms": [
+      "data subject",
+      "data protection",
+      "data controller",
+      "enforcement",
+      "comply with obligation",
+      "notify",
+      "collect data",
+      "business"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0007_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0051_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0097_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0100_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_62188cebac29",
+    "colloquial_expression": "What does declared company mean in this source?",
+    "mapped_standard_terms": [
+      "declared company",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0817_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_09a389ce7537",
+    "colloquial_expression": "What does default penalty mean in this source?",
+    "mapped_standard_terms": [
+      "default penalty",
+      "electronic communication",
+      "process data",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0052_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_e8fe8514cefc",
+    "colloquial_expression": "What does dictionary attack mean in this source?",
+    "mapped_standard_terms": [
+      "dictionary attack"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0049_ast"
+    ],
+    "confidence": "medium",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_c59f8bd89512",
+    "colloquial_expression": "What does directors’ statement mean in this source?",
+    "mapped_standard_terms": [
+      "directors’ statement",
+      "entity",
+      "financial statements",
+      "parent company",
+      "subsidiary company",
+      "subsidiary corporation"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0752_ast"
+    ],
+    "confidence": "medium",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_91815db5a303",
+    "colloquial_expression": "What does disclosure mean in this source?",
+    "mapped_standard_terms": [
+      "disclosure",
+      "individual",
+      "offence",
+      "liability",
+      "disclose data",
+      "authority",
+      "business",
+      "data protection",
+      "comply with obligation",
+      "notify",
+      "organisation",
+      "enforcement"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0015_ast",
+      "companies_act_1967_c8232023ef_chunk_0016_ast",
+      "companies_act_1967_c8232023ef_chunk_0225_ast",
+      "companies_act_1967_c8232023ef_chunk_0479_ast",
+      "companies_act_1967_c8232023ef_chunk_0490_ast",
+      "companies_act_1967_c8232023ef_chunk_0526_ast",
+      "companies_act_1967_c8232023ef_chunk_0528_ast",
+      "companies_act_1967_c8232023ef_chunk_0533_ast",
+      "companies_act_1967_c8232023ef_chunk_0539_ast",
+      "companies_act_1967_c8232023ef_chunk_0846_ast",
+      "companies_act_1967_c8232023ef_chunk_1020_ast",
+      "companies_act_1967_c8232023ef_chunk_1083_ast",
+      "companies_act_1967_c8232023ef_chunk_1085_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0028_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0037_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0109_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0159_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0163_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0059_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0146_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0176_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_747301e3fe71",
+    "colloquial_expression": "What does electronic record mean in this source?",
+    "mapped_standard_terms": [
+      "electronic record",
+      "company record",
+      "in electronic form",
+      "in hard copy form",
+      "retain records",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "electronic transactions",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_1022_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_3905b905b327",
+    "colloquial_expression": "What does electronic transaction system mean in this source?",
+    "mapped_standard_terms": [
+      "electronic transaction system",
+      "exempt private company",
+      "business",
+      "electronic transactions"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "electronic transactions",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0053_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_2ba323428b32",
+    "colloquial_expression": "What does enforcement mean in this source?",
+    "mapped_standard_terms": [
+      "enforcement",
+      "authority",
+      "business",
+      "electronic transactions",
+      "financial statements",
+      "applicable contravention",
+      "specified purpose"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "electronic transactions",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0002_ast",
+      "companies_act_1967_c8232023ef_chunk_1000_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0066_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0191_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_f9308bb57b4d",
+    "colloquial_expression": "What does entrenching provision mean in this source?",
+    "mapped_standard_terms": [
+      "entrenching provision",
+      "business"
+    ],
+    "mapped_issue": "consent_requirement",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0169_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_23e78aecabb6",
+    "colloquial_expression": "What does equal access scheme mean in this source?",
+    "mapped_standard_terms": [
+      "equal access scheme",
+      "authority",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0310_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_3a22e85255f0",
+    "colloquial_expression": "What does excess shares mean in this source?",
+    "mapped_standard_terms": [
+      "excess shares",
+      "authority",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0147_ast",
+      "companies_act_1967_c8232023ef_chunk_0148_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_adfa24b2f632",
+    "colloquial_expression": "What does filed mean in this source?",
+    "mapped_standard_terms": [
+      "filed",
+      "financial year",
+      "foreign company",
+      "notify",
+      "authority",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0054_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_e991773cdd84",
+    "colloquial_expression": "What does financial penalty mean in this source?",
+    "mapped_standard_terms": [
+      "financial penalty",
+      "enforcement",
+      "authority",
+      "comply with obligation"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0082_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0090_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0116_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0124_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_bc92dabc0f99",
+    "colloquial_expression": "What does financial statements mean in this source?",
+    "mapped_standard_terms": [
+      "financial statements",
+      "authority",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0907_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_04fbffe809cc",
+    "colloquial_expression": "What does individual mean in this source?",
+    "mapped_standard_terms": [
+      "individual",
+      "business",
+      "data protection",
+      "liability",
+      "authority",
+      "full name",
+      "identification",
+      "public company",
+      "registered",
+      "Registrar",
+      "regulations",
+      "repealed written laws"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0014_ast",
+      "companies_act_1967_c8232023ef_chunk_0049_ast",
+      "companies_act_1967_c8232023ef_chunk_0055_ast",
+      "companies_act_1967_c8232023ef_chunk_0056_ast",
+      "companies_act_1967_c8232023ef_chunk_0062_ast",
+      "companies_act_1967_c8232023ef_chunk_0106_ast",
+      "companies_act_1967_c8232023ef_chunk_0117_ast",
+      "companies_act_1967_c8232023ef_chunk_0118_ast",
+      "companies_act_1967_c8232023ef_chunk_0119_ast",
+      "companies_act_1967_c8232023ef_chunk_0120_ast",
+      "companies_act_1967_c8232023ef_chunk_0121_ast",
+      "companies_act_1967_c8232023ef_chunk_0122_ast",
+      "companies_act_1967_c8232023ef_chunk_0129_ast",
+      "companies_act_1967_c8232023ef_chunk_0130_ast",
+      "companies_act_1967_c8232023ef_chunk_0135_ast",
+      "companies_act_1967_c8232023ef_chunk_0153_ast",
+      "companies_act_1967_c8232023ef_chunk_0197_ast",
+      "companies_act_1967_c8232023ef_chunk_0226_ast",
+      "companies_act_1967_c8232023ef_chunk_0227_ast",
+      "companies_act_1967_c8232023ef_chunk_0235_ast",
+      "companies_act_1967_c8232023ef_chunk_0237_ast",
+      "companies_act_1967_c8232023ef_chunk_0409_ast",
+      "companies_act_1967_c8232023ef_chunk_0438_ast",
+      "companies_act_1967_c8232023ef_chunk_0566_ast",
+      "companies_act_1967_c8232023ef_chunk_0567_ast",
+      "companies_act_1967_c8232023ef_chunk_0569_ast",
+      "companies_act_1967_c8232023ef_chunk_0570_ast",
+      "companies_act_1967_c8232023ef_chunk_0602_ast",
+      "companies_act_1967_c8232023ef_chunk_0653_ast",
+      "companies_act_1967_c8232023ef_chunk_0659_ast",
+      "companies_act_1967_c8232023ef_chunk_0902_ast",
+      "companies_act_1967_c8232023ef_chunk_0948_ast",
+      "companies_act_1967_c8232023ef_chunk_0958_ast",
+      "companies_act_1967_c8232023ef_chunk_1064_ast",
+      "companies_act_1967_c8232023ef_chunk_1086_ast",
+      "companies_act_1967_c8232023ef_chunk_1087_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0043_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0050_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0112_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0150_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0153_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0160_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0013_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0014_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0016_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0025_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0064_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0074_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0083_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0084_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0142_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0194_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_cb0cdbe022d4",
+    "colloquial_expression": "What does lawyer mean in this source?",
+    "mapped_standard_terms": [
+      "lawyer",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0955_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_908c10cf1281",
+    "colloquial_expression": "What does legal counsel mean in this source?",
+    "mapped_standard_terms": [
+      "legal counsel",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0956_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_4546f9c24c29",
+    "colloquial_expression": "What does liability mean in this source?",
+    "mapped_standard_terms": [
+      "liability",
+      "authority",
+      "business",
+      "accounting corporation",
+      "accounting entity",
+      "accounting firm",
+      "accounting limited liability partnership",
+      "Accounting Standards",
+      "Authority",
+      "Authority’s website",
+      "banking corporation",
+      "borrowing corporation"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0020_ast",
+      "companies_act_1967_c8232023ef_chunk_0043_ast",
+      "companies_act_1967_c8232023ef_chunk_0046_ast",
+      "companies_act_1967_c8232023ef_chunk_0048_ast",
+      "companies_act_1967_c8232023ef_chunk_0051_ast",
+      "companies_act_1967_c8232023ef_chunk_0057_ast",
+      "companies_act_1967_c8232023ef_chunk_0064_ast",
+      "companies_act_1967_c8232023ef_chunk_0086_ast",
+      "companies_act_1967_c8232023ef_chunk_0137_ast",
+      "companies_act_1967_c8232023ef_chunk_0150_ast",
+      "companies_act_1967_c8232023ef_chunk_0151_ast",
+      "companies_act_1967_c8232023ef_chunk_0158_ast",
+      "companies_act_1967_c8232023ef_chunk_0159_ast",
+      "companies_act_1967_c8232023ef_chunk_0172_ast",
+      "companies_act_1967_c8232023ef_chunk_0175_ast",
+      "companies_act_1967_c8232023ef_chunk_0183_ast",
+      "companies_act_1967_c8232023ef_chunk_0187_ast",
+      "companies_act_1967_c8232023ef_chunk_0232_ast",
+      "companies_act_1967_c8232023ef_chunk_0253_ast",
+      "companies_act_1967_c8232023ef_chunk_0267_ast",
+      "companies_act_1967_c8232023ef_chunk_0294_ast",
+      "companies_act_1967_c8232023ef_chunk_0299_ast",
+      "companies_act_1967_c8232023ef_chunk_0335_ast",
+      "companies_act_1967_c8232023ef_chunk_0339_ast",
+      "companies_act_1967_c8232023ef_chunk_0341_ast",
+      "companies_act_1967_c8232023ef_chunk_0344_ast",
+      "companies_act_1967_c8232023ef_chunk_0355_ast",
+      "companies_act_1967_c8232023ef_chunk_0421_ast",
+      "companies_act_1967_c8232023ef_chunk_0482_ast",
+      "companies_act_1967_c8232023ef_chunk_0488_ast",
+      "companies_act_1967_c8232023ef_chunk_0499_ast",
+      "companies_act_1967_c8232023ef_chunk_0503_ast",
+      "companies_act_1967_c8232023ef_chunk_0505_ast",
+      "companies_act_1967_c8232023ef_chunk_0506_ast",
+      "companies_act_1967_c8232023ef_chunk_0507_ast",
+      "companies_act_1967_c8232023ef_chunk_0513_ast",
+      "companies_act_1967_c8232023ef_chunk_0545_ast",
+      "companies_act_1967_c8232023ef_chunk_0546_ast",
+      "companies_act_1967_c8232023ef_chunk_0547_ast",
+      "companies_act_1967_c8232023ef_chunk_0548_ast",
+      "companies_act_1967_c8232023ef_chunk_0591_ast",
+      "companies_act_1967_c8232023ef_chunk_0748_ast",
+      "companies_act_1967_c8232023ef_chunk_0749_ast",
+      "companies_act_1967_c8232023ef_chunk_0859_ast",
+      "companies_act_1967_c8232023ef_chunk_0863_ast",
+      "companies_act_1967_c8232023ef_chunk_0882_ast",
+      "companies_act_1967_c8232023ef_chunk_0884_ast",
+      "companies_act_1967_c8232023ef_chunk_0920_ast",
+      "companies_act_1967_c8232023ef_chunk_0932_ast",
+      "companies_act_1967_c8232023ef_chunk_0933_ast",
+      "companies_act_1967_c8232023ef_chunk_0950_ast",
+      "companies_act_1967_c8232023ef_chunk_0983_ast",
+      "companies_act_1967_c8232023ef_chunk_0990_ast",
+      "companies_act_1967_c8232023ef_chunk_0999_ast",
+      "companies_act_1967_c8232023ef_chunk_1014_ast",
+      "companies_act_1967_c8232023ef_chunk_1018_ast",
+      "companies_act_1967_c8232023ef_chunk_1059_ast",
+      "companies_act_1967_c8232023ef_chunk_1060_ast",
+      "companies_act_1967_c8232023ef_chunk_1062_ast",
+      "companies_act_1967_c8232023ef_chunk_1065_ast",
+      "companies_act_1967_c8232023ef_chunk_1111_ast",
+      "companies_act_1967_c8232023ef_chunk_1128_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0147_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_81c8e3646856",
+    "colloquial_expression": "What does named officer mean in this source?",
+    "mapped_standard_terms": [
+      "named officer"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0207_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_d6409a9d827d",
+    "colloquial_expression": "What does non-public interest company mean in this source?",
+    "mapped_standard_terms": [
+      "non-public interest company",
+      "public interest company",
+      "process data",
+      "notify",
+      "authority",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0719_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_3f04cdb8dbe5",
+    "colloquial_expression": "What does non-resident mean in this source?",
+    "mapped_standard_terms": [
+      "non-resident",
+      "authority",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0366_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_bcc4fcf68186",
+    "colloquial_expression": "What does odd-lot mean in this source?",
+    "mapped_standard_terms": [
+      "odd-lot",
+      "board lot",
+      "authority",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0270_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_f8201091deab",
+    "colloquial_expression": "What does offence mean in this source?",
+    "mapped_standard_terms": [
+      "offence",
+      "authority",
+      "business",
+      "liability",
+      "comply with obligation",
+      "notify",
+      "enforcement",
+      "retain records",
+      "charitable purpose",
+      "qualifying creditor",
+      "debarment order",
+      "secretary"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0001_ast",
+      "companies_act_1967_c8232023ef_chunk_0009_ast",
+      "companies_act_1967_c8232023ef_chunk_0010_ast",
+      "companies_act_1967_c8232023ef_chunk_0035_ast",
+      "companies_act_1967_c8232023ef_chunk_0036_ast",
+      "companies_act_1967_c8232023ef_chunk_0037_ast",
+      "companies_act_1967_c8232023ef_chunk_0041_ast",
+      "companies_act_1967_c8232023ef_chunk_0083_ast",
+      "companies_act_1967_c8232023ef_chunk_0087_ast",
+      "companies_act_1967_c8232023ef_chunk_0092_ast",
+      "companies_act_1967_c8232023ef_chunk_0093_ast",
+      "companies_act_1967_c8232023ef_chunk_0095_ast",
+      "companies_act_1967_c8232023ef_chunk_0098_ast",
+      "companies_act_1967_c8232023ef_chunk_0099_ast",
+      "companies_act_1967_c8232023ef_chunk_0152_ast",
+      "companies_act_1967_c8232023ef_chunk_0167_ast",
+      "companies_act_1967_c8232023ef_chunk_0176_ast",
+      "companies_act_1967_c8232023ef_chunk_0184_ast",
+      "companies_act_1967_c8232023ef_chunk_0204_ast",
+      "companies_act_1967_c8232023ef_chunk_0213_ast",
+      "companies_act_1967_c8232023ef_chunk_0214_ast",
+      "companies_act_1967_c8232023ef_chunk_0221_ast",
+      "companies_act_1967_c8232023ef_chunk_0223_ast",
+      "companies_act_1967_c8232023ef_chunk_0228_ast",
+      "companies_act_1967_c8232023ef_chunk_0239_ast",
+      "companies_act_1967_c8232023ef_chunk_0255_ast",
+      "companies_act_1967_c8232023ef_chunk_0260_ast",
+      "companies_act_1967_c8232023ef_chunk_0262_ast",
+      "companies_act_1967_c8232023ef_chunk_0265_ast",
+      "companies_act_1967_c8232023ef_chunk_0266_ast",
+      "companies_act_1967_c8232023ef_chunk_0297_ast",
+      "companies_act_1967_c8232023ef_chunk_0298_ast",
+      "companies_act_1967_c8232023ef_chunk_0328_ast",
+      "companies_act_1967_c8232023ef_chunk_0343_ast",
+      "companies_act_1967_c8232023ef_chunk_0345_ast",
+      "companies_act_1967_c8232023ef_chunk_0354_ast",
+      "companies_act_1967_c8232023ef_chunk_0356_ast",
+      "companies_act_1967_c8232023ef_chunk_0358_ast",
+      "companies_act_1967_c8232023ef_chunk_0368_ast",
+      "companies_act_1967_c8232023ef_chunk_0369_ast",
+      "companies_act_1967_c8232023ef_chunk_0373_ast",
+      "companies_act_1967_c8232023ef_chunk_0376_ast",
+      "companies_act_1967_c8232023ef_chunk_0377_ast",
+      "companies_act_1967_c8232023ef_chunk_0385_ast",
+      "companies_act_1967_c8232023ef_chunk_0415_ast",
+      "companies_act_1967_c8232023ef_chunk_0417_ast",
+      "companies_act_1967_c8232023ef_chunk_0419_ast",
+      "companies_act_1967_c8232023ef_chunk_0425_ast",
+      "companies_act_1967_c8232023ef_chunk_0426_ast",
+      "companies_act_1967_c8232023ef_chunk_0427_ast",
+      "companies_act_1967_c8232023ef_chunk_0428_ast",
+      "companies_act_1967_c8232023ef_chunk_0429_ast",
+      "companies_act_1967_c8232023ef_chunk_0432_ast",
+      "companies_act_1967_c8232023ef_chunk_0433_ast",
+      "companies_act_1967_c8232023ef_chunk_0435_ast",
+      "companies_act_1967_c8232023ef_chunk_0440_ast",
+      "companies_act_1967_c8232023ef_chunk_0441_ast",
+      "companies_act_1967_c8232023ef_chunk_0442_ast",
+      "companies_act_1967_c8232023ef_chunk_0451_ast",
+      "companies_act_1967_c8232023ef_chunk_0460_ast",
+      "companies_act_1967_c8232023ef_chunk_0461_ast",
+      "companies_act_1967_c8232023ef_chunk_0462_ast",
+      "companies_act_1967_c8232023ef_chunk_0463_ast",
+      "companies_act_1967_c8232023ef_chunk_0465_ast",
+      "companies_act_1967_c8232023ef_chunk_0466_ast",
+      "companies_act_1967_c8232023ef_chunk_0467_ast",
+      "companies_act_1967_c8232023ef_chunk_0469_ast",
+      "companies_act_1967_c8232023ef_chunk_0474_ast",
+      "companies_act_1967_c8232023ef_chunk_0475_ast",
+      "companies_act_1967_c8232023ef_chunk_0477_ast",
+      "companies_act_1967_c8232023ef_chunk_0486_ast",
+      "companies_act_1967_c8232023ef_chunk_0487_ast",
+      "companies_act_1967_c8232023ef_chunk_0501_ast",
+      "companies_act_1967_c8232023ef_chunk_0512_ast",
+      "companies_act_1967_c8232023ef_chunk_0530_ast",
+      "companies_act_1967_c8232023ef_chunk_0587_ast",
+      "companies_act_1967_c8232023ef_chunk_0588_ast",
+      "companies_act_1967_c8232023ef_chunk_0609_ast",
+      "companies_act_1967_c8232023ef_chunk_0610_ast",
+      "companies_act_1967_c8232023ef_chunk_0620_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_b071794fc578",
+    "colloquial_expression": "What does Official Assignee mean in this source?",
+    "mapped_standard_terms": [
+      "Official Assignee",
+      "Official Receiver",
+      "prescribed",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0059_ast"
+    ],
+    "confidence": "medium",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_52259b448c8f",
+    "colloquial_expression": "What does organisation mean in this source?",
+    "mapped_standard_terms": [
+      "organisation",
+      "company",
+      "business",
+      "data protection",
+      "individual",
+      "notify",
+      "authority",
+      "receiving organisation",
+      "collect data",
+      "comply with obligation",
+      "offence",
+      "retain records"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0761_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0027_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0031_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0033_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0034_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0044_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0045_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0063_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0064_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0065_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0068_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0071_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0073_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0075_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0076_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0077_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0078_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0079_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0080_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0081_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0084_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0085_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0086_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0089_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0091_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0092_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0094_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0095_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0097_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0098_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0106_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0107_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0108_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0114_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0119_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0142_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0144_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0010_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0029_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0057_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0058_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0063_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0075_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0076_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0094_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0097_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0098_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0099_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0107_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0109_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0110_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0111_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0112_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0113_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0114_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0115_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0117_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0118_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0119_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0120_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0122_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0123_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0125_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0127_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0128_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0131_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0132_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0149_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0151_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0152_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0154_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0160_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0195_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0196_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0197_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0199_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0209_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_79227657b18b",
+    "colloquial_expression": "What does Passing of resolutions by written mean in this source?",
+    "mapped_standard_terms": [
+      "Passing of resolutions by written",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0623_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_a55b111f89f7",
+    "colloquial_expression": "What does personal data mean in this source?",
+    "mapped_standard_terms": [
+      "personal data",
+      "data protection",
+      "consent",
+      "data subject",
+      "obtain consent",
+      "disclosure",
+      "collect data",
+      "disclose data",
+      "business",
+      "cybersecurity",
+      "data controller",
+      "Personal Data"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0001_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0002_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0003_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0004_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0005_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0006_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0008_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0009_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0010_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0019_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0020_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0021_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0022_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0023_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0025_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0026_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0027_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0029_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0030_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0031_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0032_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0034_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0035_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0036_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0037_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0038_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0039_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0040_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0041_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0042_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0043_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0044_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0045_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0046_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0047_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0048_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0049_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0050_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0052_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0053_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0054_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0055_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0056_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0057_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0058_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0059_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0060_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0061_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0062_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0063_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0064_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0065_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0066_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0067_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0068_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0069_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0070_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0071_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0072_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0077_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0078_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0079_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0080_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0081_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0084_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0086_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0088_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0089_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0093_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0095_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0099_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0102_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0103_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0104_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0105_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0107_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0108_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0112_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0116_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0117_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_8180a4b81941",
+    "colloquial_expression": "What does preference share mean in this source?",
+    "mapped_standard_terms": [
+      "preference share",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0606_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_cdf2b1a8c5a4",
+    "colloquial_expression": "What does printed mean in this source?",
+    "mapped_standard_terms": [
+      "printed",
+      "private company",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0060_ast"
+    ],
+    "confidence": "medium",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_3191fa189382",
+    "colloquial_expression": "What does prospectus mean in this source?",
+    "mapped_standard_terms": [
+      "prospectus",
+      "public accountant",
+      "public agency",
+      "authority",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0061_ast"
+    ],
+    "confidence": "medium",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_9429f4914526",
+    "colloquial_expression": "What does Recording of resolutions passed by written mean in this source?",
+    "mapped_standard_terms": [
+      "Recording of resolutions passed by written",
+      "comply with obligation",
+      "notify",
+      "retain records",
+      "business"
+    ],
+    "mapped_issue": "consent_requirement",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0631_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_a0809dfd78d0",
+    "colloquial_expression": "What does register of controllers mean in this source?",
+    "mapped_standard_terms": [
+      "register of controllers",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0949_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_b548ff476a40",
+    "colloquial_expression": "What does relevant period mean in this source?",
+    "mapped_standard_terms": [
+      "relevant period",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0303_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_c3f50c7d937a",
+    "colloquial_expression": "What does relevant person mean in this source?",
+    "mapped_standard_terms": [
+      "relevant person",
+      "relevant company",
+      "comply with obligation",
+      "authority",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0681_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_1dda8d6e307d",
+    "colloquial_expression": "What does Rules mean in this source?",
+    "mapped_standard_terms": [
+      "Rules",
+      "share",
+      "solicitor",
+      "statutory meeting",
+      "statutory report",
+      "summary financial statement"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0063_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_85ecd037a27d",
+    "colloquial_expression": "What does shipowner’s lien mean in this source?",
+    "mapped_standard_terms": [
+      "shipowner’s lien"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0414_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_7859509e1355",
+    "colloquial_expression": "What does specified share mean in this source?",
+    "mapped_standard_terms": [
+      "specified share",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0241_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_25098efc4414",
+    "colloquial_expression": "What does the excess shares mean in this source?",
+    "mapped_standard_terms": [
+      "the excess shares",
+      "authority",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0331_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_8d49acc30f3c",
+    "colloquial_expression": "What does this document say about electronic record?",
+    "mapped_standard_terms": [
+      "electronic record",
+      "company record",
+      "in electronic form",
+      "in hard copy form",
+      "retain records",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "electronic transactions",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_1022_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_398d2193b564",
+    "colloquial_expression": "What does this document say about network data?",
+    "mapped_standard_terms": [
+      "网络安全",
+      "关键信息基础设施",
+      "网络运营者",
+      "法律责任",
+      "network data",
+      "comply with obligation",
+      "process data",
+      "organisation",
+      "authority",
+      "business",
+      "notify",
+      "retain records"
+    ],
+    "mapped_issue": "cybersecurity_obligation",
+    "mapped_domain": "cybersecurity",
+    "source_node_ids": [
+      "document_ba5049f6a2_chunk_0001_ast",
+      "document_ba5049f6a2_chunk_0002_ast",
+      "document_318a65d5a2_chunk_0001_ast",
+      "document_318a65d5a2_chunk_0002_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_c2afa748de8b",
+    "colloquial_expression": "What does this document say about personal data?",
+    "mapped_standard_terms": [
+      "personal data",
+      "data protection",
+      "consent",
+      "data subject",
+      "obtain consent",
+      "disclosure",
+      "collect data",
+      "disclose data",
+      "business",
+      "cybersecurity",
+      "data controller",
+      "Personal Data"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0001_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0002_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0003_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0004_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0005_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0006_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0008_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0009_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0010_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0019_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0020_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0021_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0022_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0023_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0025_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0026_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0027_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0029_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0030_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0031_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0032_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0034_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0035_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0036_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0037_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0038_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0039_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0040_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0041_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0042_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0043_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0044_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0045_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0046_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0047_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0048_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0049_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0050_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0052_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0053_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0054_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0055_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0056_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0057_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0058_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0059_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0060_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0061_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0062_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0063_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0064_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0065_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0066_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0067_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0068_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0069_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0070_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0071_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0072_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0077_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0078_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0079_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0080_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0081_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0084_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0086_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0088_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0089_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0093_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0095_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0099_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0102_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0103_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0104_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0105_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0107_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0108_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0112_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0116_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0117_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_a3b614f70094",
+    "colloquial_expression": "What does transfer mean in this source?",
+    "mapped_standard_terms": [
+      "transfer",
+      "transfer data",
+      "business",
+      "data protection",
+      "offence",
+      "authority",
+      "enforcement",
+      "liability",
+      "comply with obligation",
+      "retain records",
+      "non-electronic medium",
+      "notify"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0011_ast",
+      "companies_act_1967_c8232023ef_chunk_0012_ast",
+      "companies_act_1967_c8232023ef_chunk_0024_ast",
+      "companies_act_1967_c8232023ef_chunk_0025_ast",
+      "companies_act_1967_c8232023ef_chunk_0031_ast",
+      "companies_act_1967_c8232023ef_chunk_0039_ast",
+      "companies_act_1967_c8232023ef_chunk_0040_ast",
+      "companies_act_1967_c8232023ef_chunk_0042_ast",
+      "companies_act_1967_c8232023ef_chunk_0081_ast",
+      "companies_act_1967_c8232023ef_chunk_0109_ast",
+      "companies_act_1967_c8232023ef_chunk_0110_ast",
+      "companies_act_1967_c8232023ef_chunk_0132_ast",
+      "companies_act_1967_c8232023ef_chunk_0133_ast",
+      "companies_act_1967_c8232023ef_chunk_0134_ast",
+      "companies_act_1967_c8232023ef_chunk_0139_ast",
+      "companies_act_1967_c8232023ef_chunk_0140_ast",
+      "companies_act_1967_c8232023ef_chunk_0144_ast",
+      "companies_act_1967_c8232023ef_chunk_0145_ast",
+      "companies_act_1967_c8232023ef_chunk_0155_ast",
+      "companies_act_1967_c8232023ef_chunk_0156_ast",
+      "companies_act_1967_c8232023ef_chunk_0231_ast",
+      "companies_act_1967_c8232023ef_chunk_0244_ast",
+      "companies_act_1967_c8232023ef_chunk_0291_ast",
+      "companies_act_1967_c8232023ef_chunk_0333_ast",
+      "companies_act_1967_c8232023ef_chunk_0334_ast",
+      "companies_act_1967_c8232023ef_chunk_0336_ast",
+      "companies_act_1967_c8232023ef_chunk_0371_ast",
+      "companies_act_1967_c8232023ef_chunk_0374_ast",
+      "companies_act_1967_c8232023ef_chunk_0383_ast",
+      "companies_act_1967_c8232023ef_chunk_0388_ast",
+      "companies_act_1967_c8232023ef_chunk_0389_ast",
+      "companies_act_1967_c8232023ef_chunk_0390_ast",
+      "companies_act_1967_c8232023ef_chunk_0392_ast",
+      "companies_act_1967_c8232023ef_chunk_0393_ast",
+      "companies_act_1967_c8232023ef_chunk_0394_ast",
+      "companies_act_1967_c8232023ef_chunk_0395_ast",
+      "companies_act_1967_c8232023ef_chunk_0396_ast",
+      "companies_act_1967_c8232023ef_chunk_0397_ast",
+      "companies_act_1967_c8232023ef_chunk_0398_ast",
+      "companies_act_1967_c8232023ef_chunk_0399_ast",
+      "companies_act_1967_c8232023ef_chunk_0400_ast",
+      "companies_act_1967_c8232023ef_chunk_0401_ast",
+      "companies_act_1967_c8232023ef_chunk_0402_ast",
+      "companies_act_1967_c8232023ef_chunk_0403_ast",
+      "companies_act_1967_c8232023ef_chunk_0404_ast",
+      "companies_act_1967_c8232023ef_chunk_0504_ast",
+      "companies_act_1967_c8232023ef_chunk_0534_ast",
+      "companies_act_1967_c8232023ef_chunk_0536_ast",
+      "companies_act_1967_c8232023ef_chunk_0537_ast",
+      "companies_act_1967_c8232023ef_chunk_0650_ast",
+      "companies_act_1967_c8232023ef_chunk_0760_ast",
+      "companies_act_1967_c8232023ef_chunk_0764_ast",
+      "companies_act_1967_c8232023ef_chunk_0765_ast",
+      "companies_act_1967_c8232023ef_chunk_0766_ast",
+      "companies_act_1967_c8232023ef_chunk_0767_ast",
+      "companies_act_1967_c8232023ef_chunk_0768_ast",
+      "companies_act_1967_c8232023ef_chunk_0769_ast",
+      "companies_act_1967_c8232023ef_chunk_0770_ast",
+      "companies_act_1967_c8232023ef_chunk_0771_ast",
+      "companies_act_1967_c8232023ef_chunk_0772_ast",
+      "companies_act_1967_c8232023ef_chunk_0773_ast",
+      "companies_act_1967_c8232023ef_chunk_0774_ast",
+      "companies_act_1967_c8232023ef_chunk_0775_ast",
+      "companies_act_1967_c8232023ef_chunk_0776_ast",
+      "companies_act_1967_c8232023ef_chunk_0777_ast",
+      "companies_act_1967_c8232023ef_chunk_0778_ast",
+      "companies_act_1967_c8232023ef_chunk_0779_ast",
+      "companies_act_1967_c8232023ef_chunk_0780_ast",
+      "companies_act_1967_c8232023ef_chunk_0781_ast",
+      "companies_act_1967_c8232023ef_chunk_0783_ast",
+      "companies_act_1967_c8232023ef_chunk_0784_ast",
+      "companies_act_1967_c8232023ef_chunk_0787_ast",
+      "companies_act_1967_c8232023ef_chunk_0800_ast",
+      "companies_act_1967_c8232023ef_chunk_0807_ast",
+      "companies_act_1967_c8232023ef_chunk_0847_ast",
+      "companies_act_1967_c8232023ef_chunk_0848_ast",
+      "companies_act_1967_c8232023ef_chunk_0849_ast",
+      "companies_act_1967_c8232023ef_chunk_0872_ast",
+      "companies_act_1967_c8232023ef_chunk_0873_ast",
+      "companies_act_1967_c8232023ef_chunk_0875_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_c7f1db3f56af",
+    "colloquial_expression": "What does ultimate parent corporation mean in this source?",
+    "mapped_standard_terms": [
+      "ultimate parent corporation",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0753_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_5d259214a0c4",
+    "colloquial_expression": "What does unlisted public company mean in this source?",
+    "mapped_standard_terms": [
+      "unlisted public company",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0627_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_f9518e62115b",
+    "colloquial_expression": "What does “instant messaging account mean in this source?",
+    "mapped_standard_terms": [
+      "“instant messaging account",
+      "instant messaging service",
+      "authority"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0155_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_17869b6856d4",
+    "colloquial_expression": "What does 个人信息 mean in this source?",
+    "mapped_standard_terms": [
+      "个人信息",
+      "个人信息处理者",
+      "法律责任",
+      "personal data",
+      "collect data",
+      "process data",
+      "disclose data",
+      "obtain consent",
+      "自动化决策",
+      "关键信息基础设施",
+      "transfer data",
+      "comply with obligation"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "document_0e841274ea_chunk_0001_ast",
+      "document_0e841274ea_chunk_0002_ast",
+      "document_0e841274ea_chunk_0003_ast",
+      "document_0e841274ea_chunk_0004_ast",
+      "document_0e841274ea_chunk_0005_ast",
+      "document_0e841274ea_chunk_0006_ast",
+      "document_0e841274ea_chunk_0007_ast",
+      "document_0e841274ea_chunk_0008_ast",
+      "document_0e841274ea_chunk_0009_ast",
+      "document_ba5049f6a2_chunk_0003_ast",
+      "document_ba5049f6a2_chunk_0004_ast",
+      "document_ba5049f6a2_chunk_0005_ast",
+      "document_ba5049f6a2_chunk_0008_ast",
+      "document_ba5049f6a2_chunk_0009_ast",
+      "document_318a65d5a2_chunk_0004_ast",
+      "document_318a65d5a2_chunk_0005_ast",
+      "document_318a65d5a2_chunk_0006_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_eae721372d8c",
+    "colloquial_expression": "What does 网络安全 mean in this source?",
+    "mapped_standard_terms": [
+      "网络安全",
+      "关键信息基础设施",
+      "网络运营者",
+      "法律责任",
+      "network data",
+      "comply with obligation",
+      "process data",
+      "organisation",
+      "collect data",
+      "notify",
+      "authority",
+      "business"
+    ],
+    "mapped_issue": "cybersecurity_obligation",
+    "mapped_domain": "cybersecurity",
+    "source_node_ids": [
+      "document_ba5049f6a2_chunk_0001_ast",
+      "document_ba5049f6a2_chunk_0002_ast",
+      "document_ba5049f6a2_chunk_0006_ast",
+      "document_ba5049f6a2_chunk_0007_ast",
+      "document_318a65d5a2_chunk_0001_ast",
+      "document_318a65d5a2_chunk_0002_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_03246c07f7b0",
+    "colloquial_expression": "What happens if a company breaks the data law?",
+    "mapped_standard_terms": [
+      "penalty or liability for contravention"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0001_ast",
+      "companies_act_1967_c8232023ef_chunk_0002_ast",
+      "companies_act_1967_c8232023ef_chunk_0003_ast",
+      "companies_act_1967_c8232023ef_chunk_0004_ast",
+      "companies_act_1967_c8232023ef_chunk_0005_ast",
+      "companies_act_1967_c8232023ef_chunk_0006_ast",
+      "companies_act_1967_c8232023ef_chunk_0007_ast",
+      "companies_act_1967_c8232023ef_chunk_0008_ast",
+      "companies_act_1967_c8232023ef_chunk_0009_ast",
+      "companies_act_1967_c8232023ef_chunk_0010_ast",
+      "companies_act_1967_c8232023ef_chunk_0011_ast",
+      "companies_act_1967_c8232023ef_chunk_0012_ast",
+      "companies_act_1967_c8232023ef_chunk_0013_ast",
+      "companies_act_1967_c8232023ef_chunk_0014_ast",
+      "companies_act_1967_c8232023ef_chunk_0015_ast",
+      "companies_act_1967_c8232023ef_chunk_0016_ast",
+      "companies_act_1967_c8232023ef_chunk_0017_ast",
+      "companies_act_1967_c8232023ef_chunk_0018_ast",
+      "companies_act_1967_c8232023ef_chunk_0019_ast",
+      "companies_act_1967_c8232023ef_chunk_0020_ast",
+      "companies_act_1967_c8232023ef_chunk_0021_ast",
+      "companies_act_1967_c8232023ef_chunk_0022_ast",
+      "companies_act_1967_c8232023ef_chunk_0023_ast",
+      "companies_act_1967_c8232023ef_chunk_0024_ast",
+      "companies_act_1967_c8232023ef_chunk_0025_ast",
+      "companies_act_1967_c8232023ef_chunk_0026_ast",
+      "companies_act_1967_c8232023ef_chunk_0027_ast",
+      "companies_act_1967_c8232023ef_chunk_0028_ast",
+      "companies_act_1967_c8232023ef_chunk_0029_ast",
+      "companies_act_1967_c8232023ef_chunk_0030_ast",
+      "companies_act_1967_c8232023ef_chunk_0031_ast",
+      "companies_act_1967_c8232023ef_chunk_0032_ast",
+      "companies_act_1967_c8232023ef_chunk_0033_ast",
+      "companies_act_1967_c8232023ef_chunk_0034_ast",
+      "companies_act_1967_c8232023ef_chunk_0035_ast",
+      "companies_act_1967_c8232023ef_chunk_0036_ast",
+      "companies_act_1967_c8232023ef_chunk_0037_ast",
+      "companies_act_1967_c8232023ef_chunk_0038_ast",
+      "companies_act_1967_c8232023ef_chunk_0039_ast",
+      "companies_act_1967_c8232023ef_chunk_0040_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Seed colloquial expression mapped to AST-backed terms; pending review."
+    ]
+  },
+  {
+    "mapping_id": "mapping_0456795e151c",
+    "colloquial_expression": "What must authority do about collect data?",
+    "mapped_standard_terms": [
+      "transfer",
+      "collect data",
+      "transfer data",
+      "authority",
+      "business",
+      "data protection",
+      "offence",
+      "personal data",
+      "consent",
+      "data subject",
+      "data controller",
+      "obtain consent"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0889_ast",
+      "companies_act_1967_c8232023ef_chunk_1046_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0029_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0037_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0056_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0061_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0062_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0007_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0141_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_a3ac4c8e3d3a",
+    "colloquial_expression": "What must authority do about comply with obligation?",
+    "mapped_standard_terms": [
+      "comply with obligation",
+      "authority",
+      "business",
+      "liability",
+      "offence",
+      "retain records",
+      "relevant person",
+      "relevant company",
+      "notify",
+      "personal data",
+      "data protection",
+      "data subject"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0127_ast",
+      "companies_act_1967_c8232023ef_chunk_0131_ast",
+      "companies_act_1967_c8232023ef_chunk_0150_ast",
+      "companies_act_1967_c8232023ef_chunk_0176_ast",
+      "companies_act_1967_c8232023ef_chunk_0184_ast",
+      "companies_act_1967_c8232023ef_chunk_0201_ast",
+      "companies_act_1967_c8232023ef_chunk_0207_ast",
+      "companies_act_1967_c8232023ef_chunk_0326_ast",
+      "companies_act_1967_c8232023ef_chunk_0372_ast",
+      "companies_act_1967_c8232023ef_chunk_0373_ast",
+      "companies_act_1967_c8232023ef_chunk_0385_ast",
+      "companies_act_1967_c8232023ef_chunk_0522_ast",
+      "companies_act_1967_c8232023ef_chunk_0548_ast",
+      "companies_act_1967_c8232023ef_chunk_0557_ast",
+      "companies_act_1967_c8232023ef_chunk_0588_ast",
+      "companies_act_1967_c8232023ef_chunk_0632_ast",
+      "companies_act_1967_c8232023ef_chunk_0658_ast",
+      "companies_act_1967_c8232023ef_chunk_0661_ast",
+      "companies_act_1967_c8232023ef_chunk_0673_ast",
+      "companies_act_1967_c8232023ef_chunk_0677_ast",
+      "companies_act_1967_c8232023ef_chunk_0681_ast",
+      "companies_act_1967_c8232023ef_chunk_0690_ast",
+      "companies_act_1967_c8232023ef_chunk_0691_ast",
+      "companies_act_1967_c8232023ef_chunk_0692_ast",
+      "companies_act_1967_c8232023ef_chunk_0696_ast",
+      "companies_act_1967_c8232023ef_chunk_0697_ast",
+      "companies_act_1967_c8232023ef_chunk_0699_ast",
+      "companies_act_1967_c8232023ef_chunk_0738_ast",
+      "companies_act_1967_c8232023ef_chunk_0811_ast",
+      "companies_act_1967_c8232023ef_chunk_0880_ast",
+      "companies_act_1967_c8232023ef_chunk_0896_ast",
+      "companies_act_1967_c8232023ef_chunk_0906_ast",
+      "companies_act_1967_c8232023ef_chunk_0910_ast",
+      "companies_act_1967_c8232023ef_chunk_0912_ast",
+      "companies_act_1967_c8232023ef_chunk_0913_ast",
+      "companies_act_1967_c8232023ef_chunk_0914_ast",
+      "companies_act_1967_c8232023ef_chunk_0921_ast",
+      "companies_act_1967_c8232023ef_chunk_0936_ast",
+      "companies_act_1967_c8232023ef_chunk_0937_ast",
+      "companies_act_1967_c8232023ef_chunk_0992_ast",
+      "companies_act_1967_c8232023ef_chunk_1017_ast",
+      "companies_act_1967_c8232023ef_chunk_1028_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0067_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0070_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0095_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0096_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0001_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0116_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0148_ast",
+      "document_ba5049f6a2_chunk_0007_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_84bfc2310c6b",
+    "colloquial_expression": "What must authority do about disclose data?",
+    "mapped_standard_terms": [
+      "disclosure",
+      "individual",
+      "offence",
+      "liability",
+      "disclose data",
+      "authority",
+      "consent",
+      "obtain consent",
+      "comply with obligation",
+      "business",
+      "data protection",
+      "personal data"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0015_ast",
+      "companies_act_1967_c8232023ef_chunk_0101_ast",
+      "companies_act_1967_c8232023ef_chunk_0225_ast",
+      "companies_act_1967_c8232023ef_chunk_0499_ast",
+      "companies_act_1967_c8232023ef_chunk_0527_ast",
+      "companies_act_1967_c8232023ef_chunk_0909_ast",
+      "companies_act_1967_c8232023ef_chunk_0995_ast",
+      "companies_act_1967_c8232023ef_chunk_0997_ast",
+      "companies_act_1967_c8232023ef_chunk_1020_ast",
+      "companies_act_1967_c8232023ef_chunk_1083_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0105_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0005_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0027_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0145_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0146_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_10e954d596e1",
+    "colloquial_expression": "What must authority do about notify?",
+    "mapped_standard_terms": [
+      "offence",
+      "notify",
+      "authority",
+      "business",
+      "consent",
+      "data protection",
+      "corporation",
+      "consumer protection",
+      "filed",
+      "financial year",
+      "foreign company",
+      "retain records"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0010_ast",
+      "companies_act_1967_c8232023ef_chunk_0017_ast",
+      "companies_act_1967_c8232023ef_chunk_0050_ast",
+      "companies_act_1967_c8232023ef_chunk_0054_ast",
+      "companies_act_1967_c8232023ef_chunk_0089_ast",
+      "companies_act_1967_c8232023ef_chunk_0107_ast",
+      "companies_act_1967_c8232023ef_chunk_0113_ast",
+      "companies_act_1967_c8232023ef_chunk_0115_ast",
+      "companies_act_1967_c8232023ef_chunk_0116_ast",
+      "companies_act_1967_c8232023ef_chunk_0180_ast",
+      "companies_act_1967_c8232023ef_chunk_0349_ast",
+      "companies_act_1967_c8232023ef_chunk_0351_ast",
+      "companies_act_1967_c8232023ef_chunk_0553_ast",
+      "companies_act_1967_c8232023ef_chunk_0560_ast",
+      "companies_act_1967_c8232023ef_chunk_0561_ast",
+      "companies_act_1967_c8232023ef_chunk_0562_ast",
+      "companies_act_1967_c8232023ef_chunk_0654_ast",
+      "companies_act_1967_c8232023ef_chunk_0657_ast",
+      "companies_act_1967_c8232023ef_chunk_0663_ast",
+      "companies_act_1967_c8232023ef_chunk_0665_ast",
+      "companies_act_1967_c8232023ef_chunk_0721_ast",
+      "companies_act_1967_c8232023ef_chunk_0727_ast",
+      "companies_act_1967_c8232023ef_chunk_0898_ast",
+      "companies_act_1967_c8232023ef_chunk_0939_ast",
+      "companies_act_1967_c8232023ef_chunk_0993_ast",
+      "companies_act_1967_c8232023ef_chunk_1107_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0011_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0094_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0154_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0154_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_f99cfdb8e648",
+    "colloquial_expression": "What must authority do about obtain consent?",
+    "mapped_standard_terms": [
+      "consent",
+      "liability",
+      "obtain consent",
+      "authority",
+      "business",
+      "data protection",
+      "notify",
+      "comply with obligation",
+      "offence",
+      "officer who is in default",
+      "organisation",
+      "individual"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0170_ast",
+      "companies_act_1967_c8232023ef_chunk_0171_ast",
+      "companies_act_1967_c8232023ef_chunk_0189_ast",
+      "companies_act_1967_c8232023ef_chunk_0191_ast",
+      "companies_act_1967_c8232023ef_chunk_0312_ast",
+      "companies_act_1967_c8232023ef_chunk_0314_ast",
+      "companies_act_1967_c8232023ef_chunk_0317_ast",
+      "companies_act_1967_c8232023ef_chunk_0319_ast",
+      "companies_act_1967_c8232023ef_chunk_0320_ast",
+      "companies_act_1967_c8232023ef_chunk_0439_ast",
+      "companies_act_1967_c8232023ef_chunk_0559_ast",
+      "companies_act_1967_c8232023ef_chunk_0722_ast",
+      "companies_act_1967_c8232023ef_chunk_0836_ast",
+      "companies_act_1967_c8232023ef_chunk_0892_ast",
+      "companies_act_1967_c8232023ef_chunk_0900_ast",
+      "companies_act_1967_c8232023ef_chunk_0901_ast",
+      "companies_act_1967_c8232023ef_chunk_0930_ast",
+      "companies_act_1967_c8232023ef_chunk_0931_ast",
+      "companies_act_1967_c8232023ef_chunk_1040_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0042_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0073_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0153_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_11256ef1ed0d",
+    "colloquial_expression": "What must authority do about process data?",
+    "mapped_standard_terms": [
+      "liability",
+      "Authority",
+      "Authority’s website",
+      "banking corporation",
+      "borrowing corporation",
+      "process data",
+      "non-public interest company",
+      "public interest company",
+      "notify",
+      "authority",
+      "business",
+      "consent"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "digital governance",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0046_ast",
+      "companies_act_1967_c8232023ef_chunk_0719_ast",
+      "companies_act_1967_c8232023ef_chunk_0720_ast",
+      "document_318a65d5a2_chunk_0001_ast",
+      "document_318a65d5a2_chunk_0002_ast",
+      "document_318a65d5a2_chunk_0003_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_6311655b38aa",
+    "colloquial_expression": "What must authority do about retain records?",
+    "mapped_standard_terms": [
+      "retain records",
+      "authority",
+      "business",
+      "electronic transactions",
+      "offence",
+      "accounting transaction",
+      "organisation",
+      "individual",
+      "data protection"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0021_ast",
+      "companies_act_1967_c8232023ef_chunk_0111_ast",
+      "companies_act_1967_c8232023ef_chunk_0112_ast",
+      "companies_act_1967_c8232023ef_chunk_0234_ast",
+      "companies_act_1967_c8232023ef_chunk_0446_ast",
+      "companies_act_1967_c8232023ef_chunk_0680_ast",
+      "companies_act_1967_c8232023ef_chunk_0746_ast",
+      "companies_act_1967_c8232023ef_chunk_0918_ast",
+      "companies_act_1967_c8232023ef_chunk_0922_ast",
+      "companies_act_1967_c8232023ef_chunk_0923_ast",
+      "companies_act_1967_c8232023ef_chunk_1027_ast",
+      "companies_act_1967_c8232023ef_chunk_1049_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0068_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_aefbeba1c3f4",
+    "colloquial_expression": "What must authority do about transfer data?",
+    "mapped_standard_terms": [
+      "transfer",
+      "transfer data",
+      "authority",
+      "business",
+      "data protection",
+      "comply with obligation",
+      "retain records",
+      "non-electronic medium",
+      "notify",
+      "offence",
+      "notice of transfer of registration",
+      "place of incorporation"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0039_ast",
+      "companies_act_1967_c8232023ef_chunk_0109_ast",
+      "companies_act_1967_c8232023ef_chunk_0110_ast",
+      "companies_act_1967_c8232023ef_chunk_0132_ast",
+      "companies_act_1967_c8232023ef_chunk_0134_ast",
+      "companies_act_1967_c8232023ef_chunk_0139_ast",
+      "companies_act_1967_c8232023ef_chunk_0140_ast",
+      "companies_act_1967_c8232023ef_chunk_0155_ast",
+      "companies_act_1967_c8232023ef_chunk_0291_ast",
+      "companies_act_1967_c8232023ef_chunk_0334_ast",
+      "companies_act_1967_c8232023ef_chunk_0388_ast",
+      "companies_act_1967_c8232023ef_chunk_0389_ast",
+      "companies_act_1967_c8232023ef_chunk_0392_ast",
+      "companies_act_1967_c8232023ef_chunk_0394_ast",
+      "companies_act_1967_c8232023ef_chunk_0395_ast",
+      "companies_act_1967_c8232023ef_chunk_0404_ast",
+      "companies_act_1967_c8232023ef_chunk_0766_ast",
+      "companies_act_1967_c8232023ef_chunk_0767_ast",
+      "companies_act_1967_c8232023ef_chunk_0787_ast",
+      "companies_act_1967_c8232023ef_chunk_0873_ast",
+      "companies_act_1967_c8232023ef_chunk_0875_ast",
+      "companies_act_1967_c8232023ef_chunk_0876_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_7cf2cdf99ad4",
+    "colloquial_expression": "What must business do about collect data?",
+    "mapped_standard_terms": [
+      "personal data",
+      "disclosure",
+      "data subject",
+      "collect data",
+      "disclose data",
+      "business",
+      "data protection",
+      "data controller",
+      "comply with obligation",
+      "address-harvesting software",
+      "applicable message",
+      "applicable telephone number"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0003_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0005_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0006_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0100_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0048_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0122_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0167_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_78045bbe3f70",
+    "colloquial_expression": "What must business do about comply with obligation?",
+    "mapped_standard_terms": [
+      "offence",
+      "liability",
+      "comply with obligation",
+      "notify",
+      "business",
+      "retain records",
+      "Recording of resolutions passed by written",
+      "directors’ statement",
+      "appointed day"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0009_ast",
+      "companies_act_1967_c8232023ef_chunk_0036_ast",
+      "companies_act_1967_c8232023ef_chunk_0086_ast",
+      "companies_act_1967_c8232023ef_chunk_0091_ast",
+      "companies_act_1967_c8232023ef_chunk_0092_ast",
+      "companies_act_1967_c8232023ef_chunk_0224_ast",
+      "companies_act_1967_c8232023ef_chunk_0360_ast",
+      "companies_act_1967_c8232023ef_chunk_0361_ast",
+      "companies_act_1967_c8232023ef_chunk_0368_ast",
+      "companies_act_1967_c8232023ef_chunk_0369_ast",
+      "companies_act_1967_c8232023ef_chunk_0370_ast",
+      "companies_act_1967_c8232023ef_chunk_0377_ast",
+      "companies_act_1967_c8232023ef_chunk_0441_ast",
+      "companies_act_1967_c8232023ef_chunk_0448_ast",
+      "companies_act_1967_c8232023ef_chunk_0466_ast",
+      "companies_act_1967_c8232023ef_chunk_0486_ast",
+      "companies_act_1967_c8232023ef_chunk_0530_ast",
+      "companies_act_1967_c8232023ef_chunk_0558_ast",
+      "companies_act_1967_c8232023ef_chunk_0587_ast",
+      "companies_act_1967_c8232023ef_chunk_0592_ast",
+      "companies_act_1967_c8232023ef_chunk_0629_ast",
+      "companies_act_1967_c8232023ef_chunk_0631_ast",
+      "companies_act_1967_c8232023ef_chunk_0645_ast",
+      "companies_act_1967_c8232023ef_chunk_0669_ast",
+      "companies_act_1967_c8232023ef_chunk_0674_ast",
+      "companies_act_1967_c8232023ef_chunk_0675_ast",
+      "companies_act_1967_c8232023ef_chunk_0689_ast",
+      "companies_act_1967_c8232023ef_chunk_0693_ast",
+      "companies_act_1967_c8232023ef_chunk_0702_ast",
+      "companies_act_1967_c8232023ef_chunk_0709_ast",
+      "companies_act_1967_c8232023ef_chunk_0710_ast",
+      "companies_act_1967_c8232023ef_chunk_0736_ast",
+      "companies_act_1967_c8232023ef_chunk_0751_ast",
+      "companies_act_1967_c8232023ef_chunk_0758_ast",
+      "companies_act_1967_c8232023ef_chunk_0803_ast",
+      "companies_act_1967_c8232023ef_chunk_0805_ast",
+      "companies_act_1967_c8232023ef_chunk_0831_ast",
+      "companies_act_1967_c8232023ef_chunk_0832_ast",
+      "companies_act_1967_c8232023ef_chunk_0871_ast",
+      "companies_act_1967_c8232023ef_chunk_0883_ast",
+      "companies_act_1967_c8232023ef_chunk_0894_ast",
+      "companies_act_1967_c8232023ef_chunk_0895_ast",
+      "companies_act_1967_c8232023ef_chunk_0947_ast",
+      "companies_act_1967_c8232023ef_chunk_0960_ast",
+      "companies_act_1967_c8232023ef_chunk_0964_ast",
+      "companies_act_1967_c8232023ef_chunk_0966_ast",
+      "companies_act_1967_c8232023ef_chunk_0967_ast",
+      "companies_act_1967_c8232023ef_chunk_0968_ast",
+      "companies_act_1967_c8232023ef_chunk_0969_ast",
+      "companies_act_1967_c8232023ef_chunk_0970_ast",
+      "companies_act_1967_c8232023ef_chunk_0971_ast",
+      "companies_act_1967_c8232023ef_chunk_0972_ast",
+      "companies_act_1967_c8232023ef_chunk_0973_ast",
+      "companies_act_1967_c8232023ef_chunk_0974_ast",
+      "companies_act_1967_c8232023ef_chunk_0975_ast",
+      "companies_act_1967_c8232023ef_chunk_0976_ast",
+      "companies_act_1967_c8232023ef_chunk_0978_ast",
+      "companies_act_1967_c8232023ef_chunk_0982_ast",
+      "companies_act_1967_c8232023ef_chunk_0988_ast",
+      "companies_act_1967_c8232023ef_chunk_0989_ast",
+      "companies_act_1967_c8232023ef_chunk_1038_ast",
+      "companies_act_1967_c8232023ef_chunk_1039_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_2355941475d6",
+    "colloquial_expression": "What must business do about disclose data?",
+    "mapped_standard_terms": [
+      "disclosure",
+      "liability",
+      "disclose data",
+      "business",
+      "data protection",
+      "consent",
+      "offence",
+      "obtain consent",
+      "comply with obligation",
+      "transfer",
+      "transfer data",
+      "retain records"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0016_ast",
+      "companies_act_1967_c8232023ef_chunk_0102_ast",
+      "companies_act_1967_c8232023ef_chunk_0258_ast",
+      "companies_act_1967_c8232023ef_chunk_0272_ast",
+      "companies_act_1967_c8232023ef_chunk_0287_ast",
+      "companies_act_1967_c8232023ef_chunk_0479_ast",
+      "companies_act_1967_c8232023ef_chunk_0490_ast",
+      "companies_act_1967_c8232023ef_chunk_0526_ast",
+      "companies_act_1967_c8232023ef_chunk_0528_ast",
+      "companies_act_1967_c8232023ef_chunk_0533_ast",
+      "companies_act_1967_c8232023ef_chunk_0534_ast",
+      "companies_act_1967_c8232023ef_chunk_0535_ast",
+      "companies_act_1967_c8232023ef_chunk_0538_ast",
+      "companies_act_1967_c8232023ef_chunk_0539_ast",
+      "companies_act_1967_c8232023ef_chunk_0668_ast",
+      "companies_act_1967_c8232023ef_chunk_0846_ast",
+      "companies_act_1967_c8232023ef_chunk_0959_ast",
+      "companies_act_1967_c8232023ef_chunk_0977_ast",
+      "companies_act_1967_c8232023ef_chunk_0984_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0039_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0066_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0168_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_2b075a5b8eb1",
+    "colloquial_expression": "What must business do about notify?",
+    "mapped_standard_terms": [
+      "notify",
+      "business",
+      "consumer protection"
+    ],
+    "mapped_issue": "consent_requirement",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0019_ast",
+      "companies_act_1967_c8232023ef_chunk_0300_ast",
+      "companies_act_1967_c8232023ef_chunk_0302_ast",
+      "companies_act_1967_c8232023ef_chunk_0362_ast",
+      "companies_act_1967_c8232023ef_chunk_0363_ast",
+      "companies_act_1967_c8232023ef_chunk_0364_ast",
+      "companies_act_1967_c8232023ef_chunk_0449_ast",
+      "companies_act_1967_c8232023ef_chunk_0457_ast",
+      "companies_act_1967_c8232023ef_chunk_0615_ast",
+      "companies_act_1967_c8232023ef_chunk_0618_ast",
+      "companies_act_1967_c8232023ef_chunk_0762_ast",
+      "companies_act_1967_c8232023ef_chunk_0821_ast",
+      "companies_act_1967_c8232023ef_chunk_0822_ast",
+      "companies_act_1967_c8232023ef_chunk_1002_ast",
+      "companies_act_1967_c8232023ef_chunk_1003_ast",
+      "companies_act_1967_c8232023ef_chunk_1004_ast",
+      "companies_act_1967_c8232023ef_chunk_1005_ast",
+      "companies_act_1967_c8232023ef_chunk_1071_ast",
+      "companies_act_1967_c8232023ef_chunk_1127_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_ac50e91e8a3e",
+    "colloquial_expression": "What must business do about obtain consent?",
+    "mapped_standard_terms": [
+      "consent",
+      "obtain consent",
+      "business",
+      "data protection",
+      "liability",
+      "individual",
+      "offence",
+      "foreign company",
+      "comply with obligation",
+      "personal data"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0074_ast",
+      "companies_act_1967_c8232023ef_chunk_0103_ast",
+      "companies_act_1967_c8232023ef_chunk_0212_ast",
+      "companies_act_1967_c8232023ef_chunk_0256_ast",
+      "companies_act_1967_c8232023ef_chunk_0454_ast",
+      "companies_act_1967_c8232023ef_chunk_0572_ast",
+      "companies_act_1967_c8232023ef_chunk_0573_ast",
+      "companies_act_1967_c8232023ef_chunk_0647_ast",
+      "companies_act_1967_c8232023ef_chunk_0828_ast",
+      "companies_act_1967_c8232023ef_chunk_0850_ast",
+      "companies_act_1967_c8232023ef_chunk_1008_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0047_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0053_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0081_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0087_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_bab307a47dbc",
+    "colloquial_expression": "What must business do about process data?",
+    "mapped_standard_terms": [
+      "default penalty",
+      "electronic communication",
+      "process data",
+      "business",
+      "offence"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0052_ast",
+      "companies_act_1967_c8232023ef_chunk_0620_ast",
+      "companies_act_1967_c8232023ef_chunk_0626_ast",
+      "companies_act_1967_c8232023ef_chunk_0891_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_f96e0666bd0b",
+    "colloquial_expression": "What must business do about retain records?",
+    "mapped_standard_terms": [
+      "offence",
+      "enforcement",
+      "retain records",
+      "business",
+      "liability",
+      "accounting corporation",
+      "accounting entity",
+      "accounting firm",
+      "accounting limited liability partnership",
+      "Accounting Standards",
+      "accounting transaction",
+      "transfer"
+    ],
+    "mapped_issue": "cross_border_data_transfer",
+    "mapped_domain": "unknown",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0035_ast",
+      "companies_act_1967_c8232023ef_chunk_0043_ast",
+      "companies_act_1967_c8232023ef_chunk_0422_ast",
+      "companies_act_1967_c8232023ef_chunk_0485_ast",
+      "companies_act_1967_c8232023ef_chunk_0488_ast",
+      "companies_act_1967_c8232023ef_chunk_0666_ast",
+      "companies_act_1967_c8232023ef_chunk_0667_ast",
+      "companies_act_1967_c8232023ef_chunk_0670_ast",
+      "companies_act_1967_c8232023ef_chunk_0731_ast",
+      "companies_act_1967_c8232023ef_chunk_0732_ast",
+      "companies_act_1967_c8232023ef_chunk_0739_ast",
+      "companies_act_1967_c8232023ef_chunk_0740_ast",
+      "companies_act_1967_c8232023ef_chunk_0741_ast",
+      "companies_act_1967_c8232023ef_chunk_0778_ast",
+      "companies_act_1967_c8232023ef_chunk_0830_ast",
+      "companies_act_1967_c8232023ef_chunk_0839_ast",
+      "companies_act_1967_c8232023ef_chunk_0840_ast",
+      "companies_act_1967_c8232023ef_chunk_1021_ast",
+      "companies_act_1967_c8232023ef_chunk_1022_ast",
+      "companies_act_1967_c8232023ef_chunk_1023_ast",
+      "companies_act_1967_c8232023ef_chunk_1024_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_241fdf05a907",
+    "colloquial_expression": "What must business do about transfer data?",
+    "mapped_standard_terms": [
+      "transfer",
+      "transfer data",
+      "business",
+      "data protection",
+      "offence",
+      "liability",
+      "comply with obligation",
+      "company",
+      "consent",
+      "obtain consent",
+      "foreign corporate entity",
+      "enforcement"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0011_ast",
+      "companies_act_1967_c8232023ef_chunk_0012_ast",
+      "companies_act_1967_c8232023ef_chunk_0024_ast",
+      "companies_act_1967_c8232023ef_chunk_0031_ast",
+      "companies_act_1967_c8232023ef_chunk_0081_ast",
+      "companies_act_1967_c8232023ef_chunk_0133_ast",
+      "companies_act_1967_c8232023ef_chunk_0144_ast",
+      "companies_act_1967_c8232023ef_chunk_0145_ast",
+      "companies_act_1967_c8232023ef_chunk_0156_ast",
+      "companies_act_1967_c8232023ef_chunk_0231_ast",
+      "companies_act_1967_c8232023ef_chunk_0244_ast",
+      "companies_act_1967_c8232023ef_chunk_0333_ast",
+      "companies_act_1967_c8232023ef_chunk_0336_ast",
+      "companies_act_1967_c8232023ef_chunk_0371_ast",
+      "companies_act_1967_c8232023ef_chunk_0383_ast",
+      "companies_act_1967_c8232023ef_chunk_0390_ast",
+      "companies_act_1967_c8232023ef_chunk_0393_ast",
+      "companies_act_1967_c8232023ef_chunk_0396_ast",
+      "companies_act_1967_c8232023ef_chunk_0397_ast",
+      "companies_act_1967_c8232023ef_chunk_0398_ast",
+      "companies_act_1967_c8232023ef_chunk_0399_ast",
+      "companies_act_1967_c8232023ef_chunk_0400_ast",
+      "companies_act_1967_c8232023ef_chunk_0401_ast",
+      "companies_act_1967_c8232023ef_chunk_0402_ast",
+      "companies_act_1967_c8232023ef_chunk_0403_ast",
+      "companies_act_1967_c8232023ef_chunk_0504_ast",
+      "companies_act_1967_c8232023ef_chunk_0536_ast",
+      "companies_act_1967_c8232023ef_chunk_0537_ast",
+      "companies_act_1967_c8232023ef_chunk_0650_ast",
+      "companies_act_1967_c8232023ef_chunk_0764_ast",
+      "companies_act_1967_c8232023ef_chunk_0765_ast",
+      "companies_act_1967_c8232023ef_chunk_0768_ast",
+      "companies_act_1967_c8232023ef_chunk_0769_ast",
+      "companies_act_1967_c8232023ef_chunk_0773_ast",
+      "companies_act_1967_c8232023ef_chunk_0774_ast",
+      "companies_act_1967_c8232023ef_chunk_0775_ast",
+      "companies_act_1967_c8232023ef_chunk_0776_ast",
+      "companies_act_1967_c8232023ef_chunk_0800_ast",
+      "companies_act_1967_c8232023ef_chunk_0837_ast",
+      "companies_act_1967_c8232023ef_chunk_0847_ast",
+      "companies_act_1967_c8232023ef_chunk_0848_ast",
+      "companies_act_1967_c8232023ef_chunk_0872_ast",
+      "companies_act_1967_c8232023ef_chunk_0879_ast",
+      "companies_act_1967_c8232023ef_chunk_0885_ast",
+      "companies_act_1967_c8232023ef_chunk_0944_ast",
+      "companies_act_1967_c8232023ef_chunk_0945_ast",
+      "companies_act_1967_c8232023ef_chunk_1007_ast",
+      "companies_act_1967_c8232023ef_chunk_1011_ast",
+      "companies_act_1967_c8232023ef_chunk_1012_ast",
+      "companies_act_1967_c8232023ef_chunk_1037_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0040_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0041_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_e7f86cb19793",
+    "colloquial_expression": "What must data controller do about collect data?",
+    "mapped_standard_terms": [
+      "personal data",
+      "data protection",
+      "disclosure",
+      "data controller",
+      "Personal Data",
+      "Data Controller",
+      "consent",
+      "data subject",
+      "collect data",
+      "disclose data",
+      "obtain consent",
+      "transfer"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0008_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0021_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0022_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0023_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0025_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0026_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0027_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0030_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0031_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0032_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0036_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0044_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0045_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0046_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0047_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0048_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0050_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0053_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0055_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0058_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0060_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0064_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0069_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0116_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_e9fbeb45295c",
+    "colloquial_expression": "What must data controller do about comply with obligation?",
+    "mapped_standard_terms": [
+      "personal data",
+      "data controller",
+      "enforcement",
+      "comply with obligation",
+      "data protection",
+      "data subject",
+      "retain records",
+      "notify",
+      "liability"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0020_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0052_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0054_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0097_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0102_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0104_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0109_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_4923a2491581",
+    "colloquial_expression": "What must data controller do about disclose data?",
+    "mapped_standard_terms": [
+      "personal data",
+      "consent",
+      "disclosure",
+      "data subject",
+      "data controller",
+      "disclose data",
+      "data protection",
+      "liability",
+      "obtain consent",
+      "comply with obligation"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0042_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0063_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0106_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_6e65035d9413",
+    "colloquial_expression": "What must data controller do about transfer data?",
+    "mapped_standard_terms": [
+      "personal data",
+      "data protection",
+      "transfer",
+      "data controller",
+      "transfer data",
+      "comply with obligation",
+      "consent",
+      "data subject"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0019_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0107_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_c0a7c70d4c09",
+    "colloquial_expression": "What must data subject do about collect data?",
+    "mapped_standard_terms": [
+      "personal data",
+      "disclosure",
+      "data subject",
+      "cybersecurity",
+      "collect data",
+      "disclose data",
+      "data protection"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0004_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0117_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_b7437780179b",
+    "colloquial_expression": "What must data subject do about comply with obligation?",
+    "mapped_standard_terms": [
+      "personal data",
+      "data subject",
+      "comply with obligation",
+      "data protection"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0035_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_214e7e8d6b81",
+    "colloquial_expression": "What must data subject do about disclose data?",
+    "mapped_standard_terms": [
+      "personal data",
+      "consent",
+      "data subject",
+      "disclose data",
+      "obtain consent",
+      "comply with obligation"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0034_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_29fa075e6a39",
+    "colloquial_expression": "What must data subject do about obtain consent?",
+    "mapped_standard_terms": [
+      "consent",
+      "data subject",
+      "obtain consent",
+      "data protection"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0024_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0033_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_48fad987c8ec",
+    "colloquial_expression": "What must individual do about collect data?",
+    "mapped_standard_terms": [
+      "personal data",
+      "disclosure",
+      "individual",
+      "affected individual",
+      "collect data",
+      "disclose data",
+      "data protection",
+      "consent",
+      "process data",
+      "business",
+      "prospective customer of X",
+      "个人信息"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0023_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0024_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0111_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0112_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0128_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0129_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0130_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0054_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0158_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0176_ast",
+      "document_0e841274ea_chunk_0003_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_bd7aaaaae829",
+    "colloquial_expression": "What must individual do about comply with obligation?",
+    "mapped_standard_terms": [
+      "consent",
+      "individual",
+      "comply with obligation",
+      "retain records",
+      "authority",
+      "business",
+      "ister",
+      "data protection",
+      "个人信息",
+      "行政处罚",
+      "personal data"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0542_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0043_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0074_ast",
+      "document_318a65d5a2_chunk_0006_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_a0c18dad01fc",
+    "colloquial_expression": "What must individual do about disclose data?",
+    "mapped_standard_terms": [
+      "disclosure",
+      "individual",
+      "disclose data",
+      "business",
+      "data protection",
+      "personal data",
+      "offence",
+      "gain",
+      "loss",
+      "Monetary Authority of Singapore",
+      "enforcement",
+      "prescribed circumstances"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_1085_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0054_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0056_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0134_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0146_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0147_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0148_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0159_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0163_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0090_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0181_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_689d76eb3428",
+    "colloquial_expression": "What must individual do about notify?",
+    "mapped_standard_terms": [
+      "individual",
+      "notify",
+      "authority",
+      "business",
+      "data protection",
+      "offence"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0106_ast",
+      "companies_act_1967_c8232023ef_chunk_0120_ast",
+      "companies_act_1967_c8232023ef_chunk_0653_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0153_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_1fd6ba081601",
+    "colloquial_expression": "What must individual do about transfer data?",
+    "mapped_standard_terms": [
+      "个人信息",
+      "网络安全",
+      "关键信息基础设施",
+      "网络运营者",
+      "personal data",
+      "network data"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "cybersecurity",
+    "source_node_ids": [
+      "document_ba5049f6a2_chunk_0008_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_7b5c4e7e7f6c",
+    "colloquial_expression": "What must organisation do about collect data?",
+    "mapped_standard_terms": [
+      "personal data",
+      "disclosure",
+      "data subject",
+      "data controller",
+      "collect data",
+      "disclose data",
+      "process data",
+      "consent",
+      "organisation",
+      "individual",
+      "data protection",
+      "specified date"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0057_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0059_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0009_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0010_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0011_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0012_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0013_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0014_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0015_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0016_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0017_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0018_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0022_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0025_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0031_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0072_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0110_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0113_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0115_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0116_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0117_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0118_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0119_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0120_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0121_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0123_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0125_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0127_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0131_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0143_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0019_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0030_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0031_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0032_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0033_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0034_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0035_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0036_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0037_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0038_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0039_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0040_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0041_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0042_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0043_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0044_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0045_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0052_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0053_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0056_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0104_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0130_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0157_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0159_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0161_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0162_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0163_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0164_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0165_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0166_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0169_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0172_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0174_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0177_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0184_ast",
+      "document_0e841274ea_chunk_0001_ast",
+      "document_0e841274ea_chunk_0004_ast",
+      "document_0e841274ea_chunk_0005_ast",
+      "document_ba5049f6a2_chunk_0003_ast",
+      "document_ba5049f6a2_chunk_0004_ast",
+      "document_ba5049f6a2_chunk_0005_ast",
+      "document_ba5049f6a2_chunk_0006_ast",
+      "document_ba5049f6a2_chunk_0009_ast",
+      "document_318a65d5a2_chunk_0005_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_907e42b0eac7",
+    "colloquial_expression": "What must organisation do about comply with obligation?",
+    "mapped_standard_terms": [
+      "organisation",
+      "individual",
+      "comply with obligation",
+      "data protection",
+      "authority",
+      "personal data",
+      "financial penalty",
+      "enforcement",
+      "offence",
+      "foreign data protection body",
+      "retain records",
+      "网络安全"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0045_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0071_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0074_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0075_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0076_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0079_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0080_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0081_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0096_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0108_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0028_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0076_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0103_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0107_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0108_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0109_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0113_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0114_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0115_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0127_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0129_ast",
+      "document_ba5049f6a2_chunk_0001_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_12759ba46883",
+    "colloquial_expression": "What must organisation do about disclose data?",
+    "mapped_standard_terms": [
+      "personal data",
+      "data protection",
+      "consent",
+      "disclosure",
+      "transfer",
+      "data subject",
+      "organisation",
+      "individual",
+      "enforcement",
+      "disclose data",
+      "notify",
+      "offence"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0038_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0019_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0028_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0035_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0036_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0037_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0057_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0058_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0059_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0126_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0133_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0135_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0046_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0047_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0049_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0050_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0059_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0091_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0092_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0093_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0144_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0178_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0180_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0182_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0183_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_2a8ec2d2f358",
+    "colloquial_expression": "What must organisation do about notify?",
+    "mapped_standard_terms": [
+      "personal data",
+      "data protection",
+      "organisation",
+      "individual",
+      "notify",
+      "authority",
+      "relevant body",
+      "financial penalty"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0021_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0027_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0065_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0086_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0106_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0018_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0048_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0058_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0098_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0119_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0151_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_8cdf1d2716a6",
+    "colloquial_expression": "What must organisation do about obtain consent?",
+    "mapped_standard_terms": [
+      "personal data",
+      "data protection",
+      "consent",
+      "data subject",
+      "data controller",
+      "obtain consent",
+      "organisation",
+      "individual",
+      "notify",
+      "authority"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0039_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0020_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0067_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0100_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_72547bd3bfaa",
+    "colloquial_expression": "What must organisation do about process data?",
+    "mapped_standard_terms": [
+      "personal data",
+      "organisation",
+      "process data",
+      "notify",
+      "data protection",
+      "disclosure",
+      "disclose data",
+      "individual",
+      "business",
+      "credit report",
+      "data intermediary",
+      "derived personal data"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0026_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0029_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0132_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0141_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0012_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0017_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0020_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0057_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0060_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0179_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0209_ast",
+      "document_0e841274ea_chunk_0002_ast",
+      "document_0e841274ea_chunk_0006_ast",
+      "document_0e841274ea_chunk_0007_ast",
+      "document_0e841274ea_chunk_0008_ast",
+      "document_0e841274ea_chunk_0009_ast",
+      "document_ba5049f6a2_chunk_0002_ast",
+      "document_318a65d5a2_chunk_0004_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_b6a55a7cd03c",
+    "colloquial_expression": "What must organisation do about retain records?",
+    "mapped_standard_terms": [
+      "personal data",
+      "organisation",
+      "individual",
+      "retain records",
+      "authority",
+      "data protection"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0101_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_0a1b9ed52d5d",
+    "colloquial_expression": "Which consumer protection obligations or risks appear here?",
+    "mapped_standard_terms": [
+      "corporation",
+      "notify",
+      "authority",
+      "business",
+      "consumer protection",
+      "calling line identity",
+      "checker",
+      "goods",
+      "message",
+      "register",
+      "process data",
+      "retain records"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "consumer protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0050_ast",
+      "companies_act_1967_c8232023ef_chunk_1127_ast",
+      "m_29_1bf3c639ac_chunk_0003_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0061_ast",
+      "document_318a65d5a2_chunk_0003_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_ef83c04ddde9",
+    "colloquial_expression": "Which cybersecurity obligations or risks appear here?",
+    "mapped_standard_terms": [
+      "网络安全",
+      "关键信息基础设施",
+      "网络运营者",
+      "法律责任",
+      "network data",
+      "comply with obligation",
+      "process data",
+      "organisation",
+      "个人信息",
+      "personal data",
+      "collect data",
+      "notify"
+    ],
+    "mapped_issue": "cybersecurity_obligation",
+    "mapped_domain": "cybersecurity",
+    "source_node_ids": [
+      "document_ba5049f6a2_chunk_0001_ast",
+      "document_ba5049f6a2_chunk_0002_ast",
+      "document_ba5049f6a2_chunk_0004_ast",
+      "document_ba5049f6a2_chunk_0005_ast",
+      "document_ba5049f6a2_chunk_0006_ast",
+      "document_ba5049f6a2_chunk_0007_ast",
+      "document_ba5049f6a2_chunk_0008_ast",
+      "document_ba5049f6a2_chunk_0009_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_22250fcd145c",
+    "colloquial_expression": "Which data protection obligations or risks appear here?",
+    "mapped_standard_terms": [
+      "transfer",
+      "transfer data",
+      "business",
+      "data protection",
+      "individual",
+      "disclosure",
+      "offence",
+      "liability",
+      "disclose data",
+      "authority",
+      "consent",
+      "notify"
+    ],
+    "mapped_issue": "personal_data_protection",
+    "mapped_domain": "data protection",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0011_ast",
+      "companies_act_1967_c8232023ef_chunk_0012_ast",
+      "companies_act_1967_c8232023ef_chunk_0014_ast",
+      "companies_act_1967_c8232023ef_chunk_0015_ast",
+      "companies_act_1967_c8232023ef_chunk_0016_ast",
+      "companies_act_1967_c8232023ef_chunk_0017_ast",
+      "companies_act_1967_c8232023ef_chunk_0024_ast",
+      "companies_act_1967_c8232023ef_chunk_0025_ast",
+      "companies_act_1967_c8232023ef_chunk_0031_ast",
+      "companies_act_1967_c8232023ef_chunk_0039_ast",
+      "companies_act_1967_c8232023ef_chunk_0040_ast",
+      "companies_act_1967_c8232023ef_chunk_0042_ast",
+      "companies_act_1967_c8232023ef_chunk_0049_ast",
+      "companies_act_1967_c8232023ef_chunk_0055_ast",
+      "companies_act_1967_c8232023ef_chunk_0056_ast",
+      "companies_act_1967_c8232023ef_chunk_0062_ast",
+      "companies_act_1967_c8232023ef_chunk_0074_ast",
+      "companies_act_1967_c8232023ef_chunk_0081_ast",
+      "companies_act_1967_c8232023ef_chunk_0101_ast",
+      "companies_act_1967_c8232023ef_chunk_0102_ast",
+      "companies_act_1967_c8232023ef_chunk_0103_ast",
+      "companies_act_1967_c8232023ef_chunk_0106_ast",
+      "companies_act_1967_c8232023ef_chunk_0109_ast",
+      "companies_act_1967_c8232023ef_chunk_0110_ast",
+      "companies_act_1967_c8232023ef_chunk_0117_ast",
+      "companies_act_1967_c8232023ef_chunk_0118_ast",
+      "companies_act_1967_c8232023ef_chunk_0119_ast",
+      "companies_act_1967_c8232023ef_chunk_0120_ast",
+      "companies_act_1967_c8232023ef_chunk_0121_ast",
+      "companies_act_1967_c8232023ef_chunk_0122_ast",
+      "companies_act_1967_c8232023ef_chunk_0129_ast",
+      "companies_act_1967_c8232023ef_chunk_0130_ast",
+      "companies_act_1967_c8232023ef_chunk_0132_ast",
+      "companies_act_1967_c8232023ef_chunk_0133_ast",
+      "companies_act_1967_c8232023ef_chunk_0134_ast",
+      "companies_act_1967_c8232023ef_chunk_0135_ast",
+      "companies_act_1967_c8232023ef_chunk_0139_ast",
+      "companies_act_1967_c8232023ef_chunk_0140_ast",
+      "companies_act_1967_c8232023ef_chunk_0144_ast",
+      "companies_act_1967_c8232023ef_chunk_0145_ast",
+      "companies_act_1967_c8232023ef_chunk_0153_ast",
+      "companies_act_1967_c8232023ef_chunk_0155_ast",
+      "companies_act_1967_c8232023ef_chunk_0156_ast",
+      "companies_act_1967_c8232023ef_chunk_0170_ast",
+      "companies_act_1967_c8232023ef_chunk_0171_ast",
+      "companies_act_1967_c8232023ef_chunk_0189_ast",
+      "companies_act_1967_c8232023ef_chunk_0191_ast",
+      "companies_act_1967_c8232023ef_chunk_0197_ast",
+      "companies_act_1967_c8232023ef_chunk_0212_ast",
+      "companies_act_1967_c8232023ef_chunk_0225_ast",
+      "companies_act_1967_c8232023ef_chunk_0226_ast",
+      "companies_act_1967_c8232023ef_chunk_0227_ast",
+      "companies_act_1967_c8232023ef_chunk_0231_ast",
+      "companies_act_1967_c8232023ef_chunk_0235_ast",
+      "companies_act_1967_c8232023ef_chunk_0237_ast",
+      "companies_act_1967_c8232023ef_chunk_0244_ast",
+      "companies_act_1967_c8232023ef_chunk_0256_ast",
+      "companies_act_1967_c8232023ef_chunk_0258_ast",
+      "companies_act_1967_c8232023ef_chunk_0272_ast",
+      "companies_act_1967_c8232023ef_chunk_0287_ast",
+      "companies_act_1967_c8232023ef_chunk_0291_ast",
+      "companies_act_1967_c8232023ef_chunk_0312_ast",
+      "companies_act_1967_c8232023ef_chunk_0314_ast",
+      "companies_act_1967_c8232023ef_chunk_0317_ast",
+      "companies_act_1967_c8232023ef_chunk_0319_ast",
+      "companies_act_1967_c8232023ef_chunk_0320_ast",
+      "companies_act_1967_c8232023ef_chunk_0333_ast",
+      "companies_act_1967_c8232023ef_chunk_0334_ast",
+      "companies_act_1967_c8232023ef_chunk_0336_ast",
+      "companies_act_1967_c8232023ef_chunk_0357_ast",
+      "companies_act_1967_c8232023ef_chunk_0371_ast",
+      "companies_act_1967_c8232023ef_chunk_0374_ast",
+      "companies_act_1967_c8232023ef_chunk_0383_ast",
+      "companies_act_1967_c8232023ef_chunk_0388_ast",
+      "companies_act_1967_c8232023ef_chunk_0389_ast",
+      "companies_act_1967_c8232023ef_chunk_0390_ast",
+      "companies_act_1967_c8232023ef_chunk_0392_ast",
+      "companies_act_1967_c8232023ef_chunk_0393_ast",
+      "companies_act_1967_c8232023ef_chunk_0394_ast",
+      "companies_act_1967_c8232023ef_chunk_0395_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_a1566415ff46",
+    "colloquial_expression": "Which digital governance obligations or risks appear here?",
+    "mapped_standard_terms": [
+      "liability",
+      "Authority",
+      "Authority’s website",
+      "banking corporation",
+      "borrowing corporation",
+      "process data",
+      "digital governance",
+      "address-harvesting software",
+      "applicable message",
+      "applicable telephone number",
+      "collect data",
+      "business"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "digital governance",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0046_ast",
+      "entranslation_of_the_personal_data_protection_act_0_1c77b4099e_chunk_0113_ast",
+      "personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0048_ast",
+      "personal_data_protection_act_2012_e857c5e9da_chunk_0082_ast",
+      "document_318a65d5a2_chunk_0001_ast",
+      "document_318a65d5a2_chunk_0002_ast",
+      "document_318a65d5a2_chunk_0005_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  },
+  {
+    "mapping_id": "mapping_8c014bf135a7",
+    "colloquial_expression": "Which electronic transactions obligations or risks appear here?",
+    "mapped_standard_terms": [
+      "enforcement",
+      "authority",
+      "business",
+      "electronic transactions",
+      "electronic transaction system",
+      "exempt private company",
+      "retain records",
+      "electronic record",
+      "company record",
+      "in electronic form",
+      "in hard copy form"
+    ],
+    "mapped_issue": "unknown",
+    "mapped_domain": "electronic transactions",
+    "source_node_ids": [
+      "companies_act_1967_c8232023ef_chunk_0002_ast",
+      "companies_act_1967_c8232023ef_chunk_0053_ast",
+      "companies_act_1967_c8232023ef_chunk_0105_ast",
+      "companies_act_1967_c8232023ef_chunk_0111_ast",
+      "companies_act_1967_c8232023ef_chunk_1022_ast"
+    ],
+    "confidence": "high",
+    "review_status": "pending",
+    "notes": [
+      "Generated from AST possible_user_questions."
+    ]
+  }
+]
