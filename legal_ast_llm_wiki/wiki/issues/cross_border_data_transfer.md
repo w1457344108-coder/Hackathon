@@ -1,0 +1,222 @@
+﻿---
+type: issue
+jurisdiction: Singapore
+domain: data protection
+source_count: 5
+review_status: pending
+created_at: "2026-05-20T00:00:55.892871+00:00"
+updated_at: "2026-05-20T00:00:55.892871+00:00"
+tags:
+  - legal-wiki
+  - issue
+  - cross_border_data_transfer
+---
+
+# Cross-Border Data Transfer
+
+## Issue Description
+
+Questions about transferring, transmitting, exporting, or disclosing personal data across borders.
+
+## Related Legal or Policy Evidence
+
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0011_ast|companies_act_1967_c8232023ef_chunk_0011_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0012_ast|companies_act_1967_c8232023ef_chunk_0012_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0024_ast|companies_act_1967_c8232023ef_chunk_0024_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0025_ast|companies_act_1967_c8232023ef_chunk_0025_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0031_ast|companies_act_1967_c8232023ef_chunk_0031_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0035_ast|companies_act_1967_c8232023ef_chunk_0035_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0039_ast|companies_act_1967_c8232023ef_chunk_0039_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0040_ast|companies_act_1967_c8232023ef_chunk_0040_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0042_ast|companies_act_1967_c8232023ef_chunk_0042_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0081_ast|companies_act_1967_c8232023ef_chunk_0081_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0109_ast|companies_act_1967_c8232023ef_chunk_0109_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0110_ast|companies_act_1967_c8232023ef_chunk_0110_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0132_ast|companies_act_1967_c8232023ef_chunk_0132_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0133_ast|companies_act_1967_c8232023ef_chunk_0133_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0134_ast|companies_act_1967_c8232023ef_chunk_0134_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0139_ast|companies_act_1967_c8232023ef_chunk_0139_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0140_ast|companies_act_1967_c8232023ef_chunk_0140_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0144_ast|companies_act_1967_c8232023ef_chunk_0144_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0145_ast|companies_act_1967_c8232023ef_chunk_0145_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0155_ast|companies_act_1967_c8232023ef_chunk_0155_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0156_ast|companies_act_1967_c8232023ef_chunk_0156_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0231_ast|companies_act_1967_c8232023ef_chunk_0231_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0244_ast|companies_act_1967_c8232023ef_chunk_0244_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0291_ast|companies_act_1967_c8232023ef_chunk_0291_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0333_ast|companies_act_1967_c8232023ef_chunk_0333_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0334_ast|companies_act_1967_c8232023ef_chunk_0334_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0336_ast|companies_act_1967_c8232023ef_chunk_0336_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0371_ast|companies_act_1967_c8232023ef_chunk_0371_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0374_ast|companies_act_1967_c8232023ef_chunk_0374_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0383_ast|companies_act_1967_c8232023ef_chunk_0383_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0388_ast|companies_act_1967_c8232023ef_chunk_0388_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0389_ast|companies_act_1967_c8232023ef_chunk_0389_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0390_ast|companies_act_1967_c8232023ef_chunk_0390_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0392_ast|companies_act_1967_c8232023ef_chunk_0392_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0393_ast|companies_act_1967_c8232023ef_chunk_0393_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0394_ast|companies_act_1967_c8232023ef_chunk_0394_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0395_ast|companies_act_1967_c8232023ef_chunk_0395_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0396_ast|companies_act_1967_c8232023ef_chunk_0396_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0397_ast|companies_act_1967_c8232023ef_chunk_0397_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0398_ast|companies_act_1967_c8232023ef_chunk_0398_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0399_ast|companies_act_1967_c8232023ef_chunk_0399_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0400_ast|companies_act_1967_c8232023ef_chunk_0400_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0401_ast|companies_act_1967_c8232023ef_chunk_0401_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0402_ast|companies_act_1967_c8232023ef_chunk_0402_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0403_ast|companies_act_1967_c8232023ef_chunk_0403_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0404_ast|companies_act_1967_c8232023ef_chunk_0404_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0504_ast|companies_act_1967_c8232023ef_chunk_0504_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0534_ast|companies_act_1967_c8232023ef_chunk_0534_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0536_ast|companies_act_1967_c8232023ef_chunk_0536_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0537_ast|companies_act_1967_c8232023ef_chunk_0537_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0592_ast|companies_act_1967_c8232023ef_chunk_0592_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0650_ast|companies_act_1967_c8232023ef_chunk_0650_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0760_ast|companies_act_1967_c8232023ef_chunk_0760_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0764_ast|companies_act_1967_c8232023ef_chunk_0764_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0765_ast|companies_act_1967_c8232023ef_chunk_0765_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0766_ast|companies_act_1967_c8232023ef_chunk_0766_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0767_ast|companies_act_1967_c8232023ef_chunk_0767_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0768_ast|companies_act_1967_c8232023ef_chunk_0768_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0769_ast|companies_act_1967_c8232023ef_chunk_0769_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0770_ast|companies_act_1967_c8232023ef_chunk_0770_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0771_ast|companies_act_1967_c8232023ef_chunk_0771_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0772_ast|companies_act_1967_c8232023ef_chunk_0772_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0773_ast|companies_act_1967_c8232023ef_chunk_0773_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0774_ast|companies_act_1967_c8232023ef_chunk_0774_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0775_ast|companies_act_1967_c8232023ef_chunk_0775_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0776_ast|companies_act_1967_c8232023ef_chunk_0776_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0777_ast|companies_act_1967_c8232023ef_chunk_0777_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0778_ast|companies_act_1967_c8232023ef_chunk_0778_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0779_ast|companies_act_1967_c8232023ef_chunk_0779_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0780_ast|companies_act_1967_c8232023ef_chunk_0780_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0781_ast|companies_act_1967_c8232023ef_chunk_0781_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0783_ast|companies_act_1967_c8232023ef_chunk_0783_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0784_ast|companies_act_1967_c8232023ef_chunk_0784_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0787_ast|companies_act_1967_c8232023ef_chunk_0787_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0800_ast|companies_act_1967_c8232023ef_chunk_0800_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0807_ast|companies_act_1967_c8232023ef_chunk_0807_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0837_ast|companies_act_1967_c8232023ef_chunk_0837_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0847_ast|companies_act_1967_c8232023ef_chunk_0847_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0848_ast|companies_act_1967_c8232023ef_chunk_0848_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0849_ast|companies_act_1967_c8232023ef_chunk_0849_ast]]
+
+## Related Concepts
+
+- [[concepts/personal_data|personal data]]
+- [[concepts/cross_border_transfer|cross-border transfer]]
+- [[concepts/transfer|transfer]]
+
+## Related AST Nodes
+
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0011_ast|companies_act_1967_c8232023ef_chunk_0011_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0012_ast|companies_act_1967_c8232023ef_chunk_0012_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0024_ast|companies_act_1967_c8232023ef_chunk_0024_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0025_ast|companies_act_1967_c8232023ef_chunk_0025_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0031_ast|companies_act_1967_c8232023ef_chunk_0031_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0035_ast|companies_act_1967_c8232023ef_chunk_0035_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0039_ast|companies_act_1967_c8232023ef_chunk_0039_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0040_ast|companies_act_1967_c8232023ef_chunk_0040_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0042_ast|companies_act_1967_c8232023ef_chunk_0042_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0081_ast|companies_act_1967_c8232023ef_chunk_0081_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0109_ast|companies_act_1967_c8232023ef_chunk_0109_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0110_ast|companies_act_1967_c8232023ef_chunk_0110_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0132_ast|companies_act_1967_c8232023ef_chunk_0132_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0133_ast|companies_act_1967_c8232023ef_chunk_0133_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0134_ast|companies_act_1967_c8232023ef_chunk_0134_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0139_ast|companies_act_1967_c8232023ef_chunk_0139_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0140_ast|companies_act_1967_c8232023ef_chunk_0140_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0144_ast|companies_act_1967_c8232023ef_chunk_0144_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0145_ast|companies_act_1967_c8232023ef_chunk_0145_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0155_ast|companies_act_1967_c8232023ef_chunk_0155_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0156_ast|companies_act_1967_c8232023ef_chunk_0156_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0231_ast|companies_act_1967_c8232023ef_chunk_0231_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0244_ast|companies_act_1967_c8232023ef_chunk_0244_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0291_ast|companies_act_1967_c8232023ef_chunk_0291_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0333_ast|companies_act_1967_c8232023ef_chunk_0333_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0334_ast|companies_act_1967_c8232023ef_chunk_0334_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0336_ast|companies_act_1967_c8232023ef_chunk_0336_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0371_ast|companies_act_1967_c8232023ef_chunk_0371_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0374_ast|companies_act_1967_c8232023ef_chunk_0374_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0383_ast|companies_act_1967_c8232023ef_chunk_0383_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0388_ast|companies_act_1967_c8232023ef_chunk_0388_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0389_ast|companies_act_1967_c8232023ef_chunk_0389_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0390_ast|companies_act_1967_c8232023ef_chunk_0390_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0392_ast|companies_act_1967_c8232023ef_chunk_0392_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0393_ast|companies_act_1967_c8232023ef_chunk_0393_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0394_ast|companies_act_1967_c8232023ef_chunk_0394_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0395_ast|companies_act_1967_c8232023ef_chunk_0395_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0396_ast|companies_act_1967_c8232023ef_chunk_0396_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0397_ast|companies_act_1967_c8232023ef_chunk_0397_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0398_ast|companies_act_1967_c8232023ef_chunk_0398_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0399_ast|companies_act_1967_c8232023ef_chunk_0399_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0400_ast|companies_act_1967_c8232023ef_chunk_0400_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0401_ast|companies_act_1967_c8232023ef_chunk_0401_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0402_ast|companies_act_1967_c8232023ef_chunk_0402_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0403_ast|companies_act_1967_c8232023ef_chunk_0403_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0404_ast|companies_act_1967_c8232023ef_chunk_0404_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0504_ast|companies_act_1967_c8232023ef_chunk_0504_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0534_ast|companies_act_1967_c8232023ef_chunk_0534_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0536_ast|companies_act_1967_c8232023ef_chunk_0536_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0537_ast|companies_act_1967_c8232023ef_chunk_0537_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0592_ast|companies_act_1967_c8232023ef_chunk_0592_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0650_ast|companies_act_1967_c8232023ef_chunk_0650_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0760_ast|companies_act_1967_c8232023ef_chunk_0760_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0764_ast|companies_act_1967_c8232023ef_chunk_0764_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0765_ast|companies_act_1967_c8232023ef_chunk_0765_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0766_ast|companies_act_1967_c8232023ef_chunk_0766_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0767_ast|companies_act_1967_c8232023ef_chunk_0767_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0768_ast|companies_act_1967_c8232023ef_chunk_0768_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0769_ast|companies_act_1967_c8232023ef_chunk_0769_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0770_ast|companies_act_1967_c8232023ef_chunk_0770_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0771_ast|companies_act_1967_c8232023ef_chunk_0771_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0772_ast|companies_act_1967_c8232023ef_chunk_0772_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0773_ast|companies_act_1967_c8232023ef_chunk_0773_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0774_ast|companies_act_1967_c8232023ef_chunk_0774_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0775_ast|companies_act_1967_c8232023ef_chunk_0775_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0776_ast|companies_act_1967_c8232023ef_chunk_0776_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0777_ast|companies_act_1967_c8232023ef_chunk_0777_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0778_ast|companies_act_1967_c8232023ef_chunk_0778_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0779_ast|companies_act_1967_c8232023ef_chunk_0779_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0780_ast|companies_act_1967_c8232023ef_chunk_0780_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0781_ast|companies_act_1967_c8232023ef_chunk_0781_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0783_ast|companies_act_1967_c8232023ef_chunk_0783_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0784_ast|companies_act_1967_c8232023ef_chunk_0784_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0787_ast|companies_act_1967_c8232023ef_chunk_0787_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0800_ast|companies_act_1967_c8232023ef_chunk_0800_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0807_ast|companies_act_1967_c8232023ef_chunk_0807_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0837_ast|companies_act_1967_c8232023ef_chunk_0837_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0847_ast|companies_act_1967_c8232023ef_chunk_0847_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0848_ast|companies_act_1967_c8232023ef_chunk_0848_ast]]
+- [[structured_nodes/companies_act_1967_c8232023ef_chunk_0849_ast|companies_act_1967_c8232023ef_chunk_0849_ast]]
+
+## Typical User Questions
+
+- What must business do about transfer data?
+- What does transfer mean in this source?
+- Which data protection obligations or risks appear here?
+- What must business do about retain records?
+- What does offence mean in this source?
+- What must authority do about transfer data?
+- What must business do about disclose data?
+- What must business do about comply with obligation?
+- What does consent mean in this source?
+- What must authority do about collect data?
+- What does enforcement mean in this source?
+- What must business do about notify?
+- What must business do about obtain consent?
+- What must data controller do about transfer data?
+- What does this document say about personal data?
+- What does personal data mean in this source?
+- What must organisation do about disclose data?
+- What must data controller do about collect data?
+- What does organisation mean in this source?
+- What must organisation do about process data?
+
+## Retrieval Keywords
+
+- transfer
+- overseas
+- cross-border
+- export
+- transmission

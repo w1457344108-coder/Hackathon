@@ -1,0 +1,101 @@
+[
+  {
+    "doc_id": "companies_act_1967_c8232023ef",
+    "original_filename": "Companies Act 1967.pdf",
+    "file_type": ".pdf",
+    "text_file_path": "processed/texts/companies_act_1967_c8232023ef.txt",
+    "character_count": 1090870,
+    "word_count": 191424,
+    "read_status": "success",
+    "error_message": "",
+    "created_at": "2026-05-19T15:35:25.691730+00:00"
+  },
+  {
+    "doc_id": "entranslation_of_the_personal_data_protection_act_0_1c77b4099e",
+    "original_filename": "entranslation_of_the_personal_data_protection_act_0.pdf",
+    "file_type": ".pdf",
+    "text_file_path": "processed/texts/entranslation_of_the_personal_data_protection_act_0_1c77b4099e.txt",
+    "character_count": 104440,
+    "word_count": 17330,
+    "read_status": "success",
+    "error_message": "",
+    "created_at": "2026-05-19T15:35:27.103225+00:00"
+  },
+  {
+    "doc_id": "m_29_1bf3c639ac",
+    "original_filename": "M-29.pdf",
+    "file_type": ".pdf",
+    "text_file_path": "processed/texts/m_29_1bf3c639ac.txt",
+    "character_count": 15262,
+    "word_count": 3422,
+    "read_status": "success",
+    "error_message": "",
+    "created_at": "2026-05-19T15:35:27.241909+00:00"
+  },
+  {
+    "doc_id": "personal_data_protection_amendment_act_2020_d7cc5937b1",
+    "original_filename": "Personal Data Protection (Amendment) Act 2020.pdf",
+    "file_type": ".pdf",
+    "text_file_path": "processed/texts/personal_data_protection_amendment_act_2020_d7cc5937b1.txt",
+    "character_count": 154277,
+    "word_count": 25959,
+    "read_status": "success",
+    "error_message": "",
+    "created_at": "2026-05-19T15:35:27.260532+00:00"
+  },
+  {
+    "doc_id": "personal_data_protection_act_2012_e857c5e9da",
+    "original_filename": "Personal Data Protection Act 2012.pdf",
+    "file_type": ".pdf",
+    "text_file_path": "processed/texts/personal_data_protection_act_2012_e857c5e9da.txt",
+    "character_count": 200112,
+    "word_count": 33698,
+    "read_status": "success",
+    "error_message": "",
+    "created_at": "2026-05-19T15:35:27.351657+00:00"
+  },
+  {
+    "doc_id": "t_0052_bb7bba92b8",
+    "original_filename": "T_0052.pdf",
+    "file_type": ".pdf",
+    "text_file_path": "processed/texts/t_0052_bb7bba92b8.txt",
+    "character_count": 83918,
+    "word_count": 17100,
+    "read_status": "success",
+    "error_message": "",
+    "created_at": "2026-05-19T15:35:27.472287+00:00"
+  },
+  {
+    "doc_id": "document_0e841274ea",
+    "original_filename": "中华人民共和国个人信息保护法.docx",
+    "file_type": ".docx",
+    "text_file_path": "processed/texts/document_0e841274ea.txt",
+    "character_count": 9551,
+    "word_count": 789,
+    "read_status": "success",
+    "error_message": "",
+    "created_at": "2026-05-19T15:35:27.550969+00:00"
+  },
+  {
+    "doc_id": "document_ba5049f6a2",
+    "original_filename": "中华人民共和国网络安全法.docx",
+    "file_type": ".docx",
+    "text_file_path": "processed/texts/document_ba5049f6a2.txt",
+    "character_count": 10325,
+    "word_count": 890,
+    "read_status": "success",
+    "error_message": "",
+    "created_at": "2026-05-19T15:35:27.932841+00:00"
+  },
+  {
+    "doc_id": "document_318a65d5a2",
+    "original_filename": "网络预约出租汽车经营服务管理暂行办法.docx",
+    "file_type": ".docx",
+    "text_file_path": "processed/texts/document_318a65d5a2.txt",
+    "character_count": 6946,
+    "word_count": 572,
+    "read_status": "success",
+    "error_message": "",
+    "created_at": "2026-05-19T15:35:27.951445+00:00"
+  }
+]

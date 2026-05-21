@@ -1,0 +1,93 @@
+﻿---
+type: concept
+jurisdiction: Singapore
+domain: data protection
+source_count: 2
+review_status: pending
+created_at: "2026-05-20T00:00:55.892871+00:00"
+updated_at: "2026-05-20T00:00:55.892871+00:00"
+tags:
+  - legal-wiki
+  - concept
+  - financial_penalty
+---
+
+# financial penalty
+
+## Brief Explanation
+
+`financial penalty` is a machine-organized concept page built from AST nodes where the term or related domain appears. The text below is an index of evidence-bearing nodes and should be reviewed before use as legal knowledge.
+
+## Source Nodes
+
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0072_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0072_ast]]
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0073_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0073_ast]]
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0075_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0075_ast]]
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0076_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0076_ast]]
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0077_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0077_ast]]
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0078_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0078_ast]]
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0079_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0079_ast]]
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0082_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0082_ast]]
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0084_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0084_ast]]
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0089_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0089_ast]]
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0090_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0090_ast]]
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0091_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0091_ast]]
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0092_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0092_ast]]
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0093_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0093_ast]]
+- [[structured_nodes/personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0094_ast|personal_data_protection_amendment_act_2020_d7cc5937b1_chunk_0094_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0105_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0105_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0106_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0106_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0107_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0107_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0108_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0108_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0109_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0109_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0110_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0110_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0111_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0111_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0112_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0112_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0113_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0113_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0116_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0116_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0117_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0117_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0118_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0118_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0119_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0119_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0123_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0123_ast]]
+- [[structured_nodes/personal_data_protection_act_2012_e857c5e9da_chunk_0124_ast|personal_data_protection_act_2012_e857c5e9da_chunk_0124_ast]]
+
+## Related Terms
+
+- personal information
+- data subject information
+- 个人信息
+- organization
+- business
+- company
+- personal data
+- organisation
+- offence
+- person
+- data subject
+- 自然人
+- individual
+- enforcement
+- data protection
+
+## Related Documents
+
+- [[sources/personal_data_protection_amendment_act_2020_d7cc5937b1|personal_data_protection_amendment_act_2020_d7cc5937b1]]
+- [[sources/personal_data_protection_act_2012_e857c5e9da|personal_data_protection_act_2012_e857c5e9da]]
+
+## User Colloquial Expressions
+
+- What must organisation do about collect data?
+- What does this document say about personal data?
+- What does personal data mean in this source?
+- Which data protection obligations or risks appear here?
+- What does organisation mean in this source?
+- What must organisation do about comply with obligation?
+- What does financial penalty mean in this source?
+- What must authority do about comply with obligation?
+- What must organisation do about notify?
+
+## Related Wiki Pages
+
+- [[sources/personal_data_protection_amendment_act_2020_d7cc5937b1|personal_data_protection_amendment_act_2020_d7cc5937b1]]
+- [[sources/personal_data_protection_act_2012_e857c5e9da|personal_data_protection_act_2012_e857c5e9da]]
+- [[laws/data_protection|data protection]]
