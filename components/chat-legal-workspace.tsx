@@ -5,6 +5,15 @@ import {
   ChatAnalysisPanels,
   type ChatAnalysisResult
 } from "@/components/chat-analysis-panels";
+import {
+  classifyAnswerDetail,
+  getFindingDetailTone,
+  parseAnswerCardMarkdown,
+  type AnswerCard,
+  type AnswerCardItem,
+  type AnswerDetailTone,
+  type FindingHighlightOptions
+} from "@/lib/answer-card-markdown";
 import { formatEvidenceSnippetForDisplay } from "@/lib/evidence-display";
 import { supportedCountries } from "@/lib/jurisdiction-inference";
 
@@ -69,21 +78,6 @@ const historyItems: ConversationItem[] = [
     id: "current",
     title: "Current Chat",
     meta: "In progress"
-  },
-  {
-    id: "china-singapore",
-    title: "China to Singapore Data Flow",
-    meta: "Pillar 6 conditional flow"
-  },
-  {
-    id: "eu-cloud",
-    title: "EU Cloud Compliance Question",
-    meta: "Regulation interpretation"
-  },
-  {
-    id: "japan-market-entry",
-    title: "Japan Market Entry Advisory",
-    meta: "Forward-looking advisory"
   }
 ];
 
@@ -1031,16 +1025,22 @@ function ConversationMessages({ messages }: { messages: ChatMessage[] }) {
           return <AnalysisLoadingMessage key={message.id} modeLabel={modeLabel} />;
         }
 
+        const answerCards = parseAnswerCardMarkdown(message.content);
+
         return (
-          <article key={message.id} className="max-w-[760px]">
+          <article key={message.id} className={answerCards.length ? "w-full max-w-[860px]" : "max-w-[760px]"}>
             {modeLabel ? (
               <p className="mb-2 text-[12px] font-semibold uppercase tracking-[0.12em] text-black/40">
                 {modeLabel}
               </p>
             ) : null}
-            <div className="rounded-[18px] border border-black/10 bg-white px-5 py-4 text-[15px] leading-7 text-black shadow-[0_12px_34px_rgba(0,0,0,0.05)]">
-              <FormattedMessageContent content={message.content} />
-            </div>
+            {answerCards.length ? (
+              <AnswerCardDeck cards={answerCards} />
+            ) : (
+              <div className="rounded-[18px] border border-black/10 bg-white px-5 py-4 text-[15px] leading-7 text-black shadow-[0_12px_34px_rgba(0,0,0,0.05)]">
+                <FormattedMessageContent content={message.content} />
+              </div>
+            )}
             {message.analysis ? (
               <ChatAnalysisPanels result={message.analysis} modeLabel={modeLabel} />
             ) : null}
@@ -1049,6 +1049,374 @@ function ConversationMessages({ messages }: { messages: ChatMessage[] }) {
       })}
     </div>
   );
+}
+
+function AnswerCardDeck({ cards }: { cards: AnswerCard[] }) {
+  return (
+    <div className="space-y-4">
+      {cards.map((card) => (
+        <AnswerResultCard key={card.title} card={card} />
+      ))}
+    </div>
+  );
+}
+
+function AnswerResultCard({ card }: { card: AnswerCard }) {
+  const [findingHighlights, setFindingHighlights] = useState<FindingHighlightOptions>({
+    finding: true,
+    risk: true,
+    action: true,
+    conflict: false,
+    law: false,
+    indicator: false,
+    context: false
+  });
+  const exactPassage = findCardItem(card.items, "Exact passage");
+  const additionalRequirement = findCardItem(card.items, "Additional requirement");
+  const hasStructuredEvidencePassage = Boolean(exactPassage || additionalRequirement);
+  const displayItems =
+    card.kind === "evidence"
+      ? card.items?.filter(
+          (item) => !["Exact passage", "Additional requirement"].includes(item.label)
+        )
+      : card.items;
+
+  return (
+    <section className="rounded-lg border border-[#dbe3ec] bg-white px-5 py-5 shadow-[0_14px_42px_rgba(15,23,42,0.06)]">
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <div className="inline-flex rounded-full bg-[#e8f0f8] px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[#2f526d]">
+            {card.title}
+          </div>
+          <h2 className="mt-3 font-fustat text-[28px] font-bold leading-tight tracking-normal text-[#284359]">
+            {card.title}
+          </h2>
+        </div>
+        {card.kind === "findings" ? (
+          <FindingHighlightControls
+            highlights={findingHighlights}
+            onHighlightsChange={setFindingHighlights}
+          />
+        ) : null}
+      </div>
+
+      {card.kind === "direct-answer" ? <DirectAnswerContent card={card} /> : null}
+
+      {card.kind === "snapshot" && displayItems?.length ? (
+        <InfoGrid items={displayItems} />
+      ) : null}
+
+      {card.kind === "evidence" && hasStructuredEvidencePassage ? (
+        <EvidenceContent
+          exactPassage={exactPassage}
+          additionalRequirement={additionalRequirement}
+          displayItems={displayItems ?? []}
+          conditions={card.children ?? []}
+        />
+      ) : null}
+
+      {card.kind === "explanation" && displayItems?.length ? (
+        <ExplanationGrid items={displayItems} />
+      ) : null}
+
+      {isGenericAnswerCard(card) ? (
+        <GenericAnswerCardContent
+          card={card}
+          displayItems={displayItems ?? []}
+          findingHighlights={findingHighlights}
+        />
+      ) : null}
+
+      {card.sourceUrl ? <SourceButton url={card.sourceUrl} /> : null}
+    </section>
+  );
+}
+
+function DirectAnswerContent({ card }: { card: AnswerCard }) {
+  const [lead, ...rest] = card.body;
+
+  return (
+    <div className="mt-5 space-y-4">
+      {card.badges?.length ? (
+        <div className="flex flex-wrap gap-2">
+          {card.badges.map((badge) => (
+            <span
+              key={badge}
+              className="rounded-full bg-[#f1f6fb] px-3 py-1.5 text-[12px] font-semibold text-[#315b79]"
+            >
+              {badge}
+            </span>
+          ))}
+        </div>
+      ) : null}
+      {lead ? (
+        <p className="text-[18px] font-semibold leading-7 tracking-normal text-black">
+          {lead}
+        </p>
+      ) : null}
+      {rest.map((paragraph) => (
+        <p key={paragraph} className="text-[15px] leading-7 text-black/68">
+          {paragraph}
+        </p>
+      ))}
+    </div>
+  );
+}
+
+function InfoGrid({ items }: { items: AnswerCardItem[] }) {
+  return (
+    <div className="mt-5 grid gap-3 md:grid-cols-2">
+      {items.map((item) => (
+        <div key={item.label} className="rounded-lg border border-black/10 bg-white px-4 py-3">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-black/42">
+            {item.label}
+          </p>
+          <p className="mt-2 text-[14px] font-semibold leading-6 text-black">{item.value}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function EvidenceContent({
+  exactPassage,
+  additionalRequirement,
+  displayItems,
+  conditions
+}: {
+  exactPassage?: AnswerCardItem;
+  additionalRequirement?: AnswerCardItem;
+  displayItems: AnswerCardItem[];
+  conditions: string[];
+}) {
+  return (
+    <div className="mt-5 space-y-4">
+      {displayItems.length ? <InfoGrid items={displayItems} /> : null}
+      {exactPassage ? (
+        <blockquote className="rounded-lg border-l-4 border-[#5aa0d4] bg-[#f7fbff] px-4 py-4 text-[14px] leading-7 text-black/72">
+          {exactPassage.value}
+        </blockquote>
+      ) : null}
+      {conditions.length ? (
+        <div>
+          <p className="text-[12px] font-bold uppercase tracking-[0.14em] text-black/42">
+            Key legal conditions
+          </p>
+          <div className="mt-3 flex flex-wrap gap-2">
+            {conditions.map((condition) => (
+              <span
+                key={condition}
+                className="rounded-full bg-[#eef6fb] px-3 py-1.5 text-[12px] font-semibold text-[#315b79]"
+              >
+                {condition}
+              </span>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      {additionalRequirement ? (
+        <div className="rounded-lg border border-black/10 bg-[#fbfcfe] px-4 py-3">
+          <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-black/42">
+            Additional requirement
+          </p>
+          <p className="mt-2 text-[14px] leading-6 text-black/72">
+            {additionalRequirement.value}
+          </p>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ExplanationGrid({ items }: { items: AnswerCardItem[] }) {
+  return (
+    <div className="mt-5 grid gap-3">
+      {items.map((item) => (
+        <div key={item.label} className="rounded-lg border border-black/10 bg-white px-4 py-4">
+          <p className="text-[13px] font-bold text-black">{item.label}</p>
+          <p className="mt-2 text-[14px] leading-7 text-black/68">{item.value}</p>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function GenericAnswerCardContent({
+  card,
+  displayItems,
+  findingHighlights
+}: {
+  card: AnswerCard;
+  displayItems: AnswerCardItem[];
+  findingHighlights: FindingHighlightOptions;
+}) {
+  return (
+    <div className="mt-5 space-y-4">
+      {displayItems.length ? <InfoGrid items={displayItems} /> : null}
+      {card.body.length ? (
+        <div className="space-y-3">
+          {card.body.map((paragraph) => (
+            <p key={paragraph} className="text-[15px] leading-7 text-black/68">
+              {paragraph}
+            </p>
+          ))}
+        </div>
+      ) : null}
+      {card.children?.length ? (
+        card.kind === "findings" ? (
+          <FindingDetails details={card.children} highlights={findingHighlights} />
+        ) : (
+          <div className="grid gap-2">
+            {card.children.map((item) => (
+              <AnswerDetailPill
+                key={item}
+                detail={item}
+                tone={classifyAnswerDetail(item)}
+              />
+            ))}
+          </div>
+        )
+      ) : null}
+    </div>
+  );
+}
+
+function FindingHighlightControls({
+  highlights,
+  onHighlightsChange
+}: {
+  highlights: FindingHighlightOptions;
+  onHighlightsChange: (highlights: FindingHighlightOptions) => void;
+}) {
+  const options: Array<{
+    id: keyof FindingHighlightOptions;
+    label: string;
+  }> = [
+    { id: "finding", label: "Risk ID" },
+    { id: "risk", label: "Risk level" },
+    { id: "action", label: "Fix" },
+    { id: "conflict", label: "Conflict" },
+    { id: "law", label: "Law" },
+    { id: "indicator", label: "Indicators" },
+    { id: "context", label: "Why" }
+  ];
+
+  return (
+    <fieldset className="rounded-lg border border-black/10 bg-[#fbfcfe] px-3 py-2">
+      <legend className="px-1 text-[10px] font-bold uppercase tracking-[0.14em] text-black/40">
+        Highlight
+      </legend>
+      <div className="flex flex-wrap gap-2">
+        {options.map((option) => (
+          <label
+            key={option.id}
+            className="inline-flex items-center gap-1.5 rounded-md bg-white px-2 py-1 text-[11px] font-bold text-black/60"
+          >
+            <input
+              type="checkbox"
+              checked={highlights[option.id]}
+              onChange={(event) =>
+                onHighlightsChange({
+                  ...highlights,
+                  [option.id]: event.target.checked
+                })
+              }
+              className="h-3 w-3 accent-[#2f85bd]"
+            />
+            {option.label}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+function FindingDetails({
+  details,
+  highlights
+}: {
+  details: string[];
+  highlights: FindingHighlightOptions;
+}) {
+  let isWithinRecommendedFix = false;
+
+  return (
+    <div className="grid gap-2">
+      {details.map((detail) => {
+        const tone = getFindingDetailTone(detail, isWithinRecommendedFix, highlights);
+
+        if (/^risk[_-]?\d+:/i.test(detail.trim())) {
+          isWithinRecommendedFix = false;
+        } else if (/^recommended fix:/i.test(detail.trim())) {
+          isWithinRecommendedFix = true;
+        }
+
+        return <AnswerDetailPill key={detail} detail={detail} tone={tone} />;
+      })}
+    </div>
+  );
+}
+
+function AnswerDetailPill({
+  detail,
+  tone
+}: {
+  detail: string;
+  tone: AnswerDetailTone;
+}) {
+  const toneClass =
+    tone === "finding"
+      ? "border-[#b8d2e5] bg-[#f1f7fc] text-[#315b79]"
+      : tone === "risk"
+      ? "border-[#f3b6a4] bg-[#fff4ef] text-[#9f3f22]"
+      : tone === "law"
+        ? "border-[#b8d2e5] bg-[#f1f7fc] text-[#315b79]"
+        : tone === "conflict"
+          ? "border-[#ebc2cf] bg-[#fff4f7] text-[#9b2f53]"
+          : tone === "action"
+            ? "border-[#c9dcb8] bg-[#f6fbf1] text-[#426d2a]"
+            : tone === "indicator"
+              ? "border-[#d4c8ef] bg-[#f7f3ff] text-[#5b438f]"
+              : tone === "source"
+                ? "border-[#cbd5e1] bg-[#f8fafc] text-[#475569]"
+                : tone === "context"
+                  ? "border-[#e6d29b] bg-[#fff9e8] text-[#7a5a14]"
+                  : "border-black/10 bg-[#fbfcfe] text-black/70";
+
+  return (
+    <div className={`rounded-lg border px-4 py-3 text-[14px] font-medium leading-6 ${toneClass}`}>
+      {detail}
+    </div>
+  );
+}
+
+function isGenericAnswerCard(card: AnswerCard) {
+  if (card.kind === "direct-answer" || card.kind === "snapshot" || card.kind === "explanation") {
+    return false;
+  }
+
+  if (card.kind === "evidence") {
+    return !findCardItem(card.items, "Exact passage") && !findCardItem(card.items, "Additional requirement");
+  }
+
+  return true;
+}
+
+function SourceButton({ url }: { url: string }) {
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noreferrer"
+      className="mt-5 inline-flex items-center justify-center rounded-lg bg-[#2f85bd] px-5 py-3 text-[13px] font-bold text-white shadow-[0_10px_24px_rgba(47,133,189,0.24)] transition hover:bg-[#246b9a]"
+    >
+      Open official source
+    </a>
+  );
+}
+
+function findCardItem(items: AnswerCardItem[] | undefined, label: string) {
+  return items?.find((item) => item.label === label);
 }
 
 function FormattedMessageContent({ content }: { content: string }) {
