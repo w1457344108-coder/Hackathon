@@ -1,0 +1,64 @@
+1
+00:00:00,400 --> 00:00:15,600
+This demo shows how legal documents become traceable evidence for cross-border
+data answers.
+
+2
+00:00:16,400 --> 00:00:39,600
+For legal users, the answer must show its source, reasoning path, and review
+boundary.
+
+3
+00:00:40,400 --> 00:01:13,600
+AST-like nodes are simply structured legal evidence cards: obligation,
+condition, exception, and source.
+
+4
+00:01:14,400 --> 00:01:35,600
+The Wiki is not the final legal answer. It is the searchable knowledge layer
+behind the answer.
+
+5
+00:01:36,400 --> 00:01:53,600
+All generated knowledge remains pending review, so uncertainty is visible
+instead of hidden.
+
+6
+00:01:54,400 --> 00:02:11,600
+We move from regulation explanation, to case analysis, to forward-looking
+advisory.
+
+7
+00:02:12,400 --> 00:02:35,600
+First, the frontend asks the system to explain Article 38 and map it to RDTII
+Pillar 6.
+
+8
+00:02:36,400 --> 00:02:55,600
+The key point is not a total export ban. The transfer is allowed only after a
+recognized legal route is satisfied.
+
+9
+00:02:56,400 --> 00:03:25,600
+Second, the frontend applies the framework to ShopPilot AI's China-to-
+Singapore transfer case.
+
+10
+00:03:26,400 --> 00:03:45,600
+ShopPilot should not treat the transfer as a technical routing issue. It is a
+governed legal transfer.
+
+11
+00:03:46,400 --> 00:04:20,600
+Third, the frontend produces a forward-looking advisory for a Singapore AI
+SaaS entering China.
+
+12
+00:04:21,400 --> 00:04:44,600
+The business model may be feasible, but not with a launch-first, paperwork-
+later design.
+
+13
+00:04:45,400 --> 00:05:02,600
+This is a prototype, not legal advice. Its value is evidence-backed legal
+review.

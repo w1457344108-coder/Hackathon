@@ -1,0 +1,209 @@
+[
+  {
+    "id": "s01-title",
+    "type": "slide",
+    "duration": 16,
+    "layout": "title",
+    "kicker": "PHASE 1 DEMO",
+    "title": "From Legal Documents to Traceable Cross-Border Data Answers",
+    "body": "A review-first prototype for cross-border data policy analysis.",
+    "caption": "This demo shows how legal documents become traceable evidence for cross-border data answers."
+  },
+  {
+    "id": "s02-problem",
+    "type": "slide",
+    "duration": 24,
+    "layout": "cards",
+    "kicker": "WHY THIS MATTERS",
+    "title": "A fluent answer is not enough for legal review.",
+    "cards": [
+      [
+        "Source",
+        "Which legal text supports the answer?"
+      ],
+      [
+        "Application",
+        "How does the rule apply to the facts?"
+      ],
+      [
+        "Review",
+        "What still needs human confirmation?"
+      ]
+    ],
+    "caption": "For legal users, the answer must show its source, reasoning path, and review boundary."
+  },
+  {
+    "id": "s03-pipeline",
+    "type": "slide",
+    "duration": 34,
+    "layout": "pipeline",
+    "kicker": "LLM WIKI + LEGAL NODES",
+    "title": "The system turns documents into reviewable evidence cards.",
+    "steps": [
+      "Original documents",
+      "Legal text chunks",
+      "Structured evidence nodes",
+      "LLM Wiki pages",
+      "Evidence-backed answer"
+    ],
+    "caption": "AST-like nodes are simply structured legal evidence cards: obligation, condition, exception, and source."
+  },
+  {
+    "id": "s04-graph",
+    "type": "slide",
+    "duration": 22,
+    "layout": "graph",
+    "kicker": "COMPONENT GRAPH",
+    "title": "A document-to-answer pipeline with source traceability.",
+    "image": "/Users/zhaoyan/Documents/\u6bd4\u8d5b/Hackathon/output/video/phase1-hyperframes/assets/component_graph_visual.png",
+    "caption": "The Wiki is not the final legal answer. It is the searchable knowledge layer behind the answer."
+  },
+  {
+    "id": "s05-metrics",
+    "type": "slide",
+    "duration": 18,
+    "layout": "metrics",
+    "kicker": "CURRENT BUILD",
+    "title": "Phase 1 already produces a working knowledge base.",
+    "metrics": [
+      [
+        "9",
+        "source documents"
+      ],
+      [
+        "1,769",
+        "text chunks"
+      ],
+      [
+        "1,769",
+        "legal nodes"
+      ],
+      [
+        "1,848",
+        "Wiki pages"
+      ],
+      [
+        "5,690",
+        "candidate terms"
+      ]
+    ],
+    "caption": "All generated knowledge remains pending review, so uncertainty is visible instead of hidden."
+  },
+  {
+    "id": "s06-questions",
+    "type": "slide",
+    "duration": 18,
+    "layout": "questions",
+    "kicker": "THREE DEMO QUESTIONS",
+    "title": "The same workflow handles three legal tasks.",
+    "cards": [
+      [
+        "Q1",
+        "Explain PIPL Article 38"
+      ],
+      [
+        "Q2",
+        "Analyze the ShopPilot transfer case"
+      ],
+      [
+        "Q3",
+        "Advise a Singapore AI SaaS before launch"
+      ]
+    ],
+    "caption": "We move from regulation explanation, to case analysis, to forward-looking advisory."
+  },
+  {
+    "id": "s07-recording-article38",
+    "type": "video",
+    "duration": 24,
+    "source": "/Users/zhaoyan/Documents/\u6bd4\u8d5b/Hackathon/output/video/phase1-hyperframes/assets/recording-article38.mov",
+    "caption": "First, the frontend asks the system to explain Article 38 and map it to RDTII Pillar 6."
+  },
+  {
+    "id": "s08-article38-routes",
+    "type": "slide",
+    "duration": 20,
+    "layout": "routes",
+    "kicker": "QUESTION 1 RESULT",
+    "title": "Article 38 creates a conditional transfer regime.",
+    "routes": [
+      "Security assessment",
+      "Protection certification",
+      "Standard contract",
+      "Other lawful conditions"
+    ],
+    "caption": "The key point is not a total export ban. The transfer is allowed only after a recognized legal route is satisfied."
+  },
+  {
+    "id": "s09-recording-shoppilot",
+    "type": "video",
+    "duration": 30,
+    "source": "/Users/zhaoyan/Documents/\u6bd4\u8d5b/Hackathon/output/video/phase1-hyperframes/assets/recording-shoppilot.mov",
+    "caption": "Second, the frontend applies the framework to ShopPilot AI's China-to-Singapore transfer case."
+  },
+  {
+    "id": "s10-linkage",
+    "type": "slide",
+    "duration": 20,
+    "layout": "split",
+    "kicker": "QUESTION 2 RESULT",
+    "title": "The primary issue is Pillar 7, with a direct Pillar 6 linkage.",
+    "left": [
+      "P7:7.4",
+      "Impact assessment, necessity, risk, safeguards, and records."
+    ],
+    "right": [
+      "P6:6.4",
+      "The overseas transfer still needs a lawful Article 38 route."
+    ],
+    "caption": "ShopPilot should not treat the transfer as a technical routing issue. It is a governed legal transfer."
+  },
+  {
+    "id": "s11-recording-advisory",
+    "type": "video",
+    "duration": 35,
+    "source": "/Users/zhaoyan/Documents/\u6bd4\u8d5b/Hackathon/output/video/phase1-hyperframes/assets/recording-advisory.mov",
+    "caption": "Third, the frontend produces a forward-looking advisory for a Singapore AI SaaS entering China."
+  },
+  {
+    "id": "s12-roadmap",
+    "type": "slide",
+    "duration": 24,
+    "layout": "roadmap",
+    "kicker": "QUESTION 3 RESULT",
+    "title": "Recommendation: No-Go until remediation is completed.",
+    "steps": [
+      [
+        "Freeze",
+        "high-risk transfer design"
+      ],
+      [
+        "Classify",
+        "data and minimize raw logs"
+      ],
+      [
+        "Select",
+        "the Pillar 6 transfer route"
+      ],
+      [
+        "Build",
+        "notice and separate consent"
+      ],
+      [
+        "Complete",
+        "impact assessment and recipient controls"
+      ]
+    ],
+    "caption": "The business model may be feasible, but not with a launch-first, paperwork-later design."
+  },
+  {
+    "id": "s13-closing",
+    "type": "slide",
+    "duration": 18,
+    "layout": "closing",
+    "kicker": "WHAT THE PROTOTYPE DEMONSTRATES",
+    "title": "Traceable. Reviewable. Exportable.",
+    "body": "The system connects user questions back to source documents, structured nodes, Wiki pages, RDTII indicators, and human review notes.",
+    "caption": "This is a prototype, not legal advice. Its value is evidence-backed legal review."
+  }
+]
