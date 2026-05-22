@@ -10,7 +10,8 @@ export type AnswerCardKind =
   | "summary"
   | "indicators"
   | "findings"
-  | "roadmap";
+  | "roadmap"
+  | "sources";
 
 export interface AnswerCardItem {
   label: string;
@@ -171,6 +172,10 @@ function getSectionKind(title: string): AnswerCardKind | null {
     return "roadmap";
   }
 
+  if (normalized.includes("source urls") || normalized.includes("sources")) {
+    return "sources";
+  }
+
   return null;
 }
 
@@ -185,6 +190,25 @@ function parseSectionLines(lines: string[]) {
     const line = rawLine.trim();
 
     if (!line) {
+      isReadingChildren = false;
+      continue;
+    }
+
+    const markdownLinkBullet = line.match(/^-\s+\[([^\]]+)\]\((https?:\/\/[^)]+)\)\s*$/);
+    if (markdownLinkBullet) {
+      const label = markdownLinkBullet[1].trim();
+      const url = markdownLinkBullet[2].trim();
+
+      sourceUrl = sourceUrl ?? url;
+      children.push(`[${label}](${url})`);
+      isReadingChildren = false;
+      continue;
+    }
+
+    const rawUrlBullet = line.match(/^-\s+(https?:\/\/\S+)\s*$/);
+    if (rawUrlBullet) {
+      sourceUrl = sourceUrl ?? rawUrlBullet[1].trim();
+      children.push(rawUrlBullet[1].trim());
       isReadingChildren = false;
       continue;
     }

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, SVGProps, useMemo, useRef, useState } from "react";
+import { FormEvent, ReactNode, SVGProps, useMemo, useRef, useState } from "react";
 import {
   ChatAnalysisPanels,
   type ChatAnalysisResult
@@ -14,7 +14,7 @@ import {
   type AnswerDetailTone,
   type FindingHighlightOptions
 } from "@/lib/answer-card-markdown";
-import { formatEvidenceSnippetForDisplay } from "@/lib/evidence-display";
+import { formatBackendAnswerMarkdown } from "@/lib/chat-answer-format";
 import { supportedCountries } from "@/lib/jurisdiction-inference";
 
 type CoreModeId = "regulation" | "case" | "advisory";
@@ -1151,12 +1151,12 @@ function DirectAnswerContent({ card }: { card: AnswerCard }) {
       ) : null}
       {lead ? (
         <p className="text-[18px] font-semibold leading-7 tracking-normal text-black">
-          {lead}
+          <InlineMarkdown text={lead} />
         </p>
       ) : null}
       {rest.map((paragraph) => (
         <p key={paragraph} className="text-[15px] leading-7 text-black/68">
-          {paragraph}
+          <InlineMarkdown text={paragraph} />
         </p>
       ))}
     </div>
@@ -1171,7 +1171,9 @@ function InfoGrid({ items }: { items: AnswerCardItem[] }) {
           <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-black/42">
             {item.label}
           </p>
-          <p className="mt-2 text-[14px] font-semibold leading-6 text-black">{item.value}</p>
+          <p className="mt-2 text-[14px] font-semibold leading-6 text-black">
+            <InlineMarkdown text={item.value} />
+          </p>
         </div>
       ))}
     </div>
@@ -1194,7 +1196,7 @@ function EvidenceContent({
       {displayItems.length ? <InfoGrid items={displayItems} /> : null}
       {exactPassage ? (
         <blockquote className="rounded-lg border-l-4 border-[#5aa0d4] bg-[#f7fbff] px-4 py-4 text-[14px] leading-7 text-black/72">
-          {exactPassage.value}
+          <InlineMarkdown text={exactPassage.value} />
         </blockquote>
       ) : null}
       {conditions.length ? (
@@ -1220,7 +1222,7 @@ function EvidenceContent({
             Additional requirement
           </p>
           <p className="mt-2 text-[14px] leading-6 text-black/72">
-            {additionalRequirement.value}
+            <InlineMarkdown text={additionalRequirement.value} />
           </p>
         </div>
       ) : null}
@@ -1234,7 +1236,9 @@ function ExplanationGrid({ items }: { items: AnswerCardItem[] }) {
       {items.map((item) => (
         <div key={item.label} className="rounded-lg border border-black/10 bg-white px-4 py-4">
           <p className="text-[13px] font-bold text-black">{item.label}</p>
-          <p className="mt-2 text-[14px] leading-7 text-black/68">{item.value}</p>
+          <p className="mt-2 text-[14px] leading-7 text-black/68">
+            <InlineMarkdown text={item.value} />
+          </p>
         </div>
       ))}
     </div>
@@ -1257,7 +1261,7 @@ function GenericAnswerCardContent({
         <div className="space-y-3">
           {card.body.map((paragraph) => (
             <p key={paragraph} className="text-[15px] leading-7 text-black/68">
-              {paragraph}
+              <InlineMarkdown text={paragraph} />
             </p>
           ))}
         </div>
@@ -1385,7 +1389,7 @@ function AnswerDetailPill({
 
   return (
     <div className={`rounded-lg border px-4 py-3 text-[14px] font-medium leading-6 ${toneClass}`}>
-      {detail}
+      <InlineMarkdown text={detail} />
     </div>
   );
 }
@@ -1420,24 +1424,182 @@ function findCardItem(items: AnswerCardItem[] | undefined, label: string) {
 }
 
 function FormattedMessageContent({ content }: { content: string }) {
-  const paragraphs = content
-    .split(/\n{2,}/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean);
+  return <MarkdownBlocks content={content} />;
+}
 
-  if (paragraphs.length <= 1) {
-    return <div className="whitespace-pre-wrap">{content}</div>;
-  }
+function MarkdownBlocks({ content }: { content: string }) {
+  const blocks = parseMarkdownBlocks(content);
 
   return (
     <div className="space-y-4">
-      {paragraphs.map((paragraph, index) => (
-        <p key={`${index}-${paragraph.slice(0, 24)}`} className="whitespace-pre-wrap">
-          {paragraph}
-        </p>
-      ))}
+      {blocks.map((block, index) => {
+        const key = `${block.type}-${index}-${block.lines.join(" ").slice(0, 24)}`;
+
+        if (block.type === "heading") {
+          return (
+            <h3 key={key} className="text-[18px] font-bold leading-7 tracking-normal text-black">
+              <InlineMarkdown text={block.lines[0]} />
+            </h3>
+          );
+        }
+
+        if (block.type === "list") {
+          return (
+            <ul key={key} className="space-y-2 pl-5 text-[15px] leading-7 text-black/72">
+              {block.lines.map((line) => (
+                <li key={line} className="list-disc">
+                  <InlineMarkdown text={line} />
+                </li>
+              ))}
+            </ul>
+          );
+        }
+
+        if (block.type === "quote") {
+          return (
+            <blockquote
+              key={key}
+              className="rounded-lg border-l-4 border-[#5aa0d4] bg-[#f7fbff] px-4 py-3 text-[14px] leading-7 text-black/72"
+            >
+              {block.lines.map((line) => (
+                <p key={line}>
+                  <InlineMarkdown text={line} />
+                </p>
+              ))}
+            </blockquote>
+          );
+        }
+
+        return (
+          <p key={key} className="whitespace-pre-wrap text-[15px] leading-7 text-black/72">
+            <InlineMarkdown text={block.lines.join(" ")} />
+          </p>
+        );
+      })}
     </div>
   );
+}
+
+function InlineMarkdown({ text }: { text: string }) {
+  const parts: ReactNode[] = [];
+  const pattern = /(\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)|\*\*([^*]+)\*\*)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = pattern.exec(text)) !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+
+    if (match[2] && match[3]) {
+      parts.push(
+        <a
+          key={`link-${match.index}-${match[3]}`}
+          href={match[3]}
+          target="_blank"
+          rel="noreferrer"
+          className="font-semibold text-[#246b9a] underline decoration-[#9cc7e4] underline-offset-4 transition hover:text-[#174d73]"
+        >
+          {match[2]}
+        </a>
+      );
+    } else if (match[4]) {
+      parts.push(
+        <strong key={`strong-${match.index}`} className="font-bold text-black">
+          {match[4]}
+        </strong>
+      );
+    }
+
+    lastIndex = pattern.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return <>{parts}</>;
+}
+
+function parseMarkdownBlocks(content: string) {
+  const blocks: Array<{ type: "paragraph" | "heading" | "list" | "quote"; lines: string[] }> = [];
+  let paragraph: string[] = [];
+  let list: string[] = [];
+  let quote: string[] = [];
+
+  function flushParagraph() {
+    if (paragraph.length) {
+      blocks.push({ type: "paragraph", lines: paragraph });
+      paragraph = [];
+    }
+  }
+
+  function flushList() {
+    if (list.length) {
+      blocks.push({ type: "list", lines: list });
+      list = [];
+    }
+  }
+
+  function flushQuote() {
+    if (quote.length) {
+      blocks.push({ type: "quote", lines: quote });
+      quote = [];
+    }
+  }
+
+  function flushAll() {
+    flushParagraph();
+    flushList();
+    flushQuote();
+  }
+
+  for (const rawLine of content.split(/\r?\n/)) {
+    const line = rawLine.trim();
+
+    if (!line) {
+      flushAll();
+      continue;
+    }
+
+    const heading = line.match(/^#{2,4}\s+(.+)$/);
+    if (heading) {
+      flushAll();
+      blocks.push({ type: "heading", lines: [heading[1].trim()] });
+      continue;
+    }
+
+    const bullet = line.match(/^[-*]\s+(.+)$/);
+    if (bullet) {
+      flushParagraph();
+      flushQuote();
+      list.push(bullet[1].trim());
+      continue;
+    }
+
+    const numbered = line.match(/^\d+\.\s+(.+)$/);
+    if (numbered) {
+      flushParagraph();
+      flushQuote();
+      list.push(numbered[1].trim());
+      continue;
+    }
+
+    const quoted = line.match(/^>\s+(.+)$/);
+    if (quoted) {
+      flushParagraph();
+      flushList();
+      quote.push(quoted[1].trim());
+      continue;
+    }
+
+    flushList();
+    flushQuote();
+    paragraph.push(line);
+  }
+
+  flushAll();
+  return blocks;
 }
 
 function AnalysisLoadingMessage({ modeLabel }: { modeLabel: string | null | undefined }) {
@@ -1769,162 +1931,7 @@ function formatQueryBuilderSuggestion(
 }
 
 function formatBackendAnswer(result: BackendWorkflowResult, mode: CoreModeId) {
-  const narrative =
-    result.report?.finalNarrative ??
-    "The workflow completed, but no final narrative was returned.";
-  const exportJson = result.supportingAgentResults?.legalReviewExport?.data?.exportJson;
-
-  if (
-    exportJson?.answerType === "REGULATION_EXPLANATION" ||
-    exportJson?.answerType === "CASE_ANALYSIS" ||
-    exportJson?.answerType === "FORWARD_LOOKING_ADVISORY"
-  ) {
-    return narrative;
-  }
-
-  const risk = result.report?.overallRisk ? `Overall risk: ${result.report.overallRisk}.` : null;
-  const provider = result.providerId
-    ? `Provider: ${result.providerId}${result.providerModel ? ` (${result.providerModel})` : ""}.`
-    : null;
-  const evidenceMode = result.evidenceSourceMode
-    ? `Evidence mode: ${result.evidenceSourceMode}.`
-    : null;
-  const exportReadiness =
-    result.supportingAgentResults?.legalReviewExport?.data?.exportReadiness ?? null;
-  const uploadedDocuments = result.input?.uploadedDocuments ?? [];
-  const citations = (result.evidenceRecords ?? [])
-    .slice(0, 3)
-    .map((record) => record.citation || record.lawTitle || record.sourceUrl)
-    .filter(Boolean);
-  const sourceUrls = [...new Set((result.evidenceRecords ?? []).map((record) => record.sourceUrl))].slice(
-    0,
-    4
-  );
-  const legalFindings = result.mainlineAgentResults?.legalReasoner?.data?.legalFindings ?? [];
-  const findingHighlights = legalFindings.slice(0, 2).map((finding, index) => {
-    return [
-      `- Finding ${index + 1}: ${finding.conclusion ?? "No conclusion returned."}`,
-      finding.legalEffect ? `  Effect: ${finding.legalEffect}` : null
-    ]
-      .filter(Boolean)
-      .join("\n");
-  });
-  const evidenceHighlights = (result.evidenceRecords ?? []).slice(0, 2).map((record, index) => {
-    return [
-      `- Evidence ${index + 1}: ${record.lawTitle}`,
-      record.sourceLocator ? `  Locator: ${record.sourceLocator}` : null,
-      record.verbatimSnippet ? "  Decisive basis:" : null,
-      record.verbatimSnippet
-        ? `${formatEvidenceSnippetForDisplay(record)
-            .split("\n")
-            .map((line) => `    ${line}`)
-            .join("\n")}`
-        : null,
-      record.sourceUrl ? `  Source URL: ${record.sourceUrl}` : null
-    ]
-      .filter(Boolean)
-      .join("\n");
-  });
-  const lacksClauseLevelEvidence =
-    (result.evidenceRecords ?? []).length > 0 &&
-    (result.evidenceRecords ?? []).every((record) => record.sourceType !== "Statute");
-  const coverageDetail = Array.from(
-    new Map(
-      (result.evidenceRecords ?? []).map((record) => [
-        record.country,
-        {
-          country: record.country,
-          strengths: new Set<string>(),
-          locators: new Set<string>()
-        }
-      ])
-    ).values()
-  )
-    .map((entry) => {
-      (result.evidenceRecords ?? [])
-        .filter((record) => record.country === entry.country)
-        .forEach((record) => {
-          entry.strengths.add(
-            record.sourceType === "Statute"
-              ? "statute text"
-              : record.sourceType === "Regulator Guidance"
-                ? "regulator guidance"
-                : record.sourceType === "Policy Notice"
-                  ? "official policy notice"
-                  : "official source"
-          );
-
-          if (record.sourceLocator) {
-            entry.locators.add(record.sourceLocator);
-          }
-        });
-
-      return [
-        `- ${entry.country}: ${[...entry.strengths].join(", ") || "unspecified"}`,
-        entry.locators.size
-          ? `  Locators: ${[...entry.locators].slice(0, 2).join(" | ")}`
-          : null
-      ]
-        .filter(Boolean)
-        .join("\n");
-    })
-    .join("\n");
-  const traceabilityLimitation = lacksClauseLevelEvidence
-    ? "Current retrieval did not yet pinpoint row-level statutes or article-level clauses; the present evidence remains page-level, guidance-level, or summary-level and still needs human legal drill-down."
-    : null;
-
-  const summaryBlock = [
-    `${coreModes.find((item) => item.id === mode)?.english ?? "Legal analysis"} result`,
-    narrative,
-    risk,
-    provider,
-    evidenceMode,
-    exportReadiness ? `Export readiness: ${exportReadiness}.` : null,
-    result.analysisRunId ? `Review run ID: ${result.analysisRunId}` : null
-  ]
-    .filter(Boolean)
-    .join("\n");
-
-  const citationBlock = citations.length
-    ? ["Key citations", ...citations.map((citation) => `- ${citation}`)].join("\n")
-    : null;
-
-  const findingsBlock = findingHighlights.length
-    ? ["Legal findings", ...findingHighlights].join("\n")
-    : null;
-
-  const evidenceBlock = evidenceHighlights.length
-    ? ["Evidence highlights", ...evidenceHighlights].join("\n")
-    : null;
-
-  const coverageBlock = coverageDetail ? ["Coverage detail", coverageDetail].join("\n") : null;
-
-  const sourceBasisBlock = sourceUrls.length
-    ? ["Source URLs used", ...sourceUrls.map((item) => `- ${item}`)].join("\n")
-    : null;
-
-  const uploadsBlock = uploadedDocuments.length
-    ? [
-        "Uploaded documents used",
-        ...uploadedDocuments.map(
-          (file) => `- ${file.fileName} (${file.characterCount.toLocaleString()} chars)`
-        )
-      ].join("\n")
-    : null;
-
-  return [
-    summaryBlock,
-    citationBlock,
-    findingsBlock,
-    evidenceBlock,
-    coverageBlock,
-    traceabilityLimitation,
-    sourceBasisBlock,
-    uploadsBlock,
-    "Open the panels below to inspect evidence records, audit review, and JSON/CSV/Markdown export."
-  ]
-    .filter(Boolean)
-    .join("\n\n");
+  return formatBackendAnswerMarkdown(result, mode);
 }
 
 function buildPlaceholderAnswer(mode: CoreModeId) {
