@@ -49,6 +49,23 @@ export interface FindingHighlightOptions {
   context: boolean;
 }
 
+export interface RoadmapHighlightOptions {
+  phase: boolean;
+  priority: boolean;
+  action: boolean;
+}
+
+export interface ReviewHighlightOptions {
+  content: boolean;
+  law: boolean;
+}
+
+export interface EvidenceHighlightOptions {
+  law: boolean;
+  role: boolean;
+  summary: boolean;
+}
+
 interface ParsedSection {
   title: string;
   lines: string[];
@@ -380,9 +397,9 @@ export function getFindingDetailTone(
   detail: string,
   isWithinRecommendedFix = false,
   highlights: FindingHighlightOptions = {
-    finding: true,
-    risk: true,
-    action: true,
+    finding: false,
+    risk: false,
+    action: false,
     conflict: false,
     law: false,
     indicator: false,
@@ -427,6 +444,88 @@ export function getFindingDetailTone(
 
   if (highlights.context && /^why it matters:/i.test(trimmed)) {
     return "context";
+  }
+
+  return "default";
+}
+
+export function getRoadmapDetailTone(
+  detail: string,
+  highlights: RoadmapHighlightOptions = {
+    phase: false,
+    priority: false,
+    action: false
+  }
+): AnswerDetailTone {
+  const trimmed = detail.trim();
+
+  if (/^phase\b/i.test(trimmed)) {
+    return highlights.phase ? "finding" : "default";
+  }
+
+  if (/^priority:/i.test(trimmed)) {
+    return highlights.priority ? "risk" : "default";
+  }
+
+  return highlights.action ? "action" : "default";
+}
+
+export function getReviewDetailTone(
+  detail: string,
+  highlights: ReviewHighlightOptions = {
+    content: false,
+    law: false
+  }
+): AnswerDetailTone {
+  const normalized = detail.trim().toLowerCase();
+
+  if (
+    normalized.startsWith("cn_") ||
+    normalized.includes("article 38") ||
+    normalized.includes("article 39") ||
+    normalized.includes("article 52") ||
+    normalized.includes("article 55") ||
+    normalized.includes("article 56") ||
+    normalized.includes("article 8") ||
+    normalized.includes("article 10") ||
+    normalized.includes("article 28")
+  ) {
+    return highlights.law ? "law" : "default";
+  }
+
+  return highlights.content ? "action" : "default";
+}
+
+export function getEvidenceDetailTone(
+  detail: string,
+  highlights: EvidenceHighlightOptions = {
+    law: false,
+    role: false,
+    summary: false
+  }
+): AnswerDetailTone {
+  const normalized = detail.trim().toLowerCase();
+
+  if (normalized.startsWith("role:")) {
+    return highlights.role ? "risk" : "default";
+  }
+
+  if (normalized.startsWith("summary:")) {
+    return highlights.summary ? "action" : "default";
+  }
+
+  if (
+    normalized.startsWith("cn_") ||
+    normalized.includes("article 38") ||
+    normalized.includes("article 39") ||
+    normalized.includes("article 52") ||
+    normalized.includes("article 55") ||
+    normalized.includes("article 56") ||
+    normalized.includes("article 8") ||
+    normalized.includes("article 10") ||
+    normalized.includes("article 28")
+  ) {
+    return highlights.law ? "law" : "default";
   }
 
   return "default";

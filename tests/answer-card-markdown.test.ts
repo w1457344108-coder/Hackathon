@@ -2,7 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   classifyAnswerDetail,
+  getEvidenceDetailTone,
   getFindingDetailTone,
+  getReviewDetailTone,
+  getRoadmapDetailTone,
   parseAnswerCardMarkdown,
 } from "../lib/answer-card-markdown.ts";
 
@@ -164,15 +167,38 @@ test("classifies advisory details for color-coded rendering", () => {
   assert.equal(classifyAnswerDetail("Possible legal conflict: The company may transfer before selecting a lawful route"), "conflict");
 });
 
-test("finding detail tone only highlights risk id, risk level, and fixes", () => {
+test("finding detail tone is off by default", () => {
   assert.equal(
     getFindingDetailTone("RISK_01: Launching transfer before selecting a legal route"),
-    "finding"
+    "default"
   );
-  assert.equal(getFindingDetailTone("Risk level: High"), "risk");
-  assert.equal(getFindingDetailTone("Recommended fix:"), "action");
+  assert.equal(getFindingDetailTone("Risk level: High"), "default");
+  assert.equal(getFindingDetailTone("Recommended fix:"), "default");
   assert.equal(
     getFindingDetailTone("Select a lawful transfer mechanism before launch", true),
+    "default"
+  );
+});
+
+test("finding detail tone highlights selected risk id, risk level, and fixes", () => {
+  const enabledHighlights = {
+    finding: true,
+    risk: true,
+    action: true,
+    conflict: false,
+    law: false,
+    indicator: false,
+    context: false
+  };
+
+  assert.equal(
+    getFindingDetailTone("RISK_01: Launching transfer before selecting a legal route", false, enabledHighlights),
+    "finding"
+  );
+  assert.equal(getFindingDetailTone("Risk level: High", false, enabledHighlights), "risk");
+  assert.equal(getFindingDetailTone("Recommended fix:", false, enabledHighlights), "action");
+  assert.equal(
+    getFindingDetailTone("Select a lawful transfer mechanism before launch", true, enabledHighlights),
     "action"
   );
   assert.equal(getFindingDetailTone("Possible legal conflict: Transfer may start too early"), "default");
@@ -252,5 +278,83 @@ test("finding default highlights can be switched off", () => {
   assert.equal(
     getFindingDetailTone("Select a lawful transfer mechanism before launch", true, disabledHighlights),
     "default"
+  );
+});
+
+test("roadmap and review detail tones are controlled independently", () => {
+  assert.equal(getRoadmapDetailTone("Phase 1 — Freeze high-risk transfer design"), "default");
+  assert.equal(getRoadmapDetailTone("Priority: High"), "default");
+  assert.equal(getRoadmapDetailTone("Complete data classification"), "default");
+  assert.equal(getReviewDetailTone("Confirm whether transfer volume crosses thresholds."), "default");
+  assert.equal(getReviewDetailTone("CN_PIPL_ART55 (Article 55, Item 5, P7)"), "default");
+
+  assert.equal(
+    getRoadmapDetailTone("Phase 1 — Freeze high-risk transfer design", {
+      phase: true,
+      priority: false,
+      action: false
+    }),
+    "finding"
+  );
+  assert.equal(
+    getRoadmapDetailTone("Priority: High", {
+      phase: false,
+      priority: true,
+      action: false
+    }),
+    "risk"
+  );
+  assert.equal(
+    getRoadmapDetailTone("Complete data classification", {
+      phase: false,
+      priority: false,
+      action: true
+    }),
+    "action"
+  );
+  assert.equal(
+    getReviewDetailTone("Confirm whether transfer volume crosses thresholds.", {
+      content: true,
+      law: false
+    }),
+    "action"
+  );
+  assert.equal(
+    getReviewDetailTone("CN_PIPL_ART55 (Article 55, Item 5, P7)", {
+      content: false,
+      law: true
+    }),
+    "law"
+  );
+});
+
+test("evidence detail tones are controlled independently", () => {
+  assert.equal(getEvidenceDetailTone("CN_PIPL_ART55 (Article 55, P7)"), "default");
+  assert.equal(getEvidenceDetailTone("Role: Supports the impact assessment finding"), "default");
+  assert.equal(getEvidenceDetailTone("Summary: Article 55 requires a personal information protection impact assessment."), "default");
+
+  assert.equal(
+    getEvidenceDetailTone("CN_PIPL_ART55 (Article 55, P7)", {
+      law: true,
+      role: false,
+      summary: false
+    }),
+    "law"
+  );
+  assert.equal(
+    getEvidenceDetailTone("Role: Supports the impact assessment finding", {
+      law: false,
+      role: true,
+      summary: false
+    }),
+    "risk"
+  );
+  assert.equal(
+    getEvidenceDetailTone("Summary: Article 55 requires a personal information protection impact assessment.", {
+      law: false,
+      role: false,
+      summary: true
+    }),
+    "action"
   );
 });

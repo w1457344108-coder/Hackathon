@@ -7,14 +7,24 @@ import {
 } from "@/components/chat-analysis-panels";
 import {
   classifyAnswerDetail,
+  getEvidenceDetailTone,
   getFindingDetailTone,
+  getReviewDetailTone,
+  getRoadmapDetailTone,
   parseAnswerCardMarkdown,
   type AnswerCard,
   type AnswerCardItem,
   type AnswerDetailTone,
-  type FindingHighlightOptions
+  type EvidenceHighlightOptions,
+  type FindingHighlightOptions,
+  type ReviewHighlightOptions,
+  type RoadmapHighlightOptions
 } from "@/lib/answer-card-markdown";
 import { formatBackendAnswerMarkdown } from "@/lib/chat-answer-format";
+import {
+  getDemoJurisdictionDefaults,
+  getDemoPromptForMode
+} from "@/lib/demo-prompts";
 import { supportedCountries } from "@/lib/jurisdiction-inference";
 
 type CoreModeId = "regulation" | "case" | "advisory";
@@ -76,7 +86,7 @@ const coreModes: Array<{
 const historyItems: ConversationItem[] = [
   {
     id: "current",
-    title: "Current Chat",
+    title: "Demo",
     meta: "In progress"
   }
 ];
@@ -95,7 +105,8 @@ export function ChatLegalWorkspace() {
   const activeModeRef = useRef<CoreModeId>("regulation");
   const [activeConversation, setActiveConversation] = useState("current");
   const [messages, setMessages] = useState<ChatMessage[]>(starterMessages);
-  const [inputValue, setInputValue] = useState("");
+  const [isDemoModeEnabled, setIsDemoModeEnabled] = useState(true);
+  const [inputValue, setInputValue] = useState(getDemoPromptForMode("regulation"));
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
   const [selectedCountryA, setSelectedCountryA] = useState<SupportedCountry>("China");
   const [selectedCountryB, setSelectedCountryB] = useState<SupportedCountry>("Singapore");
@@ -113,11 +124,31 @@ export function ChatLegalWorkspace() {
     activeModeRef.current = nextMode;
     setActiveMode(nextMode);
 
+    if (isDemoModeEnabled) {
+      setInputValue(getDemoPromptForMode(nextMode));
+      applyDemoJurisdictions(nextMode);
+    }
+
     if (nextMode === "case" && selectedCountryA === selectedCountryB) {
       const fallbackCountry =
         supportedCountries.find((country) => country !== selectedCountryA) ?? "Singapore";
       setSelectedCountryB(fallbackCountry);
     }
+  }
+
+  function handleDemoModeToggle(isEnabled: boolean) {
+    setIsDemoModeEnabled(isEnabled);
+
+    if (isEnabled) {
+      setInputValue(getDemoPromptForMode(activeModeRef.current));
+      applyDemoJurisdictions(activeModeRef.current);
+    }
+  }
+
+  function applyDemoJurisdictions(mode: CoreModeId) {
+    const demoJurisdictions = getDemoJurisdictionDefaults(mode);
+    setSelectedCountryA(demoJurisdictions.countryA);
+    setSelectedCountryB(demoJurisdictions.countryB);
   }
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -225,11 +256,19 @@ export function ChatLegalWorkspace() {
         onNewChat={() => {
           setMessages(starterMessages);
           setActiveConversation("current");
-          setInputValue("");
+          setInputValue(
+            isDemoModeEnabled ? getDemoPromptForMode("regulation") : ""
+          );
           setUploadedFiles([]);
           setIsComposerCollapsed(false);
-          setSelectedCountryA("China");
-          setSelectedCountryB("Singapore");
+          if (isDemoModeEnabled) {
+            const demoJurisdictions = getDemoJurisdictionDefaults("regulation");
+            setSelectedCountryA(demoJurisdictions.countryA);
+            setSelectedCountryB(demoJurisdictions.countryB);
+          } else {
+            setSelectedCountryA("China");
+            setSelectedCountryB("Singapore");
+          }
           handleModeChange("regulation");
         }}
       />
@@ -266,8 +305,10 @@ export function ChatLegalWorkspace() {
                     <SearchComposer
                       activeMode={activeMode}
                       inputValue={inputValue}
+                      isDemoModeEnabled={isDemoModeEnabled}
                       surface="chat"
                       onModeChange={handleModeChange}
+                      onDemoModeToggle={handleDemoModeToggle}
                       onInputChange={setInputValue}
                       uploadedFiles={uploadedFiles}
                       onUploadedFilesChange={setUploadedFiles}
@@ -295,8 +336,10 @@ export function ChatLegalWorkspace() {
                 <SearchComposer
                   activeMode={activeMode}
                   inputValue={inputValue}
+                  isDemoModeEnabled={isDemoModeEnabled}
                   surface="hero"
                   onModeChange={handleModeChange}
+                  onDemoModeToggle={handleDemoModeToggle}
                   onInputChange={setInputValue}
                   uploadedFiles={uploadedFiles}
                   onUploadedFilesChange={setUploadedFiles}
@@ -366,6 +409,15 @@ function ConversationSidebar({
             );
           })}
         </nav>
+        <a
+          href="/"
+          className="mt-2 block w-full rounded-lg px-2 py-2 text-left text-xs text-white/70 transition hover:bg-white/10 hover:text-white sm:px-3 sm:text-sm"
+        >
+          <span className="block truncate">Flow Chart</span>
+          <span className="mt-0.5 hidden truncate text-xs text-white/40 sm:block">
+            Architecture page
+          </span>
+        </a>
       </div>
 
       <div className="border-t border-white/10 p-2 sm:p-3">
@@ -530,11 +582,13 @@ function CollapsedComposerBar({
 function SearchComposer({
   activeMode,
   inputValue,
+  isDemoModeEnabled,
   surface,
   selectedCountryA,
   selectedCountryB,
   isSubmitting,
   onModeChange,
+  onDemoModeToggle,
   onInputChange,
   uploadedFiles,
   onUploadedFilesChange,
@@ -545,11 +599,13 @@ function SearchComposer({
 }: {
   activeMode: CoreModeId;
   inputValue: string;
+  isDemoModeEnabled: boolean;
   surface: "hero" | "chat";
   selectedCountryA: SupportedCountry;
   selectedCountryB: SupportedCountry;
   isSubmitting: boolean;
   onModeChange: (mode: CoreModeId) => void;
+  onDemoModeToggle: (isEnabled: boolean) => void;
   onInputChange: (value: string) => void;
   uploadedFiles: File[];
   onUploadedFilesChange: (files: File[]) => void;
@@ -704,19 +760,43 @@ function SearchComposer({
       ) : null}
 
       <div
-        className={`flex items-center px-1 pb-2 font-schibsted text-[12px] font-medium ${
+        className={`flex items-center justify-between gap-3 px-1 pb-2 font-schibsted text-[12px] font-medium ${
           isHero ? "text-white" : "text-black"
         }`}
       >
-        {onCollapse ? (
-          <button
-            type="button"
-            onClick={onCollapse}
-            className="rounded-full bg-black/5 px-3 py-1.5 text-[12px] font-semibold text-black/60 transition hover:bg-black/10 hover:text-black"
-          >
-            Hide ▲
-          </button>
-        ) : null}
+        <div>
+          {onCollapse ? (
+            <button
+              type="button"
+              onClick={onCollapse}
+              className="rounded-full bg-black/5 px-3 py-1.5 text-[12px] font-semibold text-black/60 transition hover:bg-black/10 hover:text-black"
+            >
+              Hide ▲
+            </button>
+          ) : null}
+        </div>
+
+        <button
+          type="button"
+          aria-pressed={isDemoModeEnabled}
+          onClick={() => onDemoModeToggle(!isDemoModeEnabled)}
+          className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[12px] font-semibold transition ${
+            isDemoModeEnabled
+              ? "bg-black text-white shadow-[0_8px_20px_rgba(0,0,0,0.16)]"
+              : isHero
+                ? "bg-white/75 text-black/60 hover:bg-white"
+                : "bg-black/5 text-black/55 hover:bg-black/10 hover:text-black"
+          }`}
+          title="Auto-fill the mock question for the selected task type"
+        >
+          <span
+            className={`h-2 w-2 rounded-full ${
+              isDemoModeEnabled ? "bg-[#8ef0b0]" : "bg-black/25"
+            }`}
+            aria-hidden="true"
+          />
+          Demo
+        </button>
       </div>
 
       <div className="rounded-[12px] bg-white shadow-[0_12px_30px_rgba(0,0,0,0.12)]">
@@ -725,6 +805,10 @@ function SearchComposer({
             label={countrySelectionMode === "dual" ? "Primary jurisdiction" : "Jurisdiction"}
             value={selectedCountryA}
             onChange={(country) => {
+              if (isDemoModeEnabled) {
+                return;
+              }
+
               onSelectedCountryAChange(country);
 
               if (activeMode === "case" && selectedCountryB === country) {
@@ -733,14 +817,22 @@ function SearchComposer({
                 onSelectedCountryBChange(fallbackCountry);
               }
             }}
+            isLocked={isDemoModeEnabled}
           />
           {countrySelectionMode === "dual" ? (
             <div className="mt-3">
               <CountrySelectionBlock
                 label="Counterparty jurisdiction"
                 value={selectedCountryB}
-                onChange={onSelectedCountryBChange}
+                onChange={(country) => {
+                  if (isDemoModeEnabled) {
+                    return;
+                  }
+
+                  onSelectedCountryBChange(country);
+                }}
                 disabledCountries={[selectedCountryA]}
+                isLocked={isDemoModeEnabled}
               />
             </div>
           ) : null}
@@ -870,22 +962,31 @@ function CountrySelectionBlock({
   label,
   value,
   onChange,
-  disabledCountries = []
+  disabledCountries = [],
+  isLocked = false
 }: {
   label: string;
   value: SupportedCountry;
   onChange: (country: SupportedCountry) => void;
   disabledCountries?: SupportedCountry[];
+  isLocked?: boolean;
 }) {
   return (
     <div>
-      <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-black/45">
-        {label}
-      </p>
+      <div className="flex items-center gap-2">
+        <p className="text-[12px] font-semibold uppercase tracking-[0.12em] text-black/45">
+          {label}
+        </p>
+        {isLocked ? (
+          <span className="rounded-full bg-black/5 px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.1em] text-black/40">
+            Demo locked
+          </span>
+        ) : null}
+      </div>
       <div className="mt-2 flex flex-wrap gap-2">
         {supportedCountries.map((country) => {
           const isActive = country === value;
-          const isDisabled = disabledCountries.includes(country);
+          const isDisabled = isLocked || disabledCountries.includes(country);
 
           return (
             <button
@@ -897,7 +998,9 @@ function CountrySelectionBlock({
                 isActive
                   ? "bg-black text-white"
                   : "bg-[#f5f5f5] text-black hover:bg-black hover:text-white"
-              } ${isDisabled ? "cursor-not-allowed opacity-30 hover:bg-[#f5f5f5] hover:text-black" : ""}`}
+              } ${isDisabled && !isActive ? "cursor-not-allowed opacity-30 hover:bg-[#f5f5f5] hover:text-black" : ""} ${
+                isLocked && isActive ? "cursor-not-allowed shadow-[0_0_0_3px_rgba(0,0,0,0.08)]" : ""
+              }`}
             >
               {country}
             </button>
@@ -1063,13 +1166,27 @@ function AnswerCardDeck({ cards }: { cards: AnswerCard[] }) {
 
 function AnswerResultCard({ card }: { card: AnswerCard }) {
   const [findingHighlights, setFindingHighlights] = useState<FindingHighlightOptions>({
-    finding: true,
-    risk: true,
-    action: true,
+    finding: false,
+    risk: false,
+    action: false,
     conflict: false,
     law: false,
     indicator: false,
     context: false
+  });
+  const [roadmapHighlights, setRoadmapHighlights] = useState<RoadmapHighlightOptions>({
+    phase: false,
+    priority: false,
+    action: false
+  });
+  const [reviewHighlights, setReviewHighlights] = useState<ReviewHighlightOptions>({
+    content: false,
+    law: false
+  });
+  const [evidenceHighlights, setEvidenceHighlights] = useState<EvidenceHighlightOptions>({
+    law: false,
+    role: false,
+    summary: false
   });
   const exactPassage = findCardItem(card.items, "Exact passage");
   const additionalRequirement = findCardItem(card.items, "Additional requirement");
@@ -1096,6 +1213,21 @@ function AnswerResultCard({ card }: { card: AnswerCard }) {
           <FindingHighlightControls
             highlights={findingHighlights}
             onHighlightsChange={setFindingHighlights}
+          />
+        ) : card.kind === "roadmap" ? (
+          <RoadmapHighlightControls
+            highlights={roadmapHighlights}
+            onHighlightsChange={setRoadmapHighlights}
+          />
+        ) : card.kind === "review-notes" ? (
+          <ReviewHighlightControls
+            highlights={reviewHighlights}
+            onHighlightsChange={setReviewHighlights}
+          />
+        ) : card.kind === "evidence" && !hasStructuredEvidencePassage ? (
+          <EvidenceHighlightControls
+            highlights={evidenceHighlights}
+            onHighlightsChange={setEvidenceHighlights}
           />
         ) : null}
       </div>
@@ -1124,6 +1256,9 @@ function AnswerResultCard({ card }: { card: AnswerCard }) {
           card={card}
           displayItems={displayItems ?? []}
           findingHighlights={findingHighlights}
+          roadmapHighlights={roadmapHighlights}
+          reviewHighlights={reviewHighlights}
+          evidenceHighlights={evidenceHighlights}
         />
       ) : null}
 
@@ -1248,11 +1383,17 @@ function ExplanationGrid({ items }: { items: AnswerCardItem[] }) {
 function GenericAnswerCardContent({
   card,
   displayItems,
-  findingHighlights
+  findingHighlights,
+  roadmapHighlights,
+  reviewHighlights,
+  evidenceHighlights
 }: {
   card: AnswerCard;
   displayItems: AnswerCardItem[];
   findingHighlights: FindingHighlightOptions;
+  roadmapHighlights: RoadmapHighlightOptions;
+  reviewHighlights: ReviewHighlightOptions;
+  evidenceHighlights: EvidenceHighlightOptions;
 }) {
   return (
     <div className="mt-5 space-y-4">
@@ -1269,6 +1410,12 @@ function GenericAnswerCardContent({
       {card.children?.length ? (
         card.kind === "findings" ? (
           <FindingDetails details={card.children} highlights={findingHighlights} />
+        ) : card.kind === "roadmap" ? (
+          <RoadmapDetails details={card.children} highlights={roadmapHighlights} />
+        ) : card.kind === "review-notes" ? (
+          <ReviewDetails details={card.children} highlights={reviewHighlights} />
+        ) : card.kind === "evidence" ? (
+          <EvidenceDetails details={card.children} highlights={evidenceHighlights} />
         ) : (
           <div className="grid gap-2">
             {card.children.map((item) => (
@@ -1306,6 +1453,101 @@ function FindingHighlightControls({
   ];
 
   return (
+    <HighlightControls
+      highlights={highlights}
+      onHighlightsChange={onHighlightsChange}
+      options={options}
+    />
+  );
+}
+
+function RoadmapHighlightControls({
+  highlights,
+  onHighlightsChange
+}: {
+  highlights: RoadmapHighlightOptions;
+  onHighlightsChange: (highlights: RoadmapHighlightOptions) => void;
+}) {
+  const options: Array<{
+    id: keyof RoadmapHighlightOptions;
+    label: string;
+  }> = [
+    { id: "phase", label: "Phase" },
+    { id: "priority", label: "Priority" },
+    { id: "action", label: "Content" }
+  ];
+
+  return (
+    <HighlightControls
+      highlights={highlights}
+      onHighlightsChange={onHighlightsChange}
+      options={options}
+    />
+  );
+}
+
+function ReviewHighlightControls({
+  highlights,
+  onHighlightsChange
+}: {
+  highlights: ReviewHighlightOptions;
+  onHighlightsChange: (highlights: ReviewHighlightOptions) => void;
+}) {
+  const options: Array<{
+    id: keyof ReviewHighlightOptions;
+    label: string;
+  }> = [
+    { id: "content", label: "Content" },
+    { id: "law", label: "Law" }
+  ];
+
+  return (
+    <HighlightControls
+      highlights={highlights}
+      onHighlightsChange={onHighlightsChange}
+      options={options}
+    />
+  );
+}
+
+function EvidenceHighlightControls({
+  highlights,
+  onHighlightsChange
+}: {
+  highlights: EvidenceHighlightOptions;
+  onHighlightsChange: (highlights: EvidenceHighlightOptions) => void;
+}) {
+  const options: Array<{
+    id: keyof EvidenceHighlightOptions;
+    label: string;
+  }> = [
+    { id: "law", label: "Law" },
+    { id: "role", label: "Role" },
+    { id: "summary", label: "Summary" }
+  ];
+
+  return (
+    <HighlightControls
+      highlights={highlights}
+      onHighlightsChange={onHighlightsChange}
+      options={options}
+    />
+  );
+}
+
+function HighlightControls<T extends object>({
+  highlights,
+  onHighlightsChange,
+  options
+}: {
+  highlights: T;
+  onHighlightsChange: (highlights: T) => void;
+  options: Array<{
+    id: keyof T;
+    label: string;
+  }>;
+}) {
+  return (
     <fieldset className="rounded-lg border border-black/10 bg-[#fbfcfe] px-3 py-2">
       <legend className="px-1 text-[10px] font-bold uppercase tracking-[0.14em] text-black/40">
         Highlight
@@ -1313,17 +1555,17 @@ function FindingHighlightControls({
       <div className="flex flex-wrap gap-2">
         {options.map((option) => (
           <label
-            key={option.id}
+            key={String(option.id)}
             className="inline-flex items-center gap-1.5 rounded-md bg-white px-2 py-1 text-[11px] font-bold text-black/60"
           >
             <input
               type="checkbox"
-              checked={highlights[option.id]}
+              checked={Boolean(highlights[option.id])}
               onChange={(event) =>
                 onHighlightsChange({
                   ...highlights,
                   [option.id]: event.target.checked
-                })
+                } as T)
               }
               className="h-3 w-3 accent-[#2f85bd]"
             />
@@ -1357,6 +1599,66 @@ function FindingDetails({
 
         return <AnswerDetailPill key={detail} detail={detail} tone={tone} />;
       })}
+    </div>
+  );
+}
+
+function RoadmapDetails({
+  details,
+  highlights
+}: {
+  details: string[];
+  highlights: RoadmapHighlightOptions;
+}) {
+  return (
+    <div className="grid gap-2">
+      {details.map((detail) => (
+        <AnswerDetailPill
+          key={detail}
+          detail={detail}
+          tone={getRoadmapDetailTone(detail, highlights)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function ReviewDetails({
+  details,
+  highlights
+}: {
+  details: string[];
+  highlights: ReviewHighlightOptions;
+}) {
+  return (
+    <div className="grid gap-2">
+      {details.map((detail) => (
+        <AnswerDetailPill
+          key={detail}
+          detail={detail}
+          tone={getReviewDetailTone(detail, highlights)}
+        />
+      ))}
+    </div>
+  );
+}
+
+function EvidenceDetails({
+  details,
+  highlights
+}: {
+  details: string[];
+  highlights: EvidenceHighlightOptions;
+}) {
+  return (
+    <div className="grid gap-2">
+      {details.map((detail) => (
+        <AnswerDetailPill
+          key={detail}
+          detail={detail}
+          tone={getEvidenceDetailTone(detail, highlights)}
+        />
+      ))}
     </div>
   );
 }

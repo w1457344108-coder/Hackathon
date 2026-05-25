@@ -1,5 +1,5 @@
-import { ChatLegalWorkspace } from "@/components/chat-legal-workspace";
+import { redirect } from "next/navigation";
 
 export default function HomePage() {
-  return <ChatLegalWorkspace />;
+  redirect("/architecture-flow.html");
 }
