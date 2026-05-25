@@ -348,6 +348,21 @@
       background: rgba(216, 234, 220, 0.62);
     }
 
+    .architecture-reference {
+      margin-top: 16px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: var(--shadow);
+    }
+
+    .architecture-reference img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
     .state-title {
       display: flex;
       align-items: center;
@@ -609,6 +624,10 @@
         <div class="node"><h3>Structured Answer</h3><p>Conflict, precedence, rationale, implementation rule, and citations.</p></div>
         <div class="node"><h3>Review Notes</h3><p>Pending nodes, irrelevant citations, caveats, verification prompts.</p></div>
       </div>
+
+      <figure class="architecture-reference">
+        <img src="./assets/traceable-answer-workflow.png" alt="End-to-end traceable answer workflow diagram">
+      </figure>
     </section>
 
     <section class="section" id="logic">
